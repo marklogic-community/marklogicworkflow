@@ -4,20 +4,61 @@ declare module namespace m="http://marklogic.com/scxmltocpf";
 
 declare namespace sc="http://www.w3.org/2005/07/scxml";
 
+import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
+
 (:
  : See http://www.w3.org/TR/scxml/
  :)
-
-declare function m:scxml-to-cpf($processmodeluri as xs:string,$doc as element(sc:scxml)) as xs:string {
-  (: Convert the SCXML process model to a CPF pipeline :)
+declare function m:scxml-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string,$doc as element(sc:scxml)) as xs:unsignedLong  {
+  (: Convert the SCXML process model to a CPF pipeline and insert (create or replace) :)
   let $initial :=
     if (fn:not(fn:empty($doc/@initial))) then
       $doc/sc:state[./@id = $doc/@initial]
     else
       $doc/sc:state[1]
 
+  (: NB major and minor version not needed because this forms part of the process model document URI :)
+
+  (: remove start and extension to get pname - /processengine/models/NAME/MAJOR/MINOR/model.xml :)
+  let $pname := $processmodeluri||"__"||$major||"__"||$minor
+  let $successAction :=
+  let $failureAction := xs:anyURI("/MarkLogic/cpf/actions/failure-action.xqy")
+  let $failureState := xs:anyURI("http://marklogic.com/states/error")
+
   (: create entry CPF action :)
   (: Link to initial state action :)
+
+  return p:insert(
+   p:create($pname,$pname,
+    xs:anyURI("/MarkLogic/cpf/actions/success-action.xqy"),$failureAction,(),
+    (
+    p:state-transition(xs:anyURI("http://marklogic.com/states/initial"),
+      "Standard placeholder for initial state",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($initial/@id)),
+      $failureState,(),(),()
+    )
+    ,
+      {
+        for $state in $doc/sc:state
+        return
+          p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
+            "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/sc:transition/@target) ),
+            $failureState,(),(),()
+          )
+      }
+    ,
+    p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($doc/sc:final/@id) ),
+      "Standard placeholder for final state",xs:anyURI("http://marklogic.com/states/done"),
+      $failureState,(),(),()
+    )
+   )
+  )
+
+
+
+
+
+
+(:
   let $pipelinexml :=
     <pipeline xmlns="http://marklogic.com/cpf/pipelines">
       <pipeline-name>Extended Copyright Pipeline</pipeline-name>
@@ -80,5 +121,6 @@ declare function m:scxml-to-cpf($processmodeluri as xs:string,$doc as element(sc
 
 
     </pipeline>
+    :)
 
 };
