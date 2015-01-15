@@ -1,0 +1,9 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0">
+  <state id="Open">
+    <transition event="Start" target="In Progress" />
+  </state>
+  <state id="In Progress">
+    <transition event="Finish" target="Closed"/>
+  </state>
+  <final id="Closed"/>
+</scxml>
