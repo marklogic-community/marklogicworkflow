@@ -1,4 +1,4 @@
-A quick and dirty basic SCXML to CPF pipeline conversion project, with test scenarios.
+A way to import and execute basic process models using MarkLogic's CPF feature.
 
 ## Why? Just... Why!?!
 
@@ -65,7 +65,9 @@ reference implementation for SCXML.
 A modelling tool is out of scope of this project, although creating a 'MarkLogic palette' for a process tool
 would be a good idea to make modelling simple for process model creators.
 
-TODO: What is the modelling tool we've used before that is open source?
+The Eclipse BPMN2 modeller is a good option, with support for pluggable runtime definitions and profiles. Its relatively
+easy to define a MarkLogic runtime and set of custom tasks, and hide any BPMN2 tasks that we do not support the
+execution of.
 
 ### Importing
 
@@ -147,8 +149,8 @@ Various endpoints have been created to initiate new process instances and manage
 - POST /v1/resource/process - Completes a human process step and provides data to map to the step. Optionally also used to kick a process from an admin interface.
 - DELETE /v1/resource/process - Kills a process instance
 - GET /v1/resource/processinbox - Fetches the currently logged in user's work inbox (any human steps assigned to the current user) - summary level info only
-- GET /v1/resource/processstack - Fetches a list of, or human process steps assigned to, shared workflow work stacks
-- POST /v1/resource/processstack - Used to lock a process instance for a particular user, or remove a lock
+- GET /v1/resource/processstack - Fetches a list of, or human process steps assigned to, shared workflow work stacks - DO NOT IMPLEMENT use options on processinbox instead
+- POST /v1/resource/processstack - Used to lock a process instance for a particular user, or remove a lock - DO NOT IMPLEMENT use options on processinbox instead
 - GET /v1/resource/processsearch - Search API compatible interface that restricts results to process instances
 
 - GET /v1/resource/processengine - Fetches the currently executing processes and their status, and general CPF running information, and installed processes

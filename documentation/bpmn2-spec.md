@@ -39,6 +39,11 @@ Activities supported in the spec:-
 
 - input and output sets (overloaded activities like methods)
 
+## Model serialization
+
+XPDL 2.2 is the XML file format of BPMN 2.
+http://www.xpdl.org
+
 ## BPMN2 elements not supported by jBPM (and thus not often used in BPMN2 eclipse modeler)
 
 - call choreography
