@@ -1,0 +1,9 @@
+<scxml initial="Open" version="0.9" xmlns="http://www.w3.org/2005/07/scxml"><!--   node-size-and-position x=0 y=0 w=1070 h=884  -->
+ <state id="Open"><!--   node-size-and-position x=180 y=240 w=75 h=75  -->
+  <transition target="InProgress"></transition>
+ </state>
+ <final id="Closed"><!--   node-size-and-position x=616 y=209 w=75 h=75  --></final>
+ <state id="InProgress"><!--   node-size-and-position x=372 y=246 w=75 h=75  -->
+  <transition target="Closed"></transition>
+ </state>
+</scxml>

@@ -1,0 +1,18 @@
+<scxml initial="Open" datamodel="xpath" version="0.9" xmlns="http://www.w3.org/2005/07/scxml"><!--   node-size-and-position x=0 y=0 w=1070 h=884  -->
+
+ <datamodel>
+  <data id="first" expr="0" />
+  <data id="second" expr="0" />
+  <data id="result" expr="0" />
+ </datamodel>
+
+ <state id="Open"><!--   node-size-and-position x=350 y=180 w=75 h=75  -->
+  <transition target="Add"></transition>
+ </state>
+ <state id="Add"><!--   node-size-and-position x=500 y=160 w=75 h=75  -->
+  <transition target="Closed">
+    <assign location="result" expr="$first + $second" />
+  </transition>
+ </state>
+ <final id="Closed"><!--   node-size-and-position x=640 y=140 w=75 h=75  --></final>
+</scxml>
