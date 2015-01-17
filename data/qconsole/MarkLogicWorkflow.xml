@@ -1,0 +1,91 @@
+<export><workspace name="MarkLogicWorkflow"><query name="SCXML test 1" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace sc = "http://marklogic.com/scxmltocpf" at "/app/models/scxmltocpf.xqy";
+
+(: WARNING: MUST be executed on the Triggers database, NOT the content or modules database :)
+
+sc:scxml-to-cpf("/processengine/models/scxml/two-sample-transitions.scxml","1","0",
+
+&lt;scxml initial="Open" version="0.9" xmlns="http://www.w3.org/2005/07/scxml"&gt;&lt;!--   node-size-and-position x=0 y=0 w=1070 h=884  --&gt;
+ &lt;state id="Open"&gt;&lt;!--   node-size-and-position x=180 y=240 w=75 h=75  --&gt;
+  &lt;transition target="InProgress"&gt;&lt;/transition&gt;
+ &lt;/state&gt;
+ &lt;final id="Closed"&gt;&lt;!--   node-size-and-position x=616 y=209 w=75 h=75  --&gt;&lt;/final&gt;
+ &lt;state id="InProgress"&gt;&lt;!--   node-size-and-position x=372 y=246 w=75 h=75  --&gt;
+  &lt;transition target="Closed"&gt;&lt;/transition&gt;
+ &lt;/state&gt;
+&lt;/scxml&gt;
+
+) </query><query name="Install SCXML 01" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace wf = "http://marklogic.com/workflow" at "/app/models/workflow.xqy";
+
+wf:convert-to-cpf("/workflow/models/scxml/two-sample-transitions.xml","1","0")
+</query><query name="fetch pipeline" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+fn:doc("http://marklogic.com/cpf/pipelines/11505491390326749270.xml")</query><query name="list pipelines" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
+
+p:pipelines()</query><query name="remove pipeline" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
+
+
+p:remove("/workflow/models/scxml/two-sample-transitions.xml__1__0")
+</query><query name="list domains" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
+dom:domains()</query><query name="remove domain" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
+
+dom:remove("/processengine/models/scxml/two-sample-transitions.scxml")
+</query><query name="Initiate Process 01" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+
+xdmp:document-insert("/workflow/processes/workflow/models/scxml/two-sample-transitions.xml/" || sem:uuid-string() || ".xml",
+  &lt;process xmlns="http://marklogic.com/workflow/process"&gt;
+    &lt;data&gt;
+    &lt;/data&gt;
+    &lt;attachments&gt;
+      &lt;attachment name="InitiatingAttachment" cardinality="1"&gt;
+        &lt;uri&gt;/some/sample/doc.xml&lt;/uri&gt;
+      &lt;/attachment&gt;
+    &lt;/attachments&gt;
+  &lt;/process&gt;,
+  xdmp:default-permissions(),
+  (xdmp:default-collections(),"http://marklogic.com/workflow/processes","testprocess01")
+)</query><query name="Insert sample doc" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+xdmp:document-insert("/some/sample/doc.xml",
+  &lt;mydoc&gt;
+   &lt;some&gt;element&lt;/some&gt;
+  &lt;/mydoc&gt;
+)</query><query name="List Processes" focus="true" active="true" mode="xquery">xquery version "1.0-ml";
+
+for $uri in fn:collection("http://marklogic.com/workflow/processes")/fn:base-uri(.)
+return
+  xdmp:document-properties($uri)
+</query><query name="install broken" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace wf = "http://marklogic.com/workflow" at "/app/models/workflow.xqy";
+
+wf:convert-to-cpf("/workflow/models/scxml/broken.xml","1","0")
+</query><query name="Initiate Broken" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+
+xdmp:document-insert("/workflow/processes/workflow/models/scxml/broken.xml/" || sem:uuid-string() || ".xml",
+  &lt;process xmlns="http://marklogic.com/workflow/process"&gt;
+    &lt;data&gt;
+    &lt;/data&gt;
+    &lt;attachments&gt;
+      &lt;attachment name="InitiatingAttachment" cardinality="1"&gt;
+        &lt;uri&gt;/some/sample/doc.xml&lt;/uri&gt;
+      &lt;/attachment&gt;
+    &lt;/attachments&gt;
+  &lt;/process&gt;,
+  xdmp:default-permissions(),
+  (xdmp:default-collections(),"http://marklogic.com/workflow/processes","testprocessbroken")
+)</query></workspace></export>
