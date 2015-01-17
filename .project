@@ -1,1 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>MarkLogic Workflow</name>
+	<comment></comment>
 	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.bpmn2.modeler.core.bpmn2Builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.bpmn2.modeler.core.bpmn2Nature</nature>
+	</natures>
+</projectDescription>
