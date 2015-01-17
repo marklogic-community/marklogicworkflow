@@ -1,0 +1,9 @@
+{
+  "extensions": [
+    {"name": "version", "methods": ["GET"]},
+    {"name": "workplace", "methods": ["GET","POST"]}
+  ],
+  "transforms": [],
+  "triggers": [
+  ]
+}

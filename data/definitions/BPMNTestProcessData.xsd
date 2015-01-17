@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.example.org/BPMNTestProcessData" elementFormDefault="qualified" targetNamespace="http://www.example.org/BPMNTestProcessData">
+
+    <element name="choiceA" type="string"/>
+
+    <element name="choiceB" type="string"/>
+</schema>
