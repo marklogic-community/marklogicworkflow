@@ -9,6 +9,8 @@ import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cp
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
 
 
+import module namespace ss = "http://marklogic.com/alerts/alerts" at "/app/models/lib-alerts.xqy";
+
 
 (: REST API OR XQUERY PUBLIC API FUNCTIONS :)
 
@@ -42,7 +44,11 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
 };
 
 
-
+declare function m:subscribe-process($subscriptionName as xs:string, $processuri as xs:string,$query as element(cts:query)) as xs:unsignedLong {
+  (: TODO remove existing config with same subscription name, if it exists :)
+  ss:add-alert($subscriptionName,$query,(),"/app/models/action-process.xqy",xdmp:modules-database(),
+    <process-name>{$processuri}</process-name>)
+};
 
 
 
