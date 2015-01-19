@@ -82,12 +82,27 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
 
 declare function m:install($puri as xs:string) as xs:unsignedLong {
   let $pxml := fn:doc($puri)/p:pipeline
-  (: TODO check if pipeline already exists, and recreate :)
+
+  (: check if pipeline already exists, and recreate :)
+  let $remove :=
+    if (fn:not(fn:empty(p:get($puri)))) then
+      xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;p:remove($m:puri)',
+        (xs:QName("m:puri"),$puri),
+        <options xmlns="xdmp:eval">
+          <database>{xdmp:triggers-database()}</database>
+          <isolation>different-transaction</isolation>
+        </options>
+      )
+    else
+      ()
+
+  (: Recreate pipeline :)
   return
     xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:pxml as element(p:pipeline) external;p:insert($m:pxml)',
       (xs:QName("m:pxml"),$pxml),
       <options xmlns="xdmp:eval">
         <database>{xdmp:triggers-database()}</database>
+        <isolation>different-transaction</isolation>
       </options>
     )
 };
@@ -96,8 +111,27 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
 declare function m:domain($processmodeluri as xs:string,$major as xs:string,$minor as xs:string,$pid as xs:unsignedLong) as xs:unsignedLong {
   (: let $pname := $processmodeluri||"__"||$major||"__"||$minor :)
   (: TODO Add all OOTB CPF pipelines to this domain too :)
-  (: TODO check if domain already exists and recreate :)
+
   let $mdb := xdmp:modules-database()
+
+  (: check if domain already exists and recreate :)
+  let $remove :=
+    if (fn:not(fn:empty(dom:get($processmodeluri))) then
+      xdmp:eval(
+        'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;'
+        ||
+        'dom:remove($m:processmodeluri)'
+        ,
+        (xs:QName("m:processmodeluri"),$processmodeluri),
+        <options xmlns="xdmp:eval">
+          <database>{xdmp:triggers-database()}</database>
+          <isolation>different-transaction</isolation>
+        </options>
+      )
+    else
+      ()
+
+  (: Configure domain :)
   return
     xdmp:eval(
       'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:pid as xs:unsignedLong external;declare variable $m:mdb as xs:unsignedLong external;'
@@ -107,6 +141,7 @@ declare function m:domain($processmodeluri as xs:string,$major as xs:string,$min
       (xs:QName("m:processmodeluri"),$processmodeluri,xs:QName("m:pid"),$pid,xs:QName("m:mdb"),$mdb),
       <options xmlns="xdmp:eval">
         <database>{xdmp:triggers-database()}</database>
+        <isolation>different-transaction</isolation>
       </options>
     )
 };
