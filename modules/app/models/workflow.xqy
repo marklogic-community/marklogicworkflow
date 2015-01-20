@@ -279,13 +279,53 @@ declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:strin
           )
           ,
 
-          for $state in $doc/sc:state
+          for $state in $start/b2:task
           return
             p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
-              "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/sc:transition/@target) ),
-              $failureState,(),(),()
+              "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/b2:outgoing) ),
+              $failureState,(),(),() (: TODO Configure this step's TYPE (e.g. human) and OPTIONS (E.g. assignee, action choices) :)
             )
+          ,
+          (: Handle BPMN2 exclusive gateways :)
+          for $state in $start/b2:exclusiveGateway
+          return
+            (
+              (: TODO detect task followed immediately by gateway, and treat as single human task :)
+              (: Create base decision point so previous human step(s) can point here, auto transition to first choice state :)
+              p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
+                "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)||"_"||xs:string($state/b2:outgoing[1]/@id)),
+                $failureState,(),
+                p:action("/app/processengine/actions/humanstep.xqy",""||xs:string($state/@name),
+                  <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+                    {
+                      for $route in $state/b2:outgoing
+                      return
+                        <m:route>{xs:string($start/b2:sequenceFlow[./@id = $route]/@name)}</m:route>
+                    }
+                  </p:options>
+                ),
+                ()
+              )
+              ,
+              (: Create one state transition per choice, with exclusive logic :)
+              for $outgoing at $outn in $state/b2:outgoing
+              let $next := $start/element()[./b2:incoming = $outgoing]
+              let $after := ($next/following-sibling::b2:outgoing , ())[1] (: TODO blank next state means cannot proceed from here - ERROR? :)
+              return
+                p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)||"_"||xs:string($outgoing/@id),
+                  "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($next/@id)),
+                  if (fn:empty($after)) then () else
+                    xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)||"_"||xs:string($after/@id),
+                  (),
+                  p:action("/app/processengine/actions/actionif.xqy","Check if user's route choice matches options",
+                    <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+                      <m:route>{xs:string($start/b2:sequenceFlow[./@id = $outgoing]/@name)}</m:route>
+                    </p:options>),
+                  () (: TODO Configure this step's TYPE (e.g. human) and OPTIONS (E.g. assignee) :)
+                )
 
+              (: Next step for each will be outgoing state for exclusive - NA all route processed, no 'end' step :)
+            )
           ,
           p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($doc/sc:final/@id) ),
             "Standard placeholder for final state",xs:anyURI("http://marklogic.com/states/done"),

@@ -32,7 +32,7 @@ Asynchronous processing by each step
 allows human and system steps to be safely combined without having to worry about concurrent update exceptions. These
 would be a barrier in a synchronous process system.
 
-Problems of managing state and transitions, ascynrhonousness, and a task engine are already solved by CPF.
+Problems of managing state and transitions, asynchronousness, and a task engine are already solved by CPF.
 
 ### Extending CPF
 
