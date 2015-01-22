@@ -7,7 +7,11 @@ Basic requirements, but that are still too detailed to cover elsewhere.
 ### Process step property extensions
 
 CPF provides the following properties:-
-- TODO
+- <cpf:processing-status xmlns:cpf="http://marklogic.com/cpf">done</cpf:processing-status>
+- <cpf:property-hash xmlns:cpf="http://marklogic.com/cpf">d41d8cd98f00b204e9800998ecf8427e</cpf:property-hash>
+- <cpf:last-updated xmlns:cpf="http://marklogic.com/cpf">2010-12-07T15:01:44.177-08:00</cpf:last-updated>
+- <cpf:state xmlns:cpf="http://marklogic.com/cpf">http://marklogic.com/states/done</cpf:state>
+- <prop:last-modified>2010-12-07T15:01:44-08:00</prop:last-modified>
 
 Workflow provides these additional properties:-
 - wf:step-type - The Class of the workflow task. 1 or more elements. E.g. a BPMN2 User Task is also a Human Task and a Task. Used by step processors to find their steps.
