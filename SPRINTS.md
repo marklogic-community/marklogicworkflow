@@ -18,11 +18,13 @@ This PoC development will occur in small sprints until a useful PoC system is av
 - UK-D-I
 
 ## Sprint 1 - Basic workflow
+
+- TEST BPMN2: generic blank task
 - BPMN2: user task -> aka human step
-- BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
+- TEST BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
 - BPMN2: complex gateway -> E.g. 3 of 5 incoming routes required in order to activate gateway
 - Evaluation: Support for /xpath/path to process model data
-- Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
+- TEST Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
 - Evaluation: Support for fn:doc(/process/attachments/attachment[@name="default"])/some/path/to/property style evaluation
 - Evauation: Support for 'now' date time assignment to variable
 - Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
@@ -33,6 +35,7 @@ This PoC development will occur in small sprints until a useful PoC system is av
 - UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
 
 ## Sprint 2 - CPF modelling
+
 - MarkLogic specific Activity types for pure CPF processes
  - CPF Action (module, options)
  - CPF State change event throw and receive
