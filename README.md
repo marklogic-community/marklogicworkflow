@@ -12,18 +12,13 @@ import and standard activity types are supported, allowing implementation of Con
 
 ## Information on MarkLogic Workflow
 - Overview
- - Product overview - OVERVIEW.md <-- START HERE!!!
- - Technical overview - TECHINTRO.md
+ - [Product overview](./documentation/OVERVIEW.md) -- START HERE!!!
+ - [Technical overview](./documentation/TECHINTRO.md)
 - For workflow modellers/implementors
- - Installation - INSTALL.md
- - BPMN2 modelling - MODELLING.md
+ - [Installation](./documentation/INSTALL.md)
+ - [BPMN2 modelling](./documentation/MODELLING.md)
  - CPF pipeline modelling - TBC
 - For developers
- - Linking a UI/application to MarkLogic Workflow - RESTAPI.md
+ - [Linking a UI/application to MarkLogic Workflow](./documentation/RESTAPI.md)
  - Creating your own Activity types - TBC
- - For upcoming features see SPRINTS.md
-
-- INSTALL.md - How to install MarkLogic Workflow in to a MarkLogic Server
-- MODELLING.md - How to import a workflow model in to MarkLogic Workflow
-- RESTAPI.md - How to create and interact with a running process
-- DESIGN.md - The design behind the Workflow Engine
+ - [Upcoming features list](./documentation/SPRINTS.md)

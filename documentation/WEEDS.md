@@ -7,11 +7,11 @@ Basic requirements, but that are still too detailed to cover elsewhere.
 ### Process step property extensions
 
 CPF provides the following properties:-
-- <cpf:processing-status xmlns:cpf="http://marklogic.com/cpf">done</cpf:processing-status>
-- <cpf:property-hash xmlns:cpf="http://marklogic.com/cpf">d41d8cd98f00b204e9800998ecf8427e</cpf:property-hash>
-- <cpf:last-updated xmlns:cpf="http://marklogic.com/cpf">2010-12-07T15:01:44.177-08:00</cpf:last-updated>
-- <cpf:state xmlns:cpf="http://marklogic.com/cpf">http://marklogic.com/states/done</cpf:state>
-- <prop:last-modified>2010-12-07T15:01:44-08:00</prop:last-modified>
+- cpf:processing-status - done
+- cpf:property-hash - d41d8cd98f00b204e9800998ecf8427e
+- cpf:last-updated - 2010-12-07T15:01:44.177-08:00
+- cpf:state - http://marklogic.com/states/done
+- prop:last-modified - 2010-12-07T15:01:44-08:00
 
 Workflow provides these additional properties:-
 - wf:step-type - The Class of the workflow task. 1 or more elements. E.g. a BPMN2 User Task is also a Human Task and a Task. Used by step processors to find their steps.
@@ -22,6 +22,7 @@ Workflow provides these additional properties:-
 - wf:since - Time the workflow has been at this step. Not necessarily same as last modified date
 - wf:awaiting-rendezvous - Multiple elements with value being the URI of the rendezvous step
 - wf:action - The chosen action by the user or workflow cpf action module
+- wf:status - Either RUNNING or FAILED or COMPLETED - high level whole process status
 
 ## Basic features
 
@@ -41,7 +42,7 @@ So we can easily implement an IF and SWITCH-CASE action, leaving the success sta
 
 ## Advanced features
 
-These features are out of scope for MarkLogic Workflow V1.0.
+These features may be implemented once the basics are done.
 
 ### Implementing forking and synchronising
 
@@ -72,4 +73,8 @@ should be treated as a sub process. An event raised CPF action should create the
 required.
 
 Each sub process is defined as a separate pipeline underneath the root process URI. (This also allows an event in
-  one pipeline to execute a (sub) process defined in another).
+one pipeline to execute a (sub) process defined in another).
+
+## CPF modelling and implementation
+
+A CPF Process model will also be directly importable from BPMN2. See the [OOTB CPF features](cpf-ootb.md) available.

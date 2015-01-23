@@ -16,6 +16,8 @@ The Eclipse BPMN2 modeller is a good option, with support for pluggable runtime 
 easy to define a MarkLogic runtime and set of custom tasks, and hide any BPMN2 tasks that we do not support the
 execution of.
 
+Also view the [BPMN2 specification summary document](bpmn2-spec.md)
+
 ### Importing
 
 In future a model import User Interface (UI) could be created. This is out of scope of this project. This project
@@ -30,3 +32,5 @@ them (activating them in CPF).
 - POST /v1/sresource/processmodel - Publishes a process model (creates a CPF pipeline, and enables it, updating the CPF directory or collection scope definition)
 - DELETE /v1/resource/processmodel - Removes the process model's pipeline directory or collection scope definition (so no new processes can be started. Leaves currently running processes unaffected)
 - GET /v1/resource/processmodelsearch - Search API compatible interface that restricts results to process model definitions
+
+Also see the [REST API document](RESTAPI.md)

@@ -12,6 +12,8 @@ validate-action.xqy
 link-coherency-action.xqy
 state-setting-action.xqy
 
+TODO also list the sample actions for entity extraction
+
 Conditions:-
 
 changed-type-condition.xqy

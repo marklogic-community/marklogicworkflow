@@ -1,6 +1,8 @@
-Cheat sheet guide for the BPMN2 spec
+# Cheat sheet guide for the BPMN2 spec
 
-Activities supported in the spec:-
+A copy of the [BPMN2 spec](./bpmn2omg/10-06-02.pdf) PDF is also available.
+
+## Activities supported in the spec
 
 - Task
 - Manual Task -> External (E.g. paper based) task to process engine
@@ -23,7 +25,7 @@ Activities supported in the spec:-
 - parallel gateway -> fork to or synchronise from all flow paths
 - complex gateway -> E.g. 3 of 5 incoming routes required in order to activate gateway
 - event based gateway
-- exclusiove gateway -> Decision point with one outcome
+- exclusive gateway -> Decision point with one outcome
 
 - error event
 - escalation event
@@ -41,8 +43,7 @@ Activities supported in the spec:-
 
 ## Model serialization
 
-XPDL 2.2 is the XML file format of BPMN 2.
-http://www.xpdl.org
+XPDL 2.2 is the XML file format of BPMN 2. This is covered in the BPMN2 specification.
 
 ## BPMN2 elements not supported by jBPM (and thus not often used in BPMN2 eclipse modeler)
 
@@ -65,7 +66,6 @@ http://www.xpdl.org
 - conversation link
 - global tasks
 - standard loop characteristics
-
 
 ## Customisation of Eclipse BPMN2 modeler for MarkLogic
 

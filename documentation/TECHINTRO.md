@@ -44,7 +44,7 @@ Adding support for all functionality in BPMN2 and the above human steps and para
 to create a lot of custom CPF actions. It also means we have to add additional 'workflow' state properties to the
 process data document's properties fragment, alongside the standard CPF state properties.
 
-Information on this is kept in WEEDS.md
+[Also see this page for further information on how Workflow is implemented with CPF](WEEDS.md)
 
 ## Workflow REST API to build apps on MarkLogic Workflow
 
@@ -52,8 +52,8 @@ MarkLogic Workflow does not provide any UI support (other than very basic UI pag
 with MarkLogic Workflow several REST API extensions are in development. These can be used to implement UI BPM style
 features like User and Shared Inboxes, human 'step processor' web pages, and Eforms linking to process steps.
 
-For details on this see RESTAPI.md
+[Also read the REST API doc](RESTAPI.md)
 
 ## More information
 
-For further details on all the above, see DESIGN.md
+For further details on all the above, see [the design document](DESIGN.md)
