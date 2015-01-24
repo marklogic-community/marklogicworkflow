@@ -13,10 +13,10 @@
       <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_2" name="is route A" sourceRef="ExclusiveGateway_1" targetRef="Task_1">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_1" language="http://www.w3.org/1999/XPath">choiceA = 'A'</bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_1" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceA = 'A'</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="SequenceFlow_3" name="is route B" sourceRef="ExclusiveGateway_1" targetRef="Task_2">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_2" language="http://www.w3.org/1999/XPath">choiceA = 'B'</bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_2" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceA = 'B'</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:task id="Task_2" name="2B">
       <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
@@ -36,16 +36,16 @@
       <bpmn2:outgoing>SequenceFlow_9</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_6" name="is route A" sourceRef="ExclusiveGateway_2" targetRef="Task_3">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_3" language="http://www.w3.org/1999/XPath">choiceB = 'A'</bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_3" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceB = 'A'</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="SequenceFlow_7" name="is route B" sourceRef="ExclusiveGateway_2" targetRef="Task_4">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_4" language="http://www.w3.org/1999/XPath">choiceB = 'B'</bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_4" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceB = 'B'</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="SequenceFlow_8" name="is route C" sourceRef="ExclusiveGateway_2" targetRef="Task_5">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_5" language="http://www.w3.org/1999/XPath">choiceB = 'C'</bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_5" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceB = 'C'</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="SequenceFlow_9" name="is route D" sourceRef="ExclusiveGateway_2" targetRef="Task_6">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_6" language="http://www.w3.org/1999/XPath">choiceB = 'D'</bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_6" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceB = 'D'</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:task id="Task_4" name="4B">
       <bpmn2:incoming>SequenceFlow_7</bpmn2:incoming>

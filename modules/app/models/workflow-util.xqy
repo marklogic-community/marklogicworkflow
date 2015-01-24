@@ -7,6 +7,7 @@ import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/se
 
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace p="http://marklogic.com/cpf/pipelines";
+declare namespace error="http://marklogic.com/xdmp/error";
 
 (:
  : Create a new process and activate it.
@@ -42,20 +43,20 @@ declare function m:complete($processUri as xs:string,$transition as node(),$stat
     cpf:success($processUri,$transition,$stateOverride)
 };
 
-declare function m:failure($processUri as xs:string,$transition as node(),$failureReason as xs:string,$detail as element()*) as empty-sequence() {
-  m:audit($processUri,$transition/p:state/text(),"Exception",$failureReason,$detail)
+declare function m:failure($processUri as xs:string,$transition as node(),$failureReason as element(error:error)?,$detail as node()*) as empty-sequence() {
+  m:audit($processUri,$transition/p:state/text(),"Exception",$failureReason/error:code/text(),($failureReason,$detail))
   ,
   cpf:failure($processUri,$transition,$failureReason,())
 };
 
-declare function m:audit($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as element()*) as empty-sequence() {
+declare function m:audit($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as empty-sequence() {
   (: Perform append operation on process document's audit element :)
   xdmp:node-insert-child(fn:doc($processUri)/wf:process/wf:audit-trail,
     m:audit-create($processUri,$state,$eventCategory,$description,$detail)
   )
 };
 
-declare function m:audit-create($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as element()*) as element(wf:audit) {
+declare function m:audit-create($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as element(wf:audit) {
   <wf:audit><wf:when>{fn:current-dateTime()}</wf:when><wf:category>{$eventCategory}</wf:category><wf:state>{$state}</wf:state><wf:description>{$description}</wf:description><wf:detail>{$detail}</wf:detail></wf:audit>
 };
 
@@ -68,11 +69,18 @@ declare function m:metric($processUri as xs:string,$state as xs:string,$start as
   )
 };
 
-declare function m:evaluate($processUri as xs:string,$namespaces as xs:string*,$xpath as xs:string) as xs:boolean {
+declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:namespace)*,$xpath as xs:string) as xs:boolean {
   (: TODO handle version 8 javascript conditions :)
+  let $xp :=
+    if (fn:substring($xpath,1,1) = "/") then
+      'fn:doc("' || $processUri || '")' || $xpath
+    else
+      $xpath
+  let $_ := xdmp:log($xp)
   let $ns :=
     for $namespace in $namespaces
     return ($namespace/@short/text(),$namespace/@long/text())
+  let $_ := xdmp:log($ns)
   return
-    xdmp:with-namespaces($ns, xdmp:unpath($xpath))
+    xdmp:with-namespaces($ns, xdmp:eval('declare namespace wf="http://marklogic.com/workflow"; ' || $xp,(),()))
 };

@@ -19,13 +19,12 @@ This PoC development will occur in small sprints until a useful PoC system is av
 
 ## Sprint 1 - Basic workflow
 
-- TEST BPMN2: generic blank task
+- DONE BPMN2: generic blank task
 - BPMN2: user task -> aka human step
-- TEST BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
-- BPMN2: complex gateway -> E.g. 3 of 5 incoming routes required in order to activate gateway
-- Evaluation: Support for /xpath/path to process model data
-- TEST Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
-- Evaluation: Support for fn:doc(/process/attachments/attachment[@name="default"])/some/path/to/property style evaluation
+- DONE BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
+- DONE Evaluation: Support for /xpath/path to process model data
+- DONE Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
+- TEST Evaluation: Support for fn:doc(/process/attachments/attachment[@name="default"])/some/path/to/property style evaluation
 - Evauation: Support for 'now' date time assignment to variable
 - Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
 - Evaluation: Support for (/some/path/one,/some/path/two)[1] style evaluation for set task
@@ -51,6 +50,7 @@ This PoC development will occur in small sprints until a useful PoC system is av
 - BPMN2: terminate current process
 - BPMN2: call activity (process or global task)
 - BPMN2: parallel gateway -> fork to or synchronise from all flow paths
+- BPMN2: complex gateway -> E.g. 3 of 5 incoming routes required in order to activate gateway
 - CPF: Invoke CPF pipeline
 - BPMN2: service task -> invoke service and process response
 - Update Eclipse Modeler palette

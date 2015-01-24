@@ -47,6 +47,9 @@ try {
   let $map := map:map()
   let $st := fn:current-dateTime()
 
+  let $ns := ($cpf:options/wf:namespaces/wf:namespace,<wf:namespace short="wf" long="http://marklogic.com/workflow" />)
+  (: Default namespace is same as process doc :) (: TODO mix in those from BPMN2 doc :)
+
   (: Evaluate each condition in turn :)
   let $_ :=
     for $route in $cpf:options/wf:route
@@ -54,7 +57,7 @@ try {
       if (fn:not(fn:empty(map:get($map,"route")))) then
         ()
       else
-        if ($wfu:evaluate($cpf:document-uri,$route/wf:condition/text())) then
+        if (wfu:evaluate($cpf:document-uri,$ns,$route/wf:condition/text())) then
           (: If true, set route choice state :)
           map:put($map,"route",$route/wf:state/text())
         else
@@ -69,9 +72,9 @@ try {
   (: If still none, throw failure message (misconfiguration) :)
   return
     if (fn:empty(map:get($map,"route"))) then
-      wfu:failure($cpf:document-uri,$cpf-transition,"No route chosen out of exclusive gateway!")
+      fn:error(xs:QName(wf:exclusiveGatewayNoRoute),"No route chosen out of exclusive gateway!")
     else
-      wfu:complete( $cpf:document-uri, $cpf:transition, $nextState, $st )
+      wfu:complete( $cpf:document-uri, $cpf:transition, map:get($map,"route"), $st )
 } catch ($e) {
   wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }
