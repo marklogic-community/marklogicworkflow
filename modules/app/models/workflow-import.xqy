@@ -21,7 +21,7 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
 
   (: Determine type from root element :)
   let $localPipelineId :=
-    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:major as xs:string external;declare variable $m:minor as xs:string external;m:create($m:processmodeluri,$m:major,$m:minor)',
+    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:major as xs:string external;declare variable $m:minor as xs:string external;m:create($m:processmodeluri,$m:major,$m:minor)',
       (xs:QName("m:processmodeluri"),$processmodeluri,xs:QName("m:major"),$major,xs:QName("m:minor"),$minor),
       <options xmlns="xdmp:eval">
         <isolation>different-transaction</isolation>
@@ -30,7 +30,7 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
 
   let $puri := "http://marklogic.com/cpf/pipelines/"||xs:string($localPipelineId)||".xml"
   let $pid :=
-    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow.xqy";declare variable $m:puri as xs:string external;m:install($m:puri)',
+    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:puri as xs:string external;m:install($m:puri)',
       (xs:QName("m:puri"),$puri),
       <options xmlns="xdmp:eval">
         <isolation>different-transaction</isolation>
@@ -86,9 +86,10 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
 
   (: check if pipeline already exists, and recreate :)
   let $remove :=
+    try {
     if (fn:not(fn:empty(p:get($puri)))) then
-      xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow-import"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;p:remove($m:puri)',
-        (xs:QName("m:puri"),$puri),
+      xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;p:remove($m:puri)',
+        (xs:QName("wf:puri"),$puri),
         <options xmlns="xdmp:eval">
           <database>{xdmp:triggers-database()}</database>
           <isolation>different-transaction</isolation>
@@ -96,11 +97,12 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
       )
     else
       ()
+    } catch ($e) { () } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
 
   (: Recreate pipeline :)
   return
-    xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow-import"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:pxml as element(p:pipeline) external;p:insert($m:pxml)',
-      (xs:QName("m:pxml"),$pxml),
+    xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:pxml as element(p:pipeline) external;p:insert($m:pxml)',
+      (xs:QName("wf:pxml"),$pxml),
       <options xmlns="xdmp:eval">
         <database>{xdmp:triggers-database()}</database>
         <isolation>different-transaction</isolation>
@@ -117,13 +119,14 @@ declare function m:domain($processmodeluri as xs:string,$major as xs:string,$min
 
   (: check if domain already exists and recreate :)
   let $remove :=
-    if (fn:not(fn:empty(dom:get($processmodeluri))) then
+    try {
+    if (fn:not(fn:empty(dom:get($processmodeluri)))) then
       xdmp:eval(
-        'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow-import"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;'
+        'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;'
         ||
         'dom:remove($m:processmodeluri)'
         ,
-        (xs:QName("m:processmodeluri"),$processmodeluri),
+        (xs:QName("wf:processmodeluri"),$processmodeluri),
         <options xmlns="xdmp:eval">
           <database>{xdmp:triggers-database()}</database>
           <isolation>different-transaction</isolation>
@@ -131,15 +134,18 @@ declare function m:domain($processmodeluri as xs:string,$major as xs:string,$min
       )
     else
       ()
+    } catch ($e) { () } (: catching domain throwing error if it doesn't exist. We can safely ignore this :)
 
   (: Configure domain :)
   return
     xdmp:eval(
-      'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow-import"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:pid as xs:unsignedLong external;declare variable $m:mdb as xs:unsignedLong external;'
+      'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:pid as xs:unsignedLong external;declare variable $m:mdb as xs:unsignedLong external;'
       ||
-      'dom:create($m:processmodeluri,"Execute process given a process data document for "||$m:processmodeluri,dom:domain-scope("directory","/workflow/processes"||$m:processmodeluri||"/","0"),dom:evaluation-context($m:mdb,"/"),($m:pid),())'
+      'dom:create($m:processmodeluri,"Execute process given a process data document for "||$m:processmodeluri,'
+      ||
+      'dom:domain-scope("directory","/workflow/processes"||$m:processmodeluri||"/","0"),dom:evaluation-context($m:mdb,"/"),(xs:unsignedLong(p:pipelines()/p:pipeline[./pipeline-name = "Status Change Handling"]/pipeline-id),$m:pid),())'
       ,
-      (xs:QName("m:processmodeluri"),$processmodeluri,xs:QName("m:pid"),$pid,xs:QName("m:mdb"),$mdb),
+      (xs:QName("wf:processmodeluri"),$processmodeluri,xs:QName("wf:pid"),$pid,xs:QName("wf:mdb"),$mdb),
       <options xmlns="xdmp:eval">
         <database>{xdmp:triggers-database()}</database>
         <isolation>different-transaction</isolation>
@@ -164,6 +170,7 @@ declare function m:domain($processmodeluri as xs:string,$major as xs:string,$min
  :)
 declare function m:scxml-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string,$doc as element(sc:scxml)) as xs:unsignedLong  {
   (: Convert the SCXML process model to a CPF pipeline and insert (create or replace) :)
+  let $_ := xdmp:log("in m:scxml-to-cpf()")
   let $initial :=
     if (fn:not(fn:empty($doc/@initial))) then
       $doc/sc:state[./@id = $doc/@initial]
@@ -255,6 +262,7 @@ Example:-
 
 declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string,$doc as element(b2:definitions)) as xs:unsignedLong  {
   (: Convert the process model to a CPF pipeline and insert (create or replace) :)
+  let $_ := xdmp:log("in m:bpmn2-to-cpf()")
   let $start := $doc/b2:process[1]
   let $_ := xdmp:log($start)
   (: fixed below so start isn't necessarily the task - should it be the startEvent instead? :)
@@ -280,10 +288,27 @@ declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:strin
 
           (: create entry CPF action :)
           (: Link to initial state action :)
-          p:state-transition(xs:anyURI("http://marklogic.com/states/initial"),
+          p:state-transition(xs:anyURI("http://marklogic.com/states/initial"), (: TOP LEVEL PROCESS ONLY!!! :)
             "Standard placeholder for initial state",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($initial/@id)),
             $failureState,(),(),()
           )
+
+          ,
+
+          (: 0. startEvent handling :)
+          for $state in $start/b2:startEvent
+          let $sf := $start/b2:sequenceFlow[./@id = $state/b2:outgoing[1]]
+          return
+            p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
+              "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($sf/@targetRef) ),
+              $failureState,(),
+              p:action("/workflowengine/actions/startEvent.xqy","BPMN2 start event: "||xs:string($state/@name),
+                  ()
+                )
+              ,
+              ()
+            )
+
 
           ,
 
@@ -296,7 +321,7 @@ declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:strin
             p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
               "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($sf/@targetRef) ),
               $failureState,(),
-              p:action("/app/processengine/actions/task.xqy","BPMN2 Task: "||xs:string($state/@name),
+              p:action("/workflowengine/actions/task.xqy","BPMN2 Task: "||xs:string($state/@name),
                   ()
                 )
               ,
@@ -312,14 +337,14 @@ declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:strin
               p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
                 "",(),
                 $failureState,(),
-                p:action("/app/processengine/actions/exclusiveGateway.xqy","BPMN2 Exclusive Gateway: "||xs:string($state/@name),
+                p:action("/workflowengine/actions/exclusiveGateway.xqy","BPMN2 Exclusive Gateway: "||xs:string($state/@name),
                   <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
                     {
                       for $route in $state/b2:outgoing
                       let $sf := $start/b2:sequenceFlow[./@id = $route]
                       return
                         <wf:route>
-                          <wf:state>{xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($sf/@targetRef)}</wf:state>
+                          <wf:state>{xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($sf/@targetRef))}</wf:state>
                           <wf:name>{xs:string($sf/@name)}</wf:name>
                           <wf:condition language="{xs:string($sf/b2:conditionExpression[1]/@language)}">{$sf/b2:conditionExpression/text()}</wf:condition>
                         </wf:route>
@@ -336,7 +361,7 @@ declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:strin
             p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
               "",xs:anyURI("http://marklogic.com/states"||$pname||"_end"),
               $failureState,(),
-              p:action("/app/processengine/actions/endEvent.xqy","BPMN2 End Event: "||xs:string($state/@name),
+              p:action("/workflowengine/actions/endEvent.xqy","BPMN2 End Event: "||xs:string($state/@name),
                   ()
                 )
               ,
@@ -359,7 +384,7 @@ declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:strin
           (: *** TODO SPRINT 5: MARKLOGIC DOCUMENT AND SEARCH CUSTOM ACTIVITY SUPPORT *** :)
 
           (: X. finally now route to the done state in CPF :)
-          p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"_end"),
+          p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"__end"),
             "Standard placeholder for final state",xs:anyURI("http://marklogic.com/states/done"),
             $failureState,(),(),()
           )

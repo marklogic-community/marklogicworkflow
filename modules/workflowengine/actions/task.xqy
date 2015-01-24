@@ -18,8 +18,8 @@ declare variable $cpf:options as element() external;
   <on-failure>http://marklogic.com/states/error</on-failure> <!-- could be a failure handling event step -->
   <execute>
     <action>
-      <module>/app/workflowengine/actions/task.xqy</module>
-      <options xmlns="/app/workflowengine/actions/task.xqy">
+      <module>/workflowengine/actions/task.xqy</module>
+      <options xmlns="/workflowengine/actions/task.xqy">
       </options>
     </action>
   </execute>
@@ -27,7 +27,7 @@ declare variable $cpf:options as element() external;
 :)
 
 try {
-  wfu:complete( $cpf:document-uri, $cpf:transition, () )
+  wfu:complete( $cpf:document-uri, $cpf:transition, (), fn:current-dateTime() )
 } catch ($e) {
   wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

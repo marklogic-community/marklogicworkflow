@@ -12,14 +12,14 @@ declare variable $cpf:options as element() external;
 (: A placeholder for an endEvent in a BPMN2 model
 
 <state-transition>
-  <annotation>BPMN2 End Event: end</annotation>
-  <state>http://marklogic.com/states/PROCESSNAME__1__0/end</state>
-  <on-success>http://marklogic.com/states/PROCESSNAME__1__0/_end</on-success>
+  <annotation>BPMN2 start Event: start1</annotation>
+  <state>http://marklogic.com/states/PROCESSNAME__1__0/start1</state>
+  <on-success>http://marklogic.com/states/PROCESSNAME__1__0/Task_1</on-success>
   <on-failure>http://marklogic.com/states/error</on-failure> <!-- could be a failure handling event step -->
   <execute>
     <action>
-      <module>/workflowengine/actions/endEvent.xqy</module>
-      <options xmlns="/workflowengine/actions/endEvent.xqy">
+      <module>/workflowengine/actions/startEvent.xqy</module>
+      <options xmlns="/workflowengine/actions/startEvent.xqy">
       </options>
     </action>
   </execute>
@@ -30,10 +30,12 @@ try {
   let $st := fn:current-dateTime()
   return
   (
-    (: set final Workflow properties :)
+    (: set initial Workflow properties :)
     xdmp:document-add-properties($cpf:document-uri,
       (
-        <wf:end>{fn:current-dateTime()}</wf:end>
+        <wf:start>{fn:current-dateTime()}</wf:start>
+        ,
+        <wf:status>RUNNING</wf:status>
       )
     )
     ,

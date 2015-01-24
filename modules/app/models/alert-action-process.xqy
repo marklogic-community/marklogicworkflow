@@ -8,7 +8,7 @@
 xquery version "1.0-ml";
 
 import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";
-import module namespace w = "http://marklogic.com/workflow" at "/app/models/workflow.xqy";
+declare namespace wf = "http://marklogic.com/workflow";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
 declare variable $alert:config-uri as xs:string external;
@@ -19,9 +19,9 @@ declare variable $alert:action as element(alert:action) external;
 (: Create a process instance for this document :)
 
 (: Find appropriate process from alert action option :)
-let $procname := $alert-action/w:process-name/text()
+let $procname := $alert-action/alert:options/wf:process-name/text()
 return
-  xdmp:document-insert($procname || sem:uuid-string() || ".xml",
+  xdmp:document-insert($procname || "/" || sem:uuid-string() || ".xml",
    <process xmlns="http://marklogic.com/workflow/process">
     <data>
     {

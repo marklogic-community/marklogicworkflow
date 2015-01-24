@@ -19,6 +19,5 @@ import and standard activity types are supported, allowing implementation of Con
  - [BPMN2 modelling](./documentation/MODELLING.md)
  - CPF pipeline modelling - TBC
 - For developers
- - [Linking a UI/application to MarkLogic Workflow](./documentation/RESTAPI.md)
- - Creating your own Activity types - TBC
+ - [Developer howtos](./documentation/DEVELOPER.md)
  - [Upcoming features list](./documentation/SPRINTS.md)

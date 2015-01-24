@@ -17,8 +17,8 @@ declare variable $cpf:options as element() external;
   <on-failure>http://marklogic.com/states/error</on-failure> <!-- could be a failure handling event step -->
   <execute>
     <action>
-      <module>/app/workflowengine/actions/exclusiveGateway.xqy</module>
-      <options xmlns="/app/workflowengine/actions/exclusiveGateway.xqy">
+      <module>/workflowengine/actions/exclusiveGateway.xqy</module>
+      <options xmlns="/workflowengine/actions/exclusiveGateway.xqy">
         <wf:namespaces>
           <wf:namespace short="xh" long="http://some/xml/ns" />
         </wf:namespaces>
@@ -45,6 +45,7 @@ declare variable $cpf:options as element() external;
 
 try {
   let $map := map:map()
+  let $st := fn:current-dateTime()
 
   (: Evaluate each condition in turn :)
   let $_ :=
@@ -70,7 +71,7 @@ try {
     if (fn:empty(map:get($map,"route"))) then
       wfu:failure($cpf:document-uri,$cpf-transition,"No route chosen out of exclusive gateway!")
     else
-      wfu:complete( $cpf:document-uri, $cpf:transition, $nextState )
+      wfu:complete( $cpf:document-uri, $cpf:transition, $nextState, $st )
 } catch ($e) {
   wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

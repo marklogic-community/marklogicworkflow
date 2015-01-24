@@ -19,10 +19,11 @@ Workflow provides these additional properties:-
 - wf:locked-by - The user this step is locked by. Steps can only be opened by one user at a time. Admins in future will be able to break locks.
 - wf:actions - A list of actions. The user can select only one action. Equivalent to a BPMN task followed by an exclusive gateway, or with boundary events. value attribute is what is sent to workflow, name is human readable, element text is human readable descirption
 - wf:assigned-to - A name attribute for the value, a type attribute for user, group, or stack
-- wf:since - Time the workflow has been at this step. Not necessarily same as last modified date
+- TBD how to set? - wf:since - Time the workflow has been at this step. Not necessarily same as last modified date
 - wf:awaiting-rendezvous - Multiple elements with value being the URI of the rendezvous step
 - wf:action - The chosen action by the user or workflow cpf action module
 - wf:status - Either RUNNING or FAILED or COMPLETED - high level whole process status
+- wf:start - The time the workflow's startEvent step was evaluated
 
 ## Basic features
 

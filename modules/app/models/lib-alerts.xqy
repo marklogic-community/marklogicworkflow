@@ -7,7 +7,7 @@ import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/a
 declare namespace my="http://marklogic.com/alerts";
 
 
-declare function ss:add-alert($shortname as xs:string,$query as element(cts:query),
+declare function ss:add-alert($shortname as xs:string,$query as schema-element(cts:query),
   $ruleoptions as element()*,$module as xs:string,$moduledb as xs:unsignedLong,$actionoptions as element()*) as xs:string {
 
   let $name := ss:do-create-config($shortname)
@@ -23,7 +23,7 @@ declare function ss:add-alert($shortname as xs:string,$query as element(cts:quer
 declare function ss:do-create-config($shortname as xs:string) as xs:string {
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
-    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-alerts.xqy";' ||
+    'import module namespace ah = "http://marklogic.com/alerts/alerts" at "/app/models/lib-alerts.xqy";' ||
     'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
     'declare variable $my:shortname as xs:string external;' ||
     'ah:create-config($my:shortname)',
@@ -35,7 +35,7 @@ declare function ss:do-create-config($shortname as xs:string) as xs:string {
 declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,$options as element()*) {
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
-    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-alerts.xqy";' ||
+    'import module namespace ah = "http://marklogic.com/alerts/alerts" at "/app/models/lib-alerts.xqy";' ||
     'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
     'declare variable $my:alert-name as xs:string external;' ||
     'declare variable $my:query as cts:query external;' ||
@@ -49,7 +49,7 @@ declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,
 declare function ss:do-create-action($alert-name as xs:string,$alert-module as xs:string,$db as xs:unsignedLong,$options as element()*) {
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
-    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-alerts.xqy";' ||
+    'import module namespace ah = "http://marklogic.com/alerts/alerts" at "/app/models/lib-alerts.xqy";' ||
     'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
     'declare variable $my:alert-name as xs:string external;' ||
     'declare variable $my:alert-module as xs:string external;' ||
