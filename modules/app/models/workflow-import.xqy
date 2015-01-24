@@ -256,7 +256,10 @@ Example:-
 declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string,$doc as element(b2:definitions)) as xs:unsignedLong  {
   (: Convert the process model to a CPF pipeline and insert (create or replace) :)
   let $start := $doc/b2:process[1]
-  let $initial := $start/b2:task[./@id = $start/b2:sequenceFlow[./@id = $doc/b2:process/b2:startEvent/b2:outgoing]/@targetRef]
+  let $_ := xdmp:log($start)
+  (: fixed below so start isn't necessarily the task - should it be the startEvent instead? :)
+  let $initial := $start/b2:startEvent[1] (: is more than one valid? :)
+  (: let $initial := $start/b2:task[./@id = $start/b2:sequenceFlow[./@id = $doc/b2:process/b2:startEvent/b2:outgoing]/@targetRef]:)
 
   (: NB major and minor version not needed because this forms part of the process model document URI :)
 
@@ -266,72 +269,101 @@ declare function m:bpmn2-to-cpf($processmodeluri as xs:string,$major as xs:strin
   let $failureAction := p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),())
   let $failureState := xs:anyURI("http://marklogic.com/states/error")
 
-  (: create entry CPF action :)
-  (: Link to initial state action :)
+  (: TODO determine if initial step is an incoming event step for Document Created or Document Updated event (alert has fired the process) :)
+
 
   return
     p:create($pname,$pname,
       p:action("/MarkLogic/cpf/actions/success-action.xqy",(),()),
       $failureAction,(),
       (
+
+          (: create entry CPF action :)
+          (: Link to initial state action :)
           p:state-transition(xs:anyURI("http://marklogic.com/states/initial"),
             "Standard placeholder for initial state",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($initial/@id)),
             $failureState,(),(),()
           )
+
           ,
 
+          (: *** SPRINT 1: BASIC BPMN2 ACTIVITY SUPPORT *** :)
+
+          (: 1. BPMN2 Generic task - handle as pass though only - no real implementation :)
           for $state in $start/b2:task
+          let $sf := $start/b2:sequenceFlow[./@id = $state/b2:outgoing[1]]
           return
             p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
-              "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/b2:outgoing) ),
-              $failureState,(),(),() (: TODO Configure this step's TYPE (e.g. human) and OPTIONS (E.g. assignee, action choices) :)
+              "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($sf/@targetRef) ),
+              $failureState,(),
+              p:action("/app/processengine/actions/task.xqy","BPMN2 Task: "||xs:string($state/@name),
+                  ()
+                )
+              ,
+              ()
             )
+
           ,
-          (: Handle BPMN2 exclusive gateways :)
+
+          (: 2. BPMN2 exclusive gateways :)
           for $state in $start/b2:exclusiveGateway
           return
-            (
-              (: TODO detect task followed immediately by gateway, and treat as single human task :)
-              (: Create base decision point so previous human step(s) can point here, auto transition to first choice state :)
+
               p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
-                "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)||"_"||xs:string($state/b2:outgoing[1]/@id)),
+                "",(),
                 $failureState,(),
-                p:action("/app/processengine/actions/humanstep.xqy",""||xs:string($state/@name),
+                p:action("/app/processengine/actions/exclusiveGateway.xqy","BPMN2 Exclusive Gateway: "||xs:string($state/@name),
                   <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
                     {
                       for $route in $state/b2:outgoing
+                      let $sf := $start/b2:sequenceFlow[./@id = $route]
                       return
-                        <m:route>{xs:string($start/b2:sequenceFlow[./@id = $route]/@name)}</m:route>
+                        <wf:route>
+                          <wf:state>{xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($sf/@targetRef)}</wf:state>
+                          <wf:name>{xs:string($sf/@name)}</wf:name>
+                          <wf:condition language="{xs:string($sf/b2:conditionExpression[1]/@language)}">{$sf/b2:conditionExpression/text()}</wf:condition>
+                        </wf:route>
                     }
                   </p:options>
-                ),
-                ()
+                ),()
               )
-              ,
-              (: Create one state transition per choice, with exclusive logic :)
-              for $outgoing at $outn in $state/b2:outgoing
-              let $next := $start/element()[./b2:incoming = $outgoing]
-              let $after := ($next/following-sibling::b2:outgoing , ())[1] (: TODO blank next state means cannot proceed from here - ERROR? :)
-              return
-                p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)||"_"||xs:string($outgoing/@id),
-                  "",xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($next/@id)),
-                  if (fn:empty($after)) then () else
-                    xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)||"_"||xs:string($after/@id),
-                  (),
-                  p:action("/app/processengine/actions/actionif.xqy","Check if user's route choice matches options",
-                    <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
-                      <m:route>{xs:string($start/b2:sequenceFlow[./@id = $outgoing]/@name)}</m:route>
-                    </p:options>),
-                  () (: TODO Configure this step's TYPE (e.g. human) and OPTIONS (E.g. assignee) :)
-                )
 
-              (: Next step for each will be outgoing state for exclusive - NA all route processed, no 'end' step :)
-            )
           ,
-          p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($doc/sc:final/@id) ),
+
+          (: 3. BPMN2 end event activity :)
+          for $state in $start/b2:endEvent
+          return
+            p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"/"||xs:string($state/@id)),
+              "",xs:anyURI("http://marklogic.com/states"||$pname||"_end"),
+              $failureState,(),
+              p:action("/app/processengine/actions/endEvent.xqy","BPMN2 End Event: "||xs:string($state/@name),
+                  ()
+                )
+              ,
+              ()
+            )
+
+          ,
+
+          (: 4. TODO BPMN2 User (human step) task activity :)
+          ()
+
+          ,
+
+          (: *** TODO SPRINT 2: CPF CUSTOM ACTIVITY SUPPORT *** :)
+
+          (: *** TODO SPRINT 3: ADVANCED BPMN2 PROCESS ORCHESTRATION ACTIVITY SUPPORT *** :)
+
+          (: *** TODO SPRINT 4: ADVANCED EVENT DRIVEN ACTIVITY SUPPORT *** :)
+
+          (: *** TODO SPRINT 5: MARKLOGIC DOCUMENT AND SEARCH CUSTOM ACTIVITY SUPPORT *** :)
+
+          (: X. finally now route to the done state in CPF :)
+          p:state-transition(xs:anyURI("http://marklogic.com/states"||$pname||"_end"),
             "Standard placeholder for final state",xs:anyURI("http://marklogic.com/states/done"),
             $failureState,(),(),()
           )
+
       ) (: state transition list :)
     ) (: pcreate :)
 
