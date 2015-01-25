@@ -38,3 +38,61 @@ a CPF state and link to an action. All BPMN2 custom configuration should be copi
 ./mljsadmin --install=modules
 
 You should now be able to import a new BPMN2 model with your custom action type and execute the model successfully.
+
+## List of needed activities
+
+These are yet to be coded. Feel free to add them yourself and send a pull request!
+
+BPMN2 Activities
+
+- BPMN2: User task (human step)
+- BPMN2: Ad hoc sub process
+- BPMN2: call activity
+- BPMN2: terminate current process
+- BPMN2: call activity (process or global task)
+- BPMN2: parallel gateway -> fork to or synchronise from all flow paths
+- BPMN2: complex gateway -> E.g. 3 of 5 incoming routes required in order to activate gateway
+- BPMN2: service task -> invoke service and process response (SOAP and HTTP REST)
+- BPMN2: error event
+- BPMN2: escalation event
+- BPMN2: Timer (duration or specific date time) (and timeout for escalation??? Is this supported in OOTB BPMN2?)
+- BPMN2: sub-process -> can be triggered by event rather than direct calling
+- BPMN2: event based gateway
+
+Additional generic
+
+- Set process variable (support for multiple in same definition)
+- Separate loop step (as opposed to having this within each and every activity type)
+
+MarkLogic Specific
+
+- Map variables (to/from process/attachment, support for multiples)
+- Send email (SMTP message?) with optional attachments
+- Attach document
+- Attach search results
+- Attach search
+- Attach collection
+- Attach folder
+- Detach
+- Get document element/attr (XPath)
+- Set document element/attr (XPath)
+- Append child element
+- Get property
+- Set property
+- Invoke CPF pipeline for attachment
+- Delete document (and remove from attachment)
+- Insert document (from attachment and content with mime type)
+- Set document security
+- Remove role access
+- Add role access
+- Set role access
+- Generate content MD5 hash
+- Validate content MD5 hash
+- Generate property (non CPF or WF) property hash
+- Validate property (non CPF or WF) property hash
+- Mark as duplicate (and hide access)
+- Create alert
+- Remove alert
+- Alert signal event support
+- Apply XML Schema validation against attachment
+- Apply XML Schematron validations against attachment, and create report, assign overall result to variable
