@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://marklogic.com/workflow" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:wf="http://marklogic.com/workflow">
+
+    <complexType name="processType">
+    	<sequence>
+    		<element name="data" type="wf:dataType" minOccurs="1"
+    			maxOccurs="1">
+    		</element>
+    		<element name="attachments" type="wf:attachmentsType"
+    			minOccurs="1" maxOccurs="1">
+    		</element>
+            <element name="audit-trail" type="wf:auditTrailType" minOccurs="0" maxOccurs="1"></element>
+            <element name="metrics" type="wf:metricsType" minOccurs="0"
+    			maxOccurs="1">
+    		</element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="dataType">
+    	<sequence>
+    		<any></any>
+    	</sequence></complexType>
+
+    <complexType name="attachmentsType">
+    	<sequence>
+    		<element name="attachment" type="wf:attachmentType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="attachmentType">
+    	<sequence>
+    		<element name="uri" type="anyURI" minOccurs="0" maxOccurs="1"></element>
+    	</sequence>
+    	<attribute name="name" type="string"></attribute>
+    	<attribute name="cardinality" type="string"></attribute>
+    	<attribute name="type" type="string"></attribute>
+    </complexType>
+
+    <element name="process" type="wf:processType"></element>
+
+    <complexType name="auditTrailType">
+    	<sequence>
+    		<element name="audit" type="wf:auditType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="auditType">
+    	<sequence>
+    		<element name="when" type="dateTime" minOccurs="1"
+    			maxOccurs="1">
+    		</element>
+    		<element name="category" type="string" minOccurs="1"
+    			maxOccurs="1">
+    		</element>
+    		<element name="state" type="string" minOccurs="0"
+    			maxOccurs="1">
+    		</element>
+    		<element name="description" type="string" minOccurs="0"
+    			maxOccurs="1">
+    		</element>
+    		<element name="detail" type="wf:detailType" minOccurs="0" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="metricsType">
+    	<sequence>
+    		<element name="metric" type="wf:metricType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="metricType">
+    	<sequence>
+    		<element name="state" type="string" minOccurs="1" maxOccurs="1"></element>
+    		<element name="start" type="dateTime" minOccurs="1" maxOccurs="1"></element>
+    		<element name="finish" type="dateTime" minOccurs="1" maxOccurs="1"></element>
+    		<element name="duration" type="duration" minOccurs="1" maxOccurs="1"></element>
+    		<element name="success" type="boolean" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="detailType">
+    	<sequence>
+    		<any></any>
+    	</sequence></complexType>
+</schema>

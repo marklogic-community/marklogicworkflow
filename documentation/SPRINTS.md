@@ -28,10 +28,10 @@ This PoC development will occur in small sprints until a useful PoC system is av
 - Evauation: Support for 'now' date time assignment to variable
 - Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
 - Evaluation: Support for (/some/path/one,/some/path/two)[1] style evaluation for set task
-- Tools: Process Data model XSD (for modeler import)
+- TEST Tools: Process Data model XSD (for modeler import)
 - Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
 - BPMN2: loop characteristic available in activity definitions rather than as separate process step
-- UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
+- DEFERRED UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
 
 ## Sprint 2 - CPF modelling
 

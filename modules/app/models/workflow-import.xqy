@@ -63,6 +63,23 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
   let $root := fn:doc($processmodeluri)/element()
 
   let $_ := xdmp:log("local name: "||fn:local-name($root)||" namespace: "||fn:namespace-uri($root))
+  let $pname := $processmodeluri||"__"||$major||"__"||$minor
+(:
+  let $removeDoc :=
+    try {
+    if (fn:not(fn:empty(p:get($pname)))) then
+      xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;p:remove($m:puri)',
+        (xs:QName("wf:puri"),$pname),
+        <options xmlns="xdmp:eval">
+          <database>{xdmp:database()}</database>
+          <isolation>different-transaction</isolation>
+        </options>
+      )
+    else
+      ()
+    } catch ($e) { () } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
+:)
+
 
   return
 
@@ -143,7 +160,7 @@ declare function m:domain($processmodeluri as xs:string,$major as xs:string,$min
       ||
       'dom:create($m:processmodeluri,"Execute process given a process data document for "||$m:processmodeluri,'
       ||
-      'dom:domain-scope("directory","/workflow/processes"||$m:processmodeluri||"/","0"),dom:evaluation-context($m:mdb,"/"),(xs:unsignedLong(p:pipelines()/p:pipeline[./pipeline-name = "Status Change Handling"]/pipeline-id),$m:pid),())'
+      'dom:domain-scope("directory","/workflow/processes"||$m:processmodeluri||"/","0"),dom:evaluation-context($m:mdb,"/"),(xs:unsignedLong(p:pipelines()[p:pipeline-name = "Status Change Handling"]/p:pipeline-id),$m:pid),())'
       ,
       (xs:QName("wf:processmodeluri"),$processmodeluri,xs:QName("wf:pid"),$pid,xs:QName("wf:mdb"),$mdb),
       <options xmlns="xdmp:eval">

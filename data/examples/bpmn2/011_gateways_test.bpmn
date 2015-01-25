@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns1="http://www.example.org/BPMNTestProcessData" id="Definitions_1" targetNamespace="http://marklogic.com/workflow">
   <bpmn2:itemDefinition id="ItemDefinition_1" structureRef="ns1_schema"/>
-  <bpmn2:process id="gateways_test" name="Default Process">
+  <bpmn2:process id="gateways_test" name="Default Process" processType="Public">
     <bpmn2:task id="Task_1" name="2A">
       <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_4</bpmn2:outgoing>
@@ -67,108 +67,108 @@
     </bpmn2:task>
     <bpmn2:sequenceFlow id="SequenceFlow_10" sourceRef="Task_3" targetRef="EndEvent_1"/>
     <bpmn2:endEvent id="EndEvent_1" name="Finish">
-      <bpmn2:incoming>SequenceFlow_10</bpmn2:incoming>
       <bpmn2:incoming>SequenceFlow_11</bpmn2:incoming>
       <bpmn2:incoming>SequenceFlow_13</bpmn2:incoming>
+      <bpmn2:incoming>SequenceFlow_10</bpmn2:incoming>
       <bpmn2:incoming>SequenceFlow_14</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_14" sourceRef="Task_5" targetRef="EndEvent_1"/>
     <bpmn2:property id="Property_2" name="processVar1"/>
   </bpmn2:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1" name="Data Basic">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#gateways_test">
-      <bpmndi:BPMNShape id="BPMNShape_1" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#StartEvent_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="gateways_test">
+      <bpmndi:BPMNShape id="BPMNShape_1" bpmnElement="StartEvent_1">
         <dc:Bounds height="36.0" width="36.0" x="20.0" y="308.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_2" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#EndEvent_1">
+      <bpmndi:BPMNShape id="BPMNShape_2" bpmnElement="EndEvent_1">
         <dc:Bounds height="36.0" width="36.0" x="700.0" y="308.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_ExclusiveGateway_1" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#ExclusiveGateway_1" isMarkerVisible="true">
+      <bpmndi:BPMNShape id="BPMNShape_ExclusiveGateway_1" bpmnElement="ExclusiveGateway_1" isMarkerVisible="true">
         <dc:Bounds height="50.0" width="50.0" x="121.0" y="301.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_ExclusiveGateway_2" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#ExclusiveGateway_2" isMarkerVisible="true">
+      <bpmndi:BPMNShape id="BPMNShape_ExclusiveGateway_2" bpmnElement="ExclusiveGateway_2" isMarkerVisible="true">
         <dc:Bounds height="50.0" width="50.0" x="350.0" y="302.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_Task_1" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#Task_1">
+      <bpmndi:BPMNShape id="BPMNShape_Task_1" bpmnElement="Task_1">
         <dc:Bounds height="50.0" width="110.0" x="200.0" y="250.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_Task_2" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#Task_2">
+      <bpmndi:BPMNShape id="BPMNShape_Task_2" bpmnElement="Task_2">
         <dc:Bounds height="50.0" width="110.0" x="200.0" y="353.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_Task_4" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#Task_4">
+      <bpmndi:BPMNShape id="BPMNShape_Task_4" bpmnElement="Task_4">
         <dc:Bounds height="50.0" width="110.0" x="468.0" y="250.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_Task_5" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#Task_5">
+      <bpmndi:BPMNShape id="BPMNShape_Task_5" bpmnElement="Task_5">
         <dc:Bounds height="50.0" width="110.0" x="468.0" y="353.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_Task_6" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#Task_6">
+      <bpmndi:BPMNShape id="BPMNShape_Task_6" bpmnElement="Task_6">
         <dc:Bounds height="50.0" width="110.0" x="468.0" y="450.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_Task_3" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#Task_3">
+      <bpmndi:BPMNShape id="BPMNShape_Task_3" bpmnElement="Task_3">
         <dc:Bounds height="50.0" width="110.0" x="468.0" y="150.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_1" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_1" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_1">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="SequenceFlow_1" sourceElement="BPMNShape_1" targetElement="BPMNShape_ExclusiveGateway_1">
         <di:waypoint xsi:type="dc:Point" x="56.0" y="326.0"/>
         <di:waypoint xsi:type="dc:Point" x="85.0" y="326.0"/>
         <di:waypoint xsi:type="dc:Point" x="85.0" y="326.0"/>
         <di:waypoint xsi:type="dc:Point" x="121.0" y="326.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_2" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_2" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_1" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_1">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_2" bpmnElement="SequenceFlow_2" sourceElement="BPMNShape_ExclusiveGateway_1" targetElement="BPMNShape_Task_1">
         <di:waypoint xsi:type="dc:Point" x="146.0" y="301.0"/>
         <di:waypoint xsi:type="dc:Point" x="146.0" y="275.0"/>
         <di:waypoint xsi:type="dc:Point" x="200.0" y="275.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_3" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_3" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_1" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_2">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_3" bpmnElement="SequenceFlow_3" sourceElement="BPMNShape_ExclusiveGateway_1" targetElement="BPMNShape_Task_2">
         <di:waypoint xsi:type="dc:Point" x="146.0" y="352.0"/>
         <di:waypoint xsi:type="dc:Point" x="146.0" y="378.0"/>
         <di:waypoint xsi:type="dc:Point" x="200.0" y="378.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_4" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_4" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_1" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_2">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_4" bpmnElement="SequenceFlow_4" sourceElement="BPMNShape_Task_1" targetElement="BPMNShape_ExclusiveGateway_2">
         <di:waypoint xsi:type="dc:Point" x="310.0" y="275.0"/>
         <di:waypoint xsi:type="dc:Point" x="375.0" y="275.0"/>
         <di:waypoint xsi:type="dc:Point" x="375.0" y="302.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_5" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_5" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_2" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_2">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_5" bpmnElement="SequenceFlow_5" sourceElement="BPMNShape_Task_2" targetElement="BPMNShape_ExclusiveGateway_2">
         <di:waypoint xsi:type="dc:Point" x="310.0" y="378.0"/>
         <di:waypoint xsi:type="dc:Point" x="375.0" y="378.0"/>
         <di:waypoint xsi:type="dc:Point" x="375.0" y="353.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_6" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_6" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_2" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_3">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_6" bpmnElement="SequenceFlow_6" sourceElement="BPMNShape_ExclusiveGateway_2" targetElement="BPMNShape_Task_3">
         <di:waypoint xsi:type="dc:Point" x="375.0" y="302.0"/>
         <di:waypoint xsi:type="dc:Point" x="375.0" y="175.0"/>
         <di:waypoint xsi:type="dc:Point" x="468.0" y="175.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_7" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_7" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_2" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_4">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_7" bpmnElement="SequenceFlow_7" sourceElement="BPMNShape_ExclusiveGateway_2" targetElement="BPMNShape_Task_4">
         <di:waypoint xsi:type="dc:Point" x="375.0" y="302.0"/>
         <di:waypoint xsi:type="dc:Point" x="375.0" y="275.0"/>
         <di:waypoint xsi:type="dc:Point" x="468.0" y="275.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_8" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_8" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_2" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_5">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_8" bpmnElement="SequenceFlow_8" sourceElement="BPMNShape_ExclusiveGateway_2" targetElement="BPMNShape_Task_5">
         <di:waypoint xsi:type="dc:Point" x="375.0" y="353.0"/>
         <di:waypoint xsi:type="dc:Point" x="375.0" y="378.0"/>
         <di:waypoint xsi:type="dc:Point" x="468.0" y="378.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_9" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_9" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_ExclusiveGateway_2" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_6">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_9" bpmnElement="SequenceFlow_9" sourceElement="BPMNShape_ExclusiveGateway_2" targetElement="BPMNShape_Task_6">
         <di:waypoint xsi:type="dc:Point" x="375.0" y="353.0"/>
         <di:waypoint xsi:type="dc:Point" x="375.0" y="475.0"/>
         <di:waypoint xsi:type="dc:Point" x="468.0" y="475.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_10" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_10" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_3" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_2">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_10" bpmnElement="SequenceFlow_10" sourceElement="BPMNShape_Task_3" targetElement="BPMNShape_2">
         <di:waypoint xsi:type="dc:Point" x="578.0" y="175.0"/>
         <di:waypoint xsi:type="dc:Point" x="718.0" y="175.0"/>
         <di:waypoint xsi:type="dc:Point" x="718.0" y="308.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_11" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_11" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_4" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_2">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_11" bpmnElement="SequenceFlow_11" sourceElement="BPMNShape_Task_4" targetElement="BPMNShape_2">
         <di:waypoint xsi:type="dc:Point" x="578.0" y="275.0"/>
         <di:waypoint xsi:type="dc:Point" x="718.0" y="275.0"/>
         <di:waypoint xsi:type="dc:Point" x="718.0" y="308.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_13" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_13" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_6" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_2">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_13" bpmnElement="SequenceFlow_13" sourceElement="BPMNShape_Task_6" targetElement="BPMNShape_2">
         <di:waypoint xsi:type="dc:Point" x="578.0" y="475.0"/>
         <di:waypoint xsi:type="dc:Point" x="718.0" y="475.0"/>
         <di:waypoint xsi:type="dc:Point" x="718.0" y="344.0"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_14" bpmnElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#SequenceFlow_14" sourceElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_Task_5" targetElement="platform:/resource/MarkLogic%20Workflow/data/examples/bpmn2/011_gateways_test.bpmn#BPMNShape_2">
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_14" bpmnElement="SequenceFlow_14" sourceElement="BPMNShape_Task_5" targetElement="BPMNShape_2">
         <di:waypoint xsi:type="dc:Point" x="578.0" y="378.0"/>
         <di:waypoint xsi:type="dc:Point" x="718.0" y="378.0"/>
         <di:waypoint xsi:type="dc:Point" x="718.0" y="344.0"/>
