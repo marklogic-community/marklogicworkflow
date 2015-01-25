@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns1="http://www.example.org/BPMNTestProcessData" id="Definitions_1" targetNamespace="http://marklogic.com/workflow">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns1="http://www.example.org/BPMNTestProcessData" xmlns:ns2="http://marklogic.com/workflow" id="Definitions_1" targetNamespace="http://marklogic.com/workflow">
+  <bpmn2:import importType="http://www.w3.org/2001/XMLSchema" location="platform:/resource/MarkLogic%20Workflow/documentation/marklogicworkflow.xsd" namespace="http://marklogic.com/workflow"/>
   <bpmn2:itemDefinition id="ItemDefinition_1" structureRef="ns1_schema"/>
-  <bpmn2:process id="gateways_test" name="Default Process" processType="Public">
+  <bpmn2:itemDefinition id="ItemDefinition_2" structureRef="ns2__process"/>
+  <bpmn2:itemDefinition id="_ItemDefinition_2" structureRef="ns2:process"/>
+  <bpmn2:itemDefinition id="ItemDefinition_3" structureRef="ns2__attachmentType_uri"/>
+  <bpmn2:signal id="Signal_1" name="InitiatingAttachment" structureRef="ItemDefinition_3"/>
+  <bpmn2:process id="gateways_test" name="Default Process" isExecutable="true" processType="Public">
     <bpmn2:task id="Task_1" name="2A">
-      <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_4</bpmn2:outgoing>
+      <bpmn2:incoming>ns2:SequenceFlow_2</bpmn2:incoming>
+      <bpmn2:outgoing>ns2:SequenceFlow_4</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:sequenceFlow id="SequenceFlow_4" sourceRef="Task_1" targetRef="ExclusiveGateway_2"/>
     <bpmn2:exclusiveGateway id="ExclusiveGateway_1" name="Two way" gatewayDirection="Diverging">
-      <bpmn2:incoming>SequenceFlow_1</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
-      <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
+      <bpmn2:incoming>ns2:SequenceFlow_1</bpmn2:incoming>
+      <bpmn2:outgoing>ns2:SequenceFlow_2</bpmn2:outgoing>
+      <bpmn2:outgoing>ns2:SequenceFlow_3</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_2" name="is route A" sourceRef="ExclusiveGateway_1" targetRef="Task_1">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_1" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceA = 'A'</bpmn2:conditionExpression>
@@ -19,21 +24,33 @@
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_2" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceA = 'B'</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:task id="Task_2" name="2B">
-      <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_5</bpmn2:outgoing>
+      <bpmn2:incoming>ns2:SequenceFlow_3</bpmn2:incoming>
+      <bpmn2:outgoing>ns2:SequenceFlow_5</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:sequenceFlow id="SequenceFlow_5" sourceRef="Task_2" targetRef="ExclusiveGateway_2"/>
     <bpmn2:startEvent id="StartEvent_1" name="Start">
-      <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
+      <bpmn2:outgoing>ns2:SequenceFlow_1</bpmn2:outgoing>
+      <bpmn2:dataOutput id="DataOutput_4" itemSubjectRef="ItemDefinition_2" name="Signal_1_Output"/>
+      <bpmn2:dataOutputAssociation id="DataOutputAssociation_2">
+        <bpmn2:sourceRef>DataOutput_4</bpmn2:sourceRef>
+        <bpmn2:assignment id="Assignment_1">
+          <bpmn2:from xsi:type="bpmn2:tFormalExpression" id="FormalExpression_7">DataOutput_4</bpmn2:from>
+          <bpmn2:to xsi:type="bpmn2:tFormalExpression" id="FormalExpression_9" language="http://www.w3.org/1999/XPath">/wf:process/wf:attachments/wf:attachment[@name = &quot;InitiatingAttachment&quot;]/wf:uri</bpmn2:to>
+        </bpmn2:assignment>
+      </bpmn2:dataOutputAssociation>
+      <bpmn2:outputSet id="OutputSet_1" name="Output Set 1">
+        <bpmn2:dataOutputRefs>DataOutput_4</bpmn2:dataOutputRefs>
+      </bpmn2:outputSet>
+      <bpmn2:signalEventDefinition id="SignalEventDefinition_1" signalRef="Signal_1"/>
     </bpmn2:startEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_1" sourceRef="StartEvent_1" targetRef="ExclusiveGateway_1"/>
     <bpmn2:exclusiveGateway id="ExclusiveGateway_2" name="Four Way" gatewayDirection="Diverging">
-      <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
-      <bpmn2:incoming>SequenceFlow_5</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_6</bpmn2:outgoing>
-      <bpmn2:outgoing>SequenceFlow_7</bpmn2:outgoing>
-      <bpmn2:outgoing>SequenceFlow_8</bpmn2:outgoing>
-      <bpmn2:outgoing>SequenceFlow_9</bpmn2:outgoing>
+      <bpmn2:incoming>ns2:SequenceFlow_4</bpmn2:incoming>
+      <bpmn2:incoming>ns2:SequenceFlow_5</bpmn2:incoming>
+      <bpmn2:outgoing>ns2:SequenceFlow_6</bpmn2:outgoing>
+      <bpmn2:outgoing>ns2:SequenceFlow_7</bpmn2:outgoing>
+      <bpmn2:outgoing>ns2:SequenceFlow_8</bpmn2:outgoing>
+      <bpmn2:outgoing>ns2:SequenceFlow_9</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_6" name="is route A" sourceRef="ExclusiveGateway_2" targetRef="Task_3">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_3" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceB = 'A'</bpmn2:conditionExpression>
@@ -48,32 +65,36 @@
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_6" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/choiceB = 'D'</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:task id="Task_4" name="4B">
-      <bpmn2:incoming>SequenceFlow_7</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_11</bpmn2:outgoing>
+      <bpmn2:incoming>ns2:SequenceFlow_7</bpmn2:incoming>
+      <bpmn2:outgoing>ns2:SequenceFlow_11</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:sequenceFlow id="SequenceFlow_11" sourceRef="Task_4" targetRef="EndEvent_1"/>
     <bpmn2:task id="Task_5" name="4C">
-      <bpmn2:incoming>SequenceFlow_8</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_14</bpmn2:outgoing>
+      <bpmn2:incoming>ns2:SequenceFlow_8</bpmn2:incoming>
+      <bpmn2:outgoing>ns2:SequenceFlow_14</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:task id="Task_6" name="4D">
-      <bpmn2:incoming>SequenceFlow_9</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_13</bpmn2:outgoing>
+      <bpmn2:incoming>ns2:SequenceFlow_9</bpmn2:incoming>
+      <bpmn2:outgoing>ns2:SequenceFlow_13</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:sequenceFlow id="SequenceFlow_13" sourceRef="Task_6" targetRef="EndEvent_1"/>
     <bpmn2:task id="Task_3" name="4A">
-      <bpmn2:incoming>SequenceFlow_6</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_10</bpmn2:outgoing>
+      <bpmn2:incoming>ns2:SequenceFlow_6</bpmn2:incoming>
+      <bpmn2:outgoing>ns2:SequenceFlow_10</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:sequenceFlow id="SequenceFlow_10" sourceRef="Task_3" targetRef="EndEvent_1"/>
     <bpmn2:endEvent id="EndEvent_1" name="Finish">
-      <bpmn2:incoming>SequenceFlow_11</bpmn2:incoming>
-      <bpmn2:incoming>SequenceFlow_13</bpmn2:incoming>
-      <bpmn2:incoming>SequenceFlow_10</bpmn2:incoming>
-      <bpmn2:incoming>SequenceFlow_14</bpmn2:incoming>
+      <bpmn2:incoming>ns2:SequenceFlow_11</bpmn2:incoming>
+      <bpmn2:incoming>ns2:SequenceFlow_13</bpmn2:incoming>
+      <bpmn2:incoming>ns2:SequenceFlow_10</bpmn2:incoming>
+      <bpmn2:incoming>ns2:SequenceFlow_14</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_14" sourceRef="Task_5" targetRef="EndEvent_1"/>
-    <bpmn2:property id="Property_2" name="processVar1"/>
+    <bpmn2:property id="Property_1" itemSubjectRef="ItemDefinition_2" name="wf:process"/>
+    <bpmn2:textAnnotation id="TextAnnotation_1">
+      <bpmn2:documentation id="Documentation_4">a</bpmn2:documentation>
+      <bpmn2:text>The base Task activity type is NOT treated as a human step. Instead it is treated as a placeholder, and is immediately marked as successful, with processing moving on to the next activity in the sequence flow.</bpmn2:text>
+    </bpmn2:textAnnotation>
   </bpmn2:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1" name="Data Basic">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="gateways_test">
@@ -106,6 +127,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_Task_3" bpmnElement="Task_3">
         <dc:Bounds height="50.0" width="110.0" x="468.0" y="150.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_TextAnnotation_1" bpmnElement="TextAnnotation_1">
+        <dc:Bounds height="61.0" width="516.0" x="200.0" y="80.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="SequenceFlow_1" sourceElement="BPMNShape_1" targetElement="BPMNShape_ExclusiveGateway_1">
         <di:waypoint xsi:type="dc:Point" x="56.0" y="326.0"/>
