@@ -41,6 +41,15 @@ to a different state from the document's current state. An example of a module t
 
 So we can easily implement an IF and SWITCH-CASE action, leaving the success state blank on the transition.
 
+### Implementing human steps
+
+A human step requires an additional mandatory data item in the process data model. This is called /wf:process/wf:choice
+and is of type xs:string. This is a single outcome from a process. If no choice is given, the outcomes MUST be the
+word 'complete' (all lowercase).
+
+This also forces a MarkLogic human step to have additional configuration information that is placed in an element like:
+$cpf:options/wf:choices/wf:choice+{@value='complete'}=wf:phrase+{@xml:lang='en'}=Complete
+
 ## Advanced features
 
 These features may be implemented once the basics are done.

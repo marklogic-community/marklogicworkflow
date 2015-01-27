@@ -25,6 +25,7 @@ This PoC development will occur in small sprints until a useful PoC system is av
 - DONE Evaluation: Support for /xpath/path to process model data
 - DONE Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
 - TEST Evaluation: Support for fn:doc(/process/attachments/attachment[@name="default"])/some/path/to/property style evaluation
+- Evaluation: replace $processData or $wf:process with fn:doc($processUri) everywhere in xpath expression
 - Evauation: Support for 'now' date time assignment to variable
 - Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
 - Evaluation: Support for (/some/path/one,/some/path/two)[1] style evaluation for set task
@@ -32,6 +33,8 @@ This PoC development will occur in small sprints until a useful PoC system is av
 - Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
 - BPMN2: loop characteristic available in activity definitions rather than as separate process step
 - DEFERRED UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
+- REST API: Basic process initiation, udpate and tracking methods
+- Bug: Change process model URI folder to include major and minor - else doing process doc update may run new pipeline instead of old one
 
 ## Sprint 2 - CPF modelling
 
