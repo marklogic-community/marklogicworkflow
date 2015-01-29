@@ -5,6 +5,7 @@ module namespace m="http://marklogic.com/workflow-util";
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
+declare namespace prop = "http://marklogic.com/xdmp/property";
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace p="http://marklogic.com/cpf/pipelines";
 declare namespace error="http://marklogic.com/xdmp/error";
@@ -13,10 +14,11 @@ declare namespace error="http://marklogic.com/xdmp/error";
  : Create a new process and activate it.
  :)
 declare function m:create($pipelineName as xs:string,$data as element()*,$attachments as element()*) as xs:string {
-  let $uri := "/workflow/processes"||$pipelineName||"/"||sem:uuid-string() || ".xml"
+  let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
+  let $uri := "/workflow/processes/"||$pipelineName||"/"||$id || ".xml"
   let $_ :=
   xdmp:document-insert($uri,
-  <wf:process>
+  <wf:process id="{$id}">
     <wf:data>{$data}</wf:data>
     <wf:attachments>{$attachments}</wf:attachments>
     <wf:audit-trail></wf:audit-trail>
@@ -25,7 +27,21 @@ declare function m:create($pipelineName as xs:string,$data as element()*,$attach
   xdmp:default-permissions(),
   (xdmp:default-collections(),"http://marklogic.com/workflow/processes")
   )
-  return $uri
+  return $id
+};
+
+(:
+ : Returns a process document with the given id
+ :)
+declare function m:get($processId as xs:string) as element(wf:process)? {
+  fn:collection("http://marklogic.com/workflow/processes")/wf:process[./@id = $processId]
+};
+
+(:
+ : Returns the (CPF and MarkLogic Workflow) properties fragment for the given process id
+ :)
+declare function m:getProperties($processId as xs:string) as element(prop:properties)? {
+  xdmp:document-properties((fn:collection("http://marklogic.com/workflow/processes")/wf:process[./@id = $processId]/fn:base-uri(.)))
 };
 
 (:

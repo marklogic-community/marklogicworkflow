@@ -58,8 +58,8 @@ E.g. for process administration and debugging purposes, or for a 'process histor
 
 Various endpoints have been created to initiate new process instances and manage the process engine.
 
-- PUT /v1/resource/process - starts a new instance of a workflow
-- GET /v1/resource/process - Fetches the current process status, and optionally the current process step definition and data (allows a human step to be rendered)
+- TEST PUT /v1/resource/process - starts a new instance of a workflow
+- TEST GET /v1/resource/process - Fetches the current process status, and optionally the current process step definition and data (allows a human step to be rendered)
 - POST /v1/resource/process - Completes a human process step and provides data to map to the step. Optionally also used to kick a process from an admin interface.
 - DELETE /v1/resource/process - Kills a process instance
 - GET /v1/resource/processinbox - Fetches the currently logged in user's work inbox (any human steps assigned to the current user) - summary level info only

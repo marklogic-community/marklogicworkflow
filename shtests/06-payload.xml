@@ -1,0 +1,9 @@
+<ext:createRequest xmlns:ext="http://marklogic.com/rest-api/resource/process">
+  <ext:processName>015-restapi-tests__1__0</ext:processName>
+  <ext:data>
+    <choiceA>B</choiceA>
+    <choiceB>C</choiceB>
+  </ext:data>
+  <ext:attachments>
+  </ext:attachments>
+</ext:createRequest>
