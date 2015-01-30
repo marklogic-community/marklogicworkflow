@@ -17,6 +17,19 @@ This PoC development will occur in small sprints until a useful PoC system is av
  - Email notification
 - UK-D-I
 
+## Theoretical requirements
+
+These are requirements we believe will be useful, but have no customer use cases linked to them at present:-
+
+- De-duplication - Hashing of binary content of a document to determine uniqueness. Performing automated or human routed
+steps if a duplicate is found. Requires search (by property hash AND not (same uri as starting doc)
+- Content publishing approval - Also implies versioning get/set support
+- Content deletion timeout review - with option for placing holds on content to prevent deletion
+- Complex case synchronisation - Proceed in process when several linked items of required content are present. Also implies firing a new process that fires a content arrived event that is picked up by another (or multiple) process instances waiting on that content
+- Case management - creation of 'case' object, linking of content (attachments live during time of process, case filing exists longer after), setting case object visibility/security
+- Tasking - create human task definition, pass to other users/groups (including via QBFR to other systems, or external BPM systems)
+- Collaboration - ad-hoc communities of interest working on the same case, including external invitees to access that compartment of information
+
 ## Sprint 1 - Basic workflow
 
 - DONE BPMN2: generic blank task
