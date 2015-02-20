@@ -10,7 +10,11 @@ module namespace ext = "http://marklogic.com/rest-api/resource/process";
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
 import module namespace json6 = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
+import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+
 declare namespace roxy = "http://marklogic.com/roxy";
+declare namespace wf="http://marklogic.com/workflow";
 
 (:
  : To add parameters to the functions, specify them in the params annotations.
@@ -42,26 +46,28 @@ function ext:put(
     $context as map:map,
     $params  as map:map,
     $input   as document-node()*
-) as document-node()* {
+) as document-node()? {
 
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
   let $_ := xdmp:log($input)
 
-  let $res := m:create($input/ext:createRequest/ext:processName/text(),
+  let $res := wfu:create($input/ext:createRequest/ext:processName/text(),
     $input/ext:createRequest/ext:data/element(),$input/ext:createRequest/ext:attachments/wf:attachment)
 
   let $out := <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:processId>{$res}</ext:processId></ext:createResponse>
 
   return
+  (
     map:put($context, "output-types", $preftype),
     xdmp:set-response-code(200, "OK"),
     document {
       if ("application/xml" = $preftype) then
         $out
       else
-        TODO
+        "{TODO:'TODO'}"
     }
+  )
 };
 
 
@@ -71,7 +77,7 @@ function ext:put(
  : ?part = 'document' (default), or 'properties' (returns CPF and Workflow properties fragment), or 'both'
  :)
 declare
-%roxy:params("processId=xs:string","part=xs:string")
+%roxy:params("processid=xs:string","part=xs:string")
 function ext:get(
   $context as map:map,
   $params  as map:map
@@ -80,18 +86,21 @@ function ext:get(
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
   let $part := (map:get($params,"part"),"document")[1]
 
+  let $_ := xdmp:log($params)
+  let $_ := xdmp:log($context)
+
   let $out :=
-    if (fn:empty(map:get($params,"processId"))) then
+    if (fn:empty(map:get($params,"processid"))) then
       <ext:readResponse><ext:outcome>FAILURE</ext:outcome><ext:details>processId parameter is required</ext:details></ext:readResponse>
     else
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
         {if ($part = "document") then
-          <ext:document>{wfu:get(map:get($params,"processId"))}</ext:document>
+          <ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>
          else if ($part = "properties") then
-           <ext:properties>{wfu:getProperties(map:get($params,"processId"))}</ext:properties>
+           <ext:properties>{wfu:getProperties(map:get($params,"processid"))}</ext:properties>
          else
-           <ext:document>{wfu:get(map:get($params,"processId"))}</ext:document>
-           <ext:properties>{wfu:getProperties(map:get($params,"processId"))}</ext:properties>
+           (<ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>,
+           <ext:properties>{wfu:getProperties(map:get($params,"processid"))}</ext:properties>)
         }
       </ext:readResponse>
 
@@ -102,7 +111,59 @@ function ext:get(
       if ("application/xml" = $preftype) then
         $out
       else
-        TODO
+        "{TODO:'TODO'}"
+    }
+  )
+};
+
+
+
+
+
+(: POST - update a process instance, potentially completing it (e.g. human step) :)
+declare
+%roxy:params("")
+function ext:post(
+   $context as map:map,
+   $params  as map:map,
+   $input   as document-node()*
+) as document-node()* {
+
+ let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+
+ let $_ := xdmp:log($input)
+
+ let $proc := wfu:get(map:get($params,"processId"))
+ let $props := wfu:getProperties(map:get($params,"processId"))
+
+ let $res :=
+   if ("true" = map:get($context,"complete")) then
+     (: sanity check that the specified process' status is on a user task :)
+     if ("userTask" = $props/wf:step-type) then
+       (: OK :)
+       (: TODO map any extra parameters / changes of data in to process document's data area :)
+
+       (: call wfu complete on it :)
+       wfu:complete( fn:base-uri($proc), $props/cpf:state/text(), (), fn:current-dateTime() )
+
+     else
+       (: error - cannot call complete on non completable task :)
+       ()
+   else
+     ()
+
+
+ let $out := <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
+
+  return
+  (
+    map:put($context, "output-types", $preftype),
+    xdmp:set-response-code(200, "OK"),
+    document {
+      if ("application/xml" = $preftype) then
+        $out
+      else
+        "{TODO:'TODO'}"
     }
   )
 };

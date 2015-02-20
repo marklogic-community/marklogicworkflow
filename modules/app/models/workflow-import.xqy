@@ -16,6 +16,22 @@ import module namespace ss = "http://marklogic.com/alerts/alerts" at "/app/model
 
 (: REST API OR XQUERY PUBLIC API FUNCTIONS :)
 
+declare function m:install-and-convert($doc as node(),$filename as xs:string,$major as xs:string,$minor as xs:string) as xs:string {
+  (: 1. Save document in to DB :)
+  let $uri := "/workflow/models/" || $filename
+  let $_ :=
+    xdmp:eval('xquery version "1.0-ml";declare variable $m:uri as xs:string external;declare variable $m:doc as node() external;'
+      || 'xdmp:document-insert($m:uri,$m:doc,xdmp:default-permissions(),(xdmp:default-collections(),"http://marklogic.com/workflow/model"))'
+      ,
+      (xs:QName("m:uri"),$uri,xs:QName("m:doc"),$doc),
+      <options xmlns="xdmp:eval">
+        <isolation>different-transaction</isolation>
+      </options>
+    )
+  (: 2. Convert to CPF :)
+  return m:convert-to-cpf($uri,$major,$minor)
+};
+
 
 declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as xs:string {
   (: Find document :)
