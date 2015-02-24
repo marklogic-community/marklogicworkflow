@@ -235,7 +235,7 @@ declare function ss:create-rule-notify($alert-name as xs:string,$alert-detail as
   let $searchdoc := if ($searchdoc) then $searchdoc else cts:search(fn:collection("saved-search"),cts:directory-query("/config/search/shared/","1"))/ss:saved-search
   :)
 
-  ss:create-rule($alert-name,$notificationurl,$searchdoc,(
+  ss:create-rule($alert-name,(:)$notificationurl,:) $searchdoc,(
     element notificationurl {$notificationurl},
     element searchname {$searchname},
     element detail {$alert-detail},
@@ -253,7 +253,7 @@ declare function ss:create-rule-notify($alert-name as xs:string,$alert-detail as
 
 
 declare function ss:add-alert($shortname as xs:string,$query as element(cts:query),
-  $ruleoptions as element*,$module as xs:string,$moduledbname as xs:string,$actionoptions as element*) as xs:string {
+  $ruleoptions as element()*,$module as xs:string,$moduledbname as xs:string?,$actionoptions as element()*) as xs:string {
 
   let $name := ss:do-create-config($shortname)
   return
@@ -271,13 +271,13 @@ declare function ss:do-create-config($shortname as xs:string) as xs:string {
     'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";' ||
     'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
     'declare variable $my:shortname as xs:string external;' ||
-    'ah:create-config($my:shortname)'),
+    'ah:create-config($my:shortname)',
     (xs:QName("my:shortname"),$shortname),
     <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
   )
 };
 
-declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,$options as element*) {
+declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,$options as element()*) {
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
     'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";' ||
@@ -285,13 +285,13 @@ declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,
     'declare variable $my:alert-name as xs:string external;' ||
     'declare variable $my:query as cts:query external;' ||
     'declare variable $my:options as element* external;' ||
-    'ah:create-rule($my:alert-name,$my:query,$my:options)'),
+    'ah:create-rule($my:alert-name,$my:query,$my:options)',
     (xs:QName("my:alert-name"),$alert-name,xs:QName("my:query"),$query,xs:QName("my:options"),$options),
     <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
   )
 };
 
-declare function ss:do-create-action($alert-name as xs:string,$alert-module as xs:string,$dbname as xs:string,$options as element*) {
+declare function ss:do-create-action($alert-name as xs:string,$alert-module as xs:string,$dbname as xs:string?,$options as element()*) {
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
     'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";' ||
@@ -300,7 +300,7 @@ declare function ss:do-create-action($alert-name as xs:string,$alert-module as x
     'declare variable $my:alert-module as xs:string external;' ||
     'declare variable $my:dbname as xs:string external;' ||
     'declare variable $my:options as element* external;' ||
-    'ah:create-action($my:alert-name,$my:alert-module,$my:dbname,$my:options)'),
+    'ah:create-action($my:alert-name,$my:alert-module,$my:dbname,$my:options)',
     (xs:QName("my:alert-name"),$alert-name,xs:QName("my:alert-module"),$alert-module,xs:QName("my:dbname"),$dbname,xs:QName("my:options"),$options),
     <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
   )
@@ -318,7 +318,7 @@ declare function ss:create-config($shortname as xs:string) as xs:string {
   return $alert-name
 };
 
-declare function ss:create-rule($alert-name as xs:string,$query as cts:query,$options as element*) {
+declare function ss:create-rule($alert-name as xs:string,$query as cts:query,$options as element()*) {
 
   let $rule := alert:make-rule(
       fn:concat($alert-name,"-rule"),
@@ -334,11 +334,11 @@ declare function ss:create-rule($alert-name as xs:string,$query as cts:query,$op
   return alert:rule-insert($alert-name, $rule)
 };
 
-declare function ss:create-action($alert-name as xs:string,$alert-module as xs:string,$dbname as xs:string,$options as element*) {
+declare function ss:create-action($alert-name as xs:string,$alert-module as xs:string,$dbname as xs:string?,$options as element()*) {
   let $action := alert:make-action(
       fn:concat($alert-name,"-action"),
       $alert-name || " action",
-      xdmp:database($dbname),
+      (xdmp:database($dbname),xdmp:modules-database())[1],
       "/",
       $alert-module,
       <alert:options>{$options}</alert:options> )

@@ -5,6 +5,9 @@ module namespace m="http://marklogic.com/workflow-util";
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
+
+import module namespace ss = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";
+
 declare namespace prop = "http://marklogic.com/xdmp/property";
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace p="http://marklogic.com/cpf/pipelines";
@@ -28,6 +31,13 @@ declare function m:create($pipelineName as xs:string,$data as element()*,$attach
   (xdmp:default-collections(),"http://marklogic.com/workflow/processes")
   )
   return $id
+};
+
+(:
+ : Create a new process subscription
+ :)
+declare function m:createSubscription($pipelineName as xs:string,$name as xs:string,$query as element(cts:query)) as xs:string {
+  ss:add-alert($name,$query,(),"/app/models/alert-action-process.xqy",(),(<wf:process-name>{$pipelineName}</wf:process-name>))
 };
 
 (:
@@ -92,6 +102,11 @@ declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:n
       'fn:doc("' || $processUri || '")' || $xpath
     else
       $xpath
+
+  (: replacements of shorthand variable names :)
+  let $xp := fn:string-replace("$wf:process/",'fn:doc("' || $processUri || '")/')
+  let $xp := fn:string-replace("$processData/",'fn:doc("' || $processUri || '")/wf:data/')
+
   let $_ := xdmp:log($xp)
   let $ns :=
     for $namespace in $namespaces

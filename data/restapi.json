@@ -2,7 +2,9 @@
   "extensions": [
     {"name": "version", "methods": ["GET"]},
     {"name": "workplace", "methods": ["GET","POST"]},
-    {"name": "process", "methods": ["GET","POST","PUT"]}
+    {"name": "process", "methods": ["GET","POST","PUT"]},
+    {"name": "processmodel", "methods": ["GET","POST","PUT"]},
+    {"name": "processsubscription", "methods": ["PUT"]}
   ],
   "transforms": [],
   "triggers": [

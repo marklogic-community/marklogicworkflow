@@ -19,7 +19,7 @@ This PoC development will occur in small sprints until a useful PoC system is av
 
 ## Theoretical requirements
 
-These are requirements we believe will be useful, but have no customer use cases linked to them at present:-
+These are requirements we believe will be useful, but have no customer use cases linked to them at present (and so they are out of scope):-
 
 - De-duplication - Hashing of binary content of a document to determine uniqueness. Performing automated or human routed
 steps if a duplicate is found. Requires search (by property hash AND not (same uri as starting doc)
@@ -33,34 +33,37 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 ## Sprint 1 - Basic workflow
 
 - DONE BPMN2: generic blank task
-- BPMN2: user task -> aka human step
+- IN PROGRESS BPMN2: user task -> aka human step
 - DONE BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
 - DONE Evaluation: Support for /xpath/path to process model data
 - DONE Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
 - TEST Evaluation: Support for fn:doc(/process/attachments/attachment[@name="default"]/uri/text())/some/path/to/property style evaluation
-- Evaluation: replace $processData or $wf:process with fn:doc($processUri) everywhere in xpath expression
-- Evaluation: Support for 'now' date time assignment to variable
+- TEST Evaluation: replace $processData or $wf:process with fn:doc($processUri) everywhere in xpath expression
+- TEST can use fn:current-dateTime - Evaluation: Support for 'now' date time assignment to variable
 - Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
-- Evaluation: Support for (/some/path/one,/some/path/two)[1] style evaluation for set task
+ - See if there is an equivalent BPMN2 method - may just be a variable assignment on each step instead
+ - Create import step for this BPMN2 method
+ - Create CPF step to represent this
+- TEST Evaluation: Support for (/some/path/one,/some/path/two)[1] style evaluation for set task
 - TEST Tools: Process Data model XSD (for modeler import)
 - IN PROGRESS Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
-- BPMN2: loop characteristic available in activity definitions rather than as separate process step
 - DEFERRED UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
+- TEST Start process using an Alert (content subscription)
 - IN PROGRESS REST API: Basic process initiation, update and tracking methods
+ - TEST processmodel.xqy
+  - TEST PUT create and publish process model, accepting BPMN2 content type .bpmn2
+ - TEST process.xqy
+  - TEST PUT create instance of a process (starts a process)
+  - TEST POST complete a human task
+  - TEST GET fetch the current state of a business process
+ - TEST processsubscription.xqy
+  - TEST PUT create a process subscription (alert) to create a new process instance (creating a content doc creates a process doc with an initiating attachment)
+- TEST Test scripts for automating install, create, get, update, complete via REST API
 - DONE Bug: Change process model URI folder to include major and minor - else doing process doc update may run new pipeline instead of old one
 
-## Sprint 2 - CPF modelling
+## Sprint 2 - Process Orchestration
 
-- MarkLogic specific Activity types for pure CPF processes
- - CPF Action (module, options)
- - CPF State change event throw and receive
-- Domain specification support within modelling diagram
-- Direct import and set up
-- Activity: BPMN2 step for non-CPF diagrams to change state on an Attachment, thus invoking a CPF pipeline
-- Tools: Eclipse modeler updated with CPF Diagram and steps
-
-## Sprint 3 - Process Orchestration
-
+- BPMN2: loop characteristic available in activity definitions rather than as separate process step
 - BPMN2: ad hoc sub process
 - BPMN2: call activity
 - BPMN2: terminate current process
@@ -70,8 +73,12 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - CPF: Invoke CPF pipeline
 - BPMN2: service task -> invoke service and process response
 - Update Eclipse Modeler palette
+- Enterprise features
+ - Set security as relevant to the process document at each step in the process
+ - Allow a set security permissions on documents feature
+ - Ensure installation creates relevant roles and permission sets
 
-## Sprint 4 - Event driven
+## Sprint 3 - Event driven
 
 - BPMN2: error event
 - BPMN2: escalation event
@@ -80,11 +87,22 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - BPMN2: event based gateway
 - Update Eclipse Modeler palette
 
-## Sprint 5 - MarkLogic functionality
+## Sprint 4 - MarkLogic functionality
 
 - MarkLogic: Search, results populate attachment array field, configurable limit
 - MarkLogic: Set document element value (XPath)
 - MarkLogic: Get document element value (XPath)
+
+
+## Sprint 5 - CPF modelling
+
+- MarkLogic specific Activity types for pure CPF processes
+ - CPF Action (module, options)
+ - CPF State change event throw and receive
+- Domain specification support within modelling diagram
+- Direct import and set up
+- Activity: BPMN2 step for non-CPF diagrams to change state on an Attachment, thus invoking a CPF pipeline
+- Tools: Eclipse modeler updated with CPF Diagram and steps
 
 ### BPMN2 out of scope for PoC implementation
 

@@ -2,9 +2,14 @@ xquery version "1.0-ml";
 
 module namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 
+import module namespace wfi="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+
+declare namespace wf="http://marklogic.com/workflow";
+
 declare namespace roxy = "http://marklogic.com/roxy";
 
-
+(:)
 (:
  : Get the latest process model
  :  ?[major=numeric[&minor=numeric]]&uri=uri
@@ -16,15 +21,25 @@ function ext:get(
   $params  as map:map
 ) as document-node()*
 {
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
+  let $out := ()
+  return
   (
     map:put($context, "output-types", "text/xml"),
     xdmp:set-response-code(200, "OK"),
 
     document {
+
+            if ("application/xml" = $preftype) then
+              $out
+            else
+              "{TODO:'TODO'}"
+
     }
   )
 };
+:)
 
 (:
  : Publish the process model
@@ -42,7 +57,7 @@ function ext:put(
 
   let $_ := xdmp:log($input)
 
-  let $modelid := wfu:install-and-convert(map:get($params,"name"),$input,(map:get($params,"major"),"1")[1],(map:get($params,"minor"),"0")[1] )
+  let $modelid := wfi:install-and-convert(map:get($params,"name"),$input,(map:get($params,"major"),"1")[1],(map:get($params,"minor"),"0")[1] )
 
   let $out := <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:modelId>{$modelid}</ext:modelId></ext:createResponse>
 
@@ -50,7 +65,7 @@ function ext:put(
   (
     map:put($context, "output-types", "application/json"),
     xdmp:set-response-code(200, "OK"),
-    document { "PUT called on rest api"
+    document {
       (: 1. Take the process model document and convert to a CPF pipeline document :)
       (: 2. Add a CPF pipeline by using a directory scope of /cpf/processes/ (<PROCURI>/<UUID.xml>) depth infinite :)
       (: 3. Optionally enable :)
@@ -63,6 +78,9 @@ function ext:put(
 
   )
 };
+
+
+(:)
 
 (:
  : Add a new process model version.
@@ -92,14 +110,24 @@ function ext:post(
 declare function ext:delete(
     $context as map:map,
     $params  as map:map
-) as document-node()? {
+) as document-node()?
+{
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+
   let $name := map:get($params,"something")
   let $l := xdmp:log("DELETE /v1/resources/processmodel CALLED")
+  let $out := ()
   let $l := xdmp:log($params)
   let $l := xdmp:log($context)
   return (xdmp:set-response-code(200,"OK"),document {
 
+            if ("application/xml" = $preftype) then
+              $out
+            else
+              "{TODO:'TODO'}"
 
 
    })
 };
+
+:)

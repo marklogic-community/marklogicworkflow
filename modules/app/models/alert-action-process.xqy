@@ -11,6 +11,8 @@ import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic
 declare namespace wf = "http://marklogic.com/workflow";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
+import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+
 declare variable $alert:config-uri as xs:string external;
 declare variable $alert:doc as node() external;
 declare variable $alert:rule as element(alert:rule) external;
@@ -21,11 +23,18 @@ declare variable $alert:action as element(alert:action) external;
 (: Find appropriate process from alert action option :)
 let $procname := $alert-action/alert:options/wf:process-name/text()
 return
+  wfu:create($procname,$alert:doc/element(),
+    <attachment name="InitiatingAttachment" cardinality="1">
+      <uri>{fn:base-uri($alert:doc)}</uri>
+    </attachment>
+  )
+
+(:)
   xdmp:document-insert($procname || "/" || sem:uuid-string() || ".xml",
    <process xmlns="http://marklogic.com/workflow/process">
     <data>
     {
-      (: TODO check config for mappings options :)
+      (: TODO check config for mappings options - rather than map entire document in:)
       $alert:doc/element()
     }
     </data>
@@ -38,3 +47,4 @@ return
   xdmp:default-permissions(),
   (xdmp:default-collections(),"http://marklogic.com/workflow/processes")
   )
+:)
