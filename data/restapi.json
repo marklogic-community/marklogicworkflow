@@ -3,6 +3,7 @@
     {"name": "version", "methods": ["GET"]},
     {"name": "workplace", "methods": ["GET","POST"]},
     {"name": "process", "methods": ["GET","POST","PUT"]},
+    {"name": "processinbox", "methods": ["GET"]},
     {"name": "processmodel", "methods": ["GET","POST","PUT"]},
     {"name": "processsubscription", "methods": ["PUT"]}
   ],

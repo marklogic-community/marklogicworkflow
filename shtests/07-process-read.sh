@@ -4,10 +4,25 @@
 
 echo "starting 07-process-read.sh"
 
-PID="8d352992-0f85-497a-ab97-e47c89de22f5-2015-02-11T08:37:49.708051-08:00"
+# TODO parse this using awk or similar from the -out document of the previous call
+#STEXT = `cat 06-process-create-out.txt`
+
+#infile='06-process-create-out.txt'
+
+#while read line ; do
+#  if [[ $line =~ ^(.*)([a-z0-9\-])(.*)$ ]] ; then
+#    echo "${BASH_REMATCH[0]},${BASH_REMATCH[1]}"
+#  else
+#    echo "$line"
+#  fi
+#done < "$infile"
+
+#THEPID= `[[ $STEXT =~ ^.*processId\>(.*)\<\/ext.* ]] && echo ${BASH_REMATCH[1]}`
+PID="ad8f7cbf-48e6-4256-bb23-2b4737d07919-2015-03-09T09:15:02.295983-07:00"
+#echo " THEPID: $THEPID PID: $PID"
 
 curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X GET \
     -H "Accept: application/xml" \
-    "http://$RESTHOST:$RESTPORT/v1/resources/process?processid=8d352992-0f85-497a-ab97-e47c89de22f5-2015-02-11T08:37:49.708051-08:00" > 07-process-read-out.txt
+    "http://$RESTHOST:$RESTPORT/v1/resources/process?rs:processid=$PID" > 07-process-read-out.txt
 
 echo "07-process-read.sh complete"

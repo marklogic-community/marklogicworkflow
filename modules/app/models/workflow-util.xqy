@@ -54,6 +54,38 @@ declare function m:getProperties($processId as xs:string) as element(prop:proper
   xdmp:document-properties((fn:collection("http://marklogic.com/workflow/processes")/wf:process[./@id = $processId]/fn:base-uri(.)))
 };
 
+
+
+
+(:
+ : Returns the specified user, or current user, inbox list. Lists all processes in a UserTask (or subclass thereof)
+ :)
+declare function m:inbox($username as xs:string?) as element(wf:inbox) {
+  <wf:inbox>
+  {
+    for $process in cts:search(fn:collection("http://marklogic.com/workflow/processes"),
+      cts:and-query(
+        (: TODO add cpf-active check, wf:status running check, wf:locked-user blank :)
+        cts:properties-query(
+          cts:element-query(xs:QName("wf:currentStep"),
+            cts:element-value-query(xs:QName("wf:assignee"),($username,xdmp:get-current-user())[1])
+          )
+        )
+      ),("unfiltered") (: TODO ordering, prioritisation support, and so on :)
+    )
+    return
+      <wf:task processid="{xs:string($process/wf:process/@id)}">
+        {$process}
+      </wf:task>
+  }
+  </wf:inbox>
+};
+
+
+
+
+
+
 (:
  : This module performs process data document update functions via a high level abstraction.
  :)
@@ -104,8 +136,8 @@ declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:n
       $xpath
 
   (: replacements of shorthand variable names :)
-  let $xp := fn:string-replace("$wf:process/",'fn:doc("' || $processUri || '")/')
-  let $xp := fn:string-replace("$processData/",'fn:doc("' || $processUri || '")/wf:data/')
+  let $xp := fn:replace($xp,"$wf:process/",'fn:doc("' || $processUri || '")/')
+  let $xp := fn:replace($xp, "$processData/",'fn:doc("' || $processUri || '")/wf:data/')
 
   let $_ := xdmp:log($xp)
   let $ns :=

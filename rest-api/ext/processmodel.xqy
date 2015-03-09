@@ -9,10 +9,10 @@ declare namespace wf="http://marklogic.com/workflow";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 
-(:)
+
 (:
- : Get the latest process model
- :  ?[major=numeric[&minor=numeric]]&uri=uri
+ : Get the process model by exact name
+ :  ?publishedId=name
  :)
 declare
 %roxy:params("")
@@ -21,12 +21,12 @@ function ext:get(
   $params  as map:map
 ) as document-node()*
 {
-  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $preftype := "application/xml" (: if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json" :)
 
-  let $out := ()
+  let $out := wfi:get-model-by-name(map:get($params,"publishedId"))
   return
   (
-    map:put($context, "output-types", "text/xml"),
+    map:put($context, "output-types", "text/xml"), (: TODO mime type from file name itself :)
     xdmp:set-response-code(200, "OK"),
 
     document {
@@ -39,11 +39,11 @@ function ext:get(
     }
   )
 };
-:)
+
 
 (:
  : Publish the process model
- :  ?[major=numeric[&minor=numeric]]&name=name
+ :  ?[major=numeric[&minor=numeric]]&name=name[&enable=true]
  :)
 declare
 %roxy:params("")
@@ -55,9 +55,15 @@ function ext:put(
 {
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
+  let $_ := xdmp:log("processmodel: PUT: name: " || map:get($params,"name") || ", major: " || map:get($params,"major") || ", minor: " || map:get($params,"minor"))
+  let $_ := xdmp:log($params)
+  let $_ := xdmp:log($context)
   let $_ := xdmp:log($input)
 
-  let $modelid := wfi:install-and-convert(map:get($params,"name"),$input,(map:get($params,"major"),"1")[1],(map:get($params,"minor"),"0")[1] )
+  let $enable := if (map:get($params,"enable") = "true") then fn:true() else fn:false()
+  let $_ := xdmp:log("Enabled? : " || xs:string($enable))
+
+  let $modelid := wfi:install-and-convert($input,map:get($params,"name"),(map:get($params,"major"),"1")[1],(map:get($params,"minor"),"0")[1], $enable )
 
   let $out := <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:modelId>{$modelid}</ext:modelId></ext:createResponse>
 
@@ -80,11 +86,11 @@ function ext:put(
 };
 
 
-(:)
+
 
 (:
  : Add a new process model version.
- : ?major=numeric&minor=numeric&name=name
+ : ?publishedId=myprocess__1__0
  :)
 declare
 %roxy:params("")
@@ -94,15 +100,33 @@ function ext:post(
     $input   as document-node()*
 ) as document-node()*
 {
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+
+  let $_ := xdmp:log($params)
+  let $_ := xdmp:log($context)
+  let $_ := xdmp:log($input)
+
+  let $published := xs:string(wfi:enable(map:get($params,"publishedId")))
+
+  let $out := <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome><ext:domainId>{$published}</ext:domainId></ext:updateResponse>
+
+  return
   (
     map:put($context, "output-types", "application/json"),
     xdmp:set-response-code(200, "OK"),
-    document { "POST called on rest api" }
+    document {
+
+        if ("application/xml" = $preftype) then
+          $out
+        else
+          "{TODO:'TODO'}"
+    }
+
   )
 };
 
 
-
+(:)
 (:
  : Remove the specified process model from execution
  :  ?[major=numeric[&minor=numeric]]&modelid=modelid
@@ -129,5 +153,4 @@ declare function ext:delete(
 
    })
 };
-
 :)

@@ -49,17 +49,25 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - IN PROGRESS Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
 - DEFERRED UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
 - TEST Start process using an Alert (content subscription)
-- IN PROGRESS REST API: Basic process initiation, update and tracking methods
- - TEST processmodel.xqy
-  - TEST PUT create and publish process model, accepting BPMN2 content type .bpmn2
+- TEST REST API: Basic process initiation, update and tracking methods
+ - DONE processmodel.xqy
+  - DONE PUT create and publish process model, accepting BPMN2 content type .bpmn2, and to update process model without publishing
+  - DONE GET to fetch process model
+  - DONE POST to publish process model
  - TEST process.xqy
-  - TEST PUT create instance of a process (starts a process)
+  - DONE PUT create instance of a process (starts a process)
   - TEST POST complete a human task
-  - TEST GET fetch the current state of a business process
+  - DONE GET fetch the current state of a business process
  - TEST processsubscription.xqy
   - TEST PUT create a process subscription (alert) to create a new process instance (creating a content doc creates a process doc with an initiating attachment)
 - TEST Test scripts for automating install, create, get, update, complete via REST API
 - DONE Bug: Change process model URI folder to include major and minor - else doing process doc update may run new pipeline instead of old one
+- Bug: Multiple wf:status properties on in process process, complete and running
+- BPMN2 specification test process models modified and tested to MarkLogic executable standard
+ - Basic
+  - Incident Management Level 1
+  - Incident Management Account Manager Only
+  - Incident Management Process Engine only
 
 ## Sprint 2 - Process Orchestration
 
@@ -77,6 +85,22 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
  - Set security as relevant to the process document at each step in the process
  - Allow a set security permissions on documents feature
  - Ensure installation creates relevant roles and permission sets
+- BPMN2 specification test process models modified and tested to MarkLogic executable standard
+ - Advanced
+  - Collapsed sub process
+  - Correlation example seller
+  - email voting 2
+  - expanded subprocess
+  - laneset
+  - pool
+  - Process
+  - Procurement Processes with Error Handling - Stencil Trosotech 2 pages
+  - Travel Booking
+  - triso - Hardware Retailer v2
+  - Triso - Order process for pizza v4
+ - Extended
+  - Call activity
+  - Nobel prize process
 
 ## Sprint 3 - Event driven
 

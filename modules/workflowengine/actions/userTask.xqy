@@ -27,8 +27,9 @@ declare variable $cpf:options as element() external;
 :)
 
 try {
-  () (: Do nothing, but log the fact we are here :)
-  
+  (: Copy the cpf options over to the process' properties document :)
+  xdmp:document-set-property($cpf:document-uri,<wf:currentStep>{$cpf:options/*}</wf:currentStep>)
+
 } catch ($e) {
   wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

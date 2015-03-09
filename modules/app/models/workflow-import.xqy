@@ -16,11 +16,12 @@ import module namespace ss = "http://marklogic.com/alerts/alerts" at "/app/model
 
 (: REST API OR XQUERY PUBLIC API FUNCTIONS :)
 
-declare function m:install-and-convert($doc as node(),$filename as xs:string,$major as xs:string,$minor as xs:string) as xs:string {
+declare function m:install-and-convert($doc as node(),$filename as xs:string,$major as xs:string,$minor as xs:string,$enable as xs:boolean?) as xs:string {
+let $_ := xdmp:log("In wfi:install-and-convert")
   (: 1. Save document in to DB :)
   let $uri := "/workflow/models/" || $filename
   let $_ :=
-    xdmp:eval('xquery version "1.0-ml";declare variable $m:uri as xs:string external;declare variable $m:doc as node() external;'
+    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:uri as xs:string external;declare variable $m:doc as node() external;'
       || 'xdmp:document-insert($m:uri,$m:doc,xdmp:default-permissions(),(xdmp:default-collections(),"http://marklogic.com/workflow/model"))'
       ,
       (xs:QName("m:uri"),$uri,xs:QName("m:doc"),$doc),
@@ -29,12 +30,30 @@ declare function m:install-and-convert($doc as node(),$filename as xs:string,$ma
       </options>
     )
   (: 2. Convert to CPF :)
-  return m:convert-to-cpf($uri,$major,$minor)
+  let $resp := m:convert-to-cpf($uri,$major,$minor)
+  let $dom :=
+    if ($enable) then
+      m:domain( (: $processmodeluri,$major,$minor, :) $resp,m:get-pipeline-id($resp)) (: Keep uri, major, minor here in case :)
+      (: xdmp:log("In wfi:convert-to-cpf: domain: " || $dom) :)
+    else
+      ()
+
+  return $resp
+};
+
+declare function m:enable($localPipelineId as xs:string) as xs:unsignedLong {
+  m:domain($localPipelineId,m:get-pipeline-id($localPipelineId)) (: Keep uri, major, minor here in case :)
+};
+
+declare function m:get-model-by-name($name as xs:string) as node() {
+  let $uri := "/workflow/models/" || $name
+  return fn:doc($uri)
 };
 
 
 declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as xs:string {
   (: Find document :)
+  let $_ := xdmp:log("In wfi:convert-to-cpf")
 
   (: Determine type from root element :)
   let $localPipelineId :=
@@ -44,6 +63,7 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
         <isolation>different-transaction</isolation>
       </options>
     )
+    let $_ := xdmp:log("In wfi:convert-to-cpf: pipeline id: " || $localPipelineId)
 
   (: let $puri := "http://marklogic.com/cpf/pipelines/"||xs:string($localPipelineId)||".xml" :)
   let $puri :=
@@ -53,6 +73,7 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
         <isolation>different-transaction</isolation>
       </options>
     )
+    let $_ := xdmp:log("In wfi:convert-to-cpf: puri: " || $puri)
 
   let $pid :=
     xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:puri as xs:string external;m:install($m:puri)',
@@ -62,7 +83,6 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
       </options>
     )
 
-  let $dom := m:domain($processmodeluri,$major,$minor,$localPipelineId,$pid) (: Keep uri, major, minor here in case :)
 
 
   return $localPipelineId
@@ -104,12 +124,15 @@ declare function m:index-of-string
 (: INTERNAL PRIVATE FUNCTIONS :)
 
 declare function m:create($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as xs:string {
+  let $_ := xdmp:log("In wfi:create")
 
   let $root := fn:doc($processmodeluri)/element()
 
   let $_ := xdmp:log("local name: "||fn:local-name($root)||" namespace: "||fn:namespace-uri($root))
+  (:)
   let $pname := $processmodeluri||"__"||$major||"__"||$minor
-
+  let $_ := xdmp:log("pname: " || $pname)
+:)
 
 
 let $max := m:index-of-string($processmodeluri,"/")[last()]
@@ -123,12 +146,13 @@ let $start := fn:substring($processmodeluri,$max + 1)
   let $name := $shortname || "__" || $major || "__" || $minor (: VERY IMPORTANT :)
 
 
+  let $_ := xdmp:log("In wfi:create: name: " || $name)
 
 
 
   let $removeDoc :=
     try {
-    if (fn:not(fn:empty(p:get($pname)))) then
+    if (fn:not(fn:empty(p:get($name)))) then
       xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;p:remove($m:puri)',
         (xs:QName("wf:puri"),$name),
         <options xmlns="xdmp:eval">
@@ -159,7 +183,23 @@ let $start := fn:substring($processmodeluri,$max + 1)
 
 };
 
+declare function m:get-pipeline-id($pname as xs:string) as xs:unsignedLong {
+    xdmp:eval(
+     'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; ' ||
+     'import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; ' ||
+     'declare variable $m:processmodeluri as xs:string external; xs:unsignedLong(p:get($m:processmodeluri)/p:pipeline-id)'
+     ,
+      (xs:QName("wf:processmodeluri"),$pname),
+      <options xmlns="xdmp:eval">
+        <database>{xdmp:triggers-database()}</database>
+        <isolation>different-transaction</isolation>
+      </options>
+    )
+};
+
 declare function m:do-create($pipelineName as xs:string,$root as element()) as xs:unsignedLong {
+  let $_ := xdmp:log("In wfi:do-create: pipelineName: " || $pipelineName)
+  return
 
     if (fn:local-name($root) = 'scxml' and fn:namespace-uri($root) = 'http://www.w3.org/2005/07/scxml') then
       (: Call appropriate conversion function :)
@@ -176,6 +216,7 @@ declare function m:do-create($pipelineName as xs:string,$root as element()) as x
 };
 
 declare function m:install($puri as xs:string) as xs:unsignedLong {
+  let $_ := xdmp:log("In wfi:install: puri: " || $puri)
   let $pxml := fn:doc($puri)/p:pipeline
 
   (: check if pipeline already exists, and recreate :)
@@ -205,12 +246,15 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
 };
 
 
-declare function m:domain($processmodeluri as xs:string,$major as xs:string,$minor as xs:string,$pname as xs:string,$pid as xs:unsignedLong) as xs:unsignedLong {
+declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$minor as xs:string, :) $pname as xs:string,$pid as xs:unsignedLong) as xs:unsignedLong {
+
+  let $_ := xdmp:log("In wfi:domain")
+
   (: let $pname := $processmodeluri||"__"||$major||"__"||$minor :)
   (: TODO Add all OOTB CPF pipelines to this domain too :)
 
   let $mdb := xdmp:modules-database()
-  let $_ := xdmp:log("processmodeluri: " || $processmodeluri || ", pid: " || $pid)
+  let $_ := xdmp:log("pname: " || $pname || ", pid: " || xs:string($pid))
 
   (: check if domain already exists and recreate :)
   let $remove :=
@@ -242,18 +286,18 @@ declare function m:domain($processmodeluri as xs:string,$major as xs:string,$min
       )
     else
       ()
-    } catch ($e) { () } (: catching domain throwing error if it doesn't exist. We can safely ignore this :)
+    } catch ($e) { ( xdmp:log("Error trying to remove domain: " || $pname),xdmp:log($e) ) } (: catching domain throwing error if it doesn't exist. We can safely ignore this :)
 
   (: Configure domain :)
   return
     xdmp:eval(
-      'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:pname as xs:string external;declare variable $m:pid as xs:unsignedLong external;declare variable $m:mdb as xs:unsignedLong external;'
+      'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:pname as xs:string external;declare variable $m:pid as xs:unsignedLong external;declare variable $m:mdb as xs:unsignedLong external;'
       ||
-      'dom:create($m:pname,"Execute process given a process data document for "||$m:processmodeluri,'
+      'dom:create($m:pname,"Execute process given a process data document for "||$m:pname,'
       ||
       'dom:domain-scope("directory","/workflow/processes/"||$m:pname||"/","0"),dom:evaluation-context($m:mdb,"/"),(xs:unsignedLong(p:pipelines()[p:pipeline-name = "Status Change Handling"]/p:pipeline-id),$m:pid),())'
       ,
-      (xs:QName("wf:processmodeluri"),$processmodeluri,xs:QName("wf:pid"),$pid,xs:QName("wf:mdb"),$mdb,xs:QName("wf:pname"),$pname),
+      (xs:QName("wf:pid"),$pid,xs:QName("wf:mdb"),$mdb,xs:QName("wf:pname"),$pname),
       <options xmlns="xdmp:eval">
         <database>{xdmp:triggers-database()}</database>
         <isolation>different-transaction</isolation>
@@ -405,7 +449,13 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
 
           (: 0. startEvent handling :)
           for $state in $start/b2:startEvent
-          let $sf := $start/b2:sequenceFlow[./@id = $state/b2:outgoing[1]]
+          let $route := xs:string($state/b2:outgoing[1]) (: TODO support split here? :)
+          let $rc :=
+            if (fn:contains($route,":")) then
+              fn:substring-after($route,":")
+            else
+              $route
+          let $sf := $start/b2:sequenceFlow[./@id = $rc]
           return
             p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
               "",xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef) ),
@@ -424,7 +474,13 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
 
           (: 1. BPMN2 Generic task - handle as pass though only - no real implementation :)
           for $state in $start/b2:task
-          let $sf := $start/b2:sequenceFlow[./@id = $state/b2:outgoing[1]]
+          let $route := xs:string($state/b2:outgoing[1]) (: TODO support split here? :)
+          let $rc :=
+            if (fn:contains($route,":")) then
+              fn:substring-after($route,":")
+            else
+              $route
+          let $sf := $start/b2:sequenceFlow[./@id = $rc]
           return
             p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
               "",xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef) ),
@@ -449,7 +505,12 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
                   <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
                     {
                       for $route in $state/b2:outgoing
-                      let $sf := $start/b2:sequenceFlow[./@id = $route]
+                      let $rc :=
+                        if (fn:contains($route,":")) then
+                          fn:substring-after($route,":")
+                        else
+                          $route
+                      let $sf := $start/b2:sequenceFlow[./@id = $rc]
                       return
                         <wf:route>
                           <wf:state>{xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef))}</wf:state>
@@ -479,7 +540,47 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
           ,
 
           (: 4. TODO BPMN2 User (human step) task activity :)
-          ()
+          for $state in $start/b2:userTask
+          let $type :=
+            if ($state/b2:resourceRole/@name = "Assignee") then
+              "user"
+            else if ($state/b2:resourceRole/@name = "Queue") then
+              "queue"
+            else
+              "unknown"
+          let $userResource := ($state/b2:resourceRole[@name = "Assignee"])[1]/b2:resourceRef/text()
+          let $user := xs:string($doc/b2:resource[@id = $userResource]/@name)
+          let $queueResource := ($state/b2:resourceRole[@name = "Queue"])[1]/b2:resourceRef/text()
+          let $queue := xs:string($doc/b2:resource[@id = $queueResource]/@name)
+
+          let $route := xs:string($state/b2:outgoing[1]) (: TODO support split here? :)
+          let $rc :=
+            if (fn:contains($route,":")) then
+              fn:substring-after($route,":")
+            else
+              $route
+          let $sf := $start/b2:sequenceFlow[./@id = $rc]
+          let $_ := xdmp:log("user task: " || xs:string($state/@id) || " out route: " || $route || ", target ref: " || xs:string($sf/@targetRef))
+          return
+            p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
+              "",(),
+              $failureState,(),
+              p:action("/workflowengine/actions/userTask.xqy","BPMN2 User Task: "||xs:string($state/@name),
+
+                <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+                  <wf:type>{$type}</wf:type>
+                  {
+                    if (fn:not(fn:empty($user))) then <wf:assignee>{$user}</wf:assignee> else ()
+                  }
+                  {
+                    if (fn:not(fn:empty($queue))) then <wf:queue>{$queue}</wf:queue> else ()
+                  }
+                  <wf:state>{xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef))}</wf:state>
+                </p:options>
+                )
+              ,
+              ()
+            )
 
           ,
 
