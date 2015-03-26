@@ -4,6 +4,7 @@
     {"name": "workplace", "methods": ["GET","POST"]},
     {"name": "process", "methods": ["GET","POST","PUT"]},
     {"name": "processinbox", "methods": ["GET"]},
+    {"name": "processqueue", "methods": ["GET"]},
     {"name": "processmodel", "methods": ["GET","POST","PUT"]},
     {"name": "processsubscription", "methods": ["PUT"]}
   ],

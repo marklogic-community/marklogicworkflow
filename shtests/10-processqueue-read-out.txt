@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ext:readResponse xmlns:ext="http://marklogic.com/rest-api/resource/processqueue"><ext:outcome>SUCCESS</ext:outcome><wf:queue xmlns:wf="http://marklogic.com/workflow"/></ext:readResponse>

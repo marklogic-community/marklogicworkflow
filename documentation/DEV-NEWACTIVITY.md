@@ -22,6 +22,20 @@ There are some optional elements:-
 
 TODO write this section
 
+## Out of process step completion
+
+CPF is designed for steps to execute straight through, or wait until the content is modified before the state can
+be transitioned. In Workflow an out of CPF action may need to complete a state. In order to do this, CPF must be told
+that a CPF action (genericComplete.xqy) can move the state onwards. This CANNOT be done outside of a CPF action (despite
+  what the MarkLogic documentation website says).
+
+In order to do this an element (/prop:properties/wf:currentStep/wf:step-status) is initially set to ENTERED, then when
+the set up action (E.g. add to a queue) completes, this is set to IN PROGRESS. When the out of sequence action (user task,
+  web service call) wants the state to complete it sets this to COMPLETE. CPF then in turn runs the isComplete.xqy
+condition, which returns true, running the genericComplete.xqy action, which calls wfu:complete.
+
+NEVER call wfu:complete or wfu:completeById outside of a CPF action.
+
 ## Notes on the CPF configuration of custom steps
 
 Some things of note when creating a new step type:-

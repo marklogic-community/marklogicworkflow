@@ -28,8 +28,17 @@ declare variable $cpf:options as element() external;
 
 try {
   (: Copy the cpf options over to the process' properties document :)
-  xdmp:document-set-property($cpf:document-uri,<wf:currentStep>{$cpf:options/*}</wf:currentStep>)
-
+  (xdmp:log("IN USER TASK ACTION: " || $cpf:document-uri),xdmp:log($cpf:options),
+  xdmp:document-set-property($cpf:document-uri,
+    <wf:currentStep>
+      {$cpf:options/*}
+      <wf:startTime>{fn:current-dateTime()}</wf:startTime>
+      <wf:step-type>userTask</wf:step-type>
+      <wf:step-status>ENTERED</wf:step-status>
+    </wf:currentStep>)
+  )
+  (: WARNING the above currentStep properties are the MINIMUM required of all late-completing process steps :)
+  (: Note the state transition is a full path as a string, so in the WF namespace, not the pipeline namespace :)
 } catch ($e) {
   wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

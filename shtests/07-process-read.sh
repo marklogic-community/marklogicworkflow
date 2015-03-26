@@ -18,7 +18,8 @@ echo "starting 07-process-read.sh"
 #done < "$infile"
 
 #THEPID= `[[ $STEXT =~ ^.*processId\>(.*)\<\/ext.* ]] && echo ${BASH_REMATCH[1]}`
-PID="ad8f7cbf-48e6-4256-bb23-2b4737d07919-2015-03-09T09:15:02.295983-07:00"
+#PID="ad8f7cbf-48e6-4256-bb23-2b4737d07919-2015-03-09T09:15:02.295983-07:00"
+PID=`cat 06-process-create-out.txt`
 #echo " THEPID: $THEPID PID: $PID"
 
 curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X GET \

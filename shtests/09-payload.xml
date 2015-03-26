@@ -1,3 +1,7 @@
-<ext:createRequest xmlns:ext="http://marklogic.com/rest-api/resource/process">
+<ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
   <ext:processId>{PID}</ext:processId>
-</ext:createRequest>
+  <wf:data>
+  </wf:data>
+  <wf:attachments>
+  </wf:attachments>
+</ext:updateRequest>

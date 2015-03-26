@@ -15,6 +15,7 @@ This PoC development will occur in small sprints until a useful PoC system is av
  - Create Attachment step - one or more attachments must be set in order to proceed (E.g. required forms at this step)
  - SLA timer and routing on failure
  - Email notification
+ - Assigning tasks to MarkLogic roles
 - UK-D-I
 
 ## Theoretical requirements
@@ -33,7 +34,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 ## Sprint 1 - Basic workflow
 
 - DONE BPMN2: generic blank task
-- IN PROGRESS BPMN2: user task -> aka human step
+- TEST BPMN2: user task -> aka human step
 - DONE BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
 - DONE Evaluation: Support for /xpath/path to process model data
 - DONE Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
@@ -54,20 +55,24 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
   - DONE PUT create and publish process model, accepting BPMN2 content type .bpmn2, and to update process model without publishing
   - DONE GET to fetch process model
   - DONE POST to publish process model
- - TEST process.xqy
+ - DONE process.xqy
   - DONE PUT create instance of a process (starts a process)
-  - TEST POST complete a human task
+  - DONE POST complete a human task
   - DONE GET fetch the current state of a business process
  - TEST processsubscription.xqy
   - TEST PUT create a process subscription (alert) to create a new process instance (creating a content doc creates a process doc with an initiating attachment)
+ - TEST processinbox.xqy
+ - TEST processqueue.xqy
+ - TEST support for roles (processroleinbox.xqy) on user tasks (For BD)
 - TEST Test scripts for automating install, create, get, update, complete via REST API
 - DONE Bug: Change process model URI folder to include major and minor - else doing process doc update may run new pipeline instead of old one
-- Bug: Multiple wf:status properties on in process process, complete and running
+- DONE Bug: Multiple wf:status properties on in process process, complete and running
 - BPMN2 specification test process models modified and tested to MarkLogic executable standard
  - Basic
   - Incident Management Level 1
   - Incident Management Account Manager Only
   - Incident Management Process Engine only
+- DONE basic documentation for supported step types and their configuration (STEPS.md)
 
 ## Sprint 2 - Process Orchestration
 

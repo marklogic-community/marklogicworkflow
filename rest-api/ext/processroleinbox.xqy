@@ -1,6 +1,6 @@
 xquery version "1.0-ml";
 
-module namespace ext = "http://marklogic.com/rest-api/resource/processqueue";
+module namespace ext = "http://marklogic.com/rest-api/resource/processroleinbox";
 
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
 import module namespace json6 = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
@@ -13,8 +13,7 @@ declare namespace wf="http://marklogic.com/workflow";
 
 
 (:
- : Fetch a process inbox for the current user
- : Returns the full process document
+ : Fetch a process inbox for the current role
  :)
 declare
 %roxy:params("inbox=xs:string")
@@ -29,11 +28,11 @@ function ext:get(
   let $_ := xdmp:log($context)
 
   let $out :=
-    if (fn:empty(map:get($params,"queue"))) then
-      <ext:readResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Parameter 'queue' is required.</ext:message></ext:readResponse>
+    if (fn:empty(map:get($params,"role"))) then
+      <ext:readResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Parameter 'role' is required.</ext:message></ext:readResponse>
     else
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
-        {wfu:queue( map:get($params,"queue") )}
+        {wfu:roleinbox( map:get($params,"role") )}
       </ext:readResponse>
 
   return

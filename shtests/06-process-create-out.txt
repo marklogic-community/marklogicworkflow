@@ -1,2 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/process"><ext:outcome>SUCCESS</ext:outcome><ext:processId>ad8f7cbf-48e6-4256-bb23-2b4737d07919-2015-03-09T09:15:02.295983-07:00</ext:processId></ext:createResponse>
+c8974067-cf30-457c-96d4-98eacbab7a40-2015-03-26T09:56:23.449304-07:00

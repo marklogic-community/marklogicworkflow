@@ -36,3 +36,10 @@ to configure content centric workflow applications with a user interface over do
 
 This system could then be used for pre-sales demonstrations of complex information management scenarios beyond the usual
 simple 'add document' and 'search for document' capabilities of MarkLogic Server.
+
+## Information
+
+- [Installing MarkLogic Workflow](INSTALL.md)
+- [Creating a MarkLogic Workflow compatible BPMN2 model](MODELLING.md)
+- [Using MarkLogic Workflow processes](USING.md)
+- [Developing and extending MarkLogic Workflow](DEVELOPER.md)

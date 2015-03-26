@@ -18,6 +18,8 @@ execution of.
 
 Also view the [BPMN2 specification summary document](bpmn2-spec.md)
 
+Also take a look at the [Step documentation](STEPS.md) for information on individual steps and supported parameters.
+
 ### Importing
 
 In future a model import User Interface (UI) could be created. This is out of scope of this project. This project

@@ -12,6 +12,7 @@ import module namespace json6 = "http://marklogic.com/xdmp/json" at "/MarkLogic/
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfa="http://marklogic.com/workflow-actions" at "/app/models/workflow-actions.xqy";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
@@ -48,7 +49,8 @@ function ext:put(
     $input   as document-node()*
 ) as document-node()? {
 
-  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else
+    if ("text/plain" = map:get($context,"accept-types")) then "text/plain" else "application/json"
 
   let $_ := xdmp:log($input)
 
@@ -64,6 +66,8 @@ function ext:put(
     document {
       if ("application/xml" = $preftype) then
         $out
+      else if ("text/plain" = $preftype) then
+        $res
       else
         "{TODO:'TODO'}"
     }
@@ -132,28 +136,40 @@ function ext:post(
  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
  let $_ := xdmp:log($input)
-
- let $proc := wfu:get(map:get($params,"processId"))
- let $props := wfu:getProperties(map:get($params,"processId"))
-
+ let $pid := map:get($params,"processid")
+ (:let $proc := wfu:get($pid):)
+ let $_ := xdmp:log("REST EXT ProcessId: " || $pid)
+ let $props := wfu:getProperties($pid)
+ (:
+ let $_ := xdmp:log("CURRENT STEP INFO")
+ let $_ := xdmp:log($props/wf:currentStep)
+ :)
  let $res :=
-   if ("true" = map:get($context,"complete")) then
+   if ("true" = map:get($params,"complete")) then
      (: sanity check that the specified process' status is on a user task :)
-     if ("userTask" = $props/wf:step-type) then
+     if ("userTask" = $props/wf:currentStep/wf:step-type) then
        (: OK :)
        (: TODO map any extra parameters / changes of data in to process document's data area :)
 
        (: call wfu complete on it :)
-       wfu:complete( fn:base-uri($proc), $props/cpf:state/text(), (), fn:current-dateTime() )
+       let $_ := xdmp:log("Calling wfa:complete-userTask")
+       let $feedback := wfa:complete-userTask($pid,$input/wf:data/node(),$input/wf:attachments/node())
+       (: Could return errors with data or attachments :)
+       return
+         if (fn:not(fn:empty($feedback))) then
+           <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Data Feedback</ext:message><ext:feedback>{$feedback}</ext:feedback></ext:updateResponse>
+         else ()
+       (: wfu:complete( fn:base-uri($proc), $props/cpf:state/text(), (), fn:current-dateTime() ) :)
 
      else
        (: error - cannot call complete on non completable task :)
-       ()
+       <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Cannot call complete on non completable task: {$props/wf:step-type/text()}</ext:message></ext:updateResponse>
    else
-     ()
+     (: TODO perform a data update but leave incomplete :)
+     <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome><ext:message>No complete parameter, or complete parameter false. Leaving incomplete.</ext:message></ext:updateResponse>
 
 
- let $out := <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
+ let $out := ($res,<ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>)[1]
 
   return
   (

@@ -539,19 +539,23 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
 
           ,
 
-          (: 4. TODO BPMN2 User (human step) task activity :)
+          (: 4. BPMN2 User (human step) task activity :)
           for $state in $start/b2:userTask
           let $type :=
             if ($state/b2:resourceRole/@name = "Assignee") then
               "user"
             else if ($state/b2:resourceRole/@name = "Queue") then
               "queue"
+            else if ($state/b2:resourceRole/@name = "Role") then
+              "role"
             else
               "unknown"
           let $userResource := ($state/b2:resourceRole[@name = "Assignee"])[1]/b2:resourceRef/text()
           let $user := xs:string($doc/b2:resource[@id = $userResource]/@name)
           let $queueResource := ($state/b2:resourceRole[@name = "Queue"])[1]/b2:resourceRef/text()
           let $queue := xs:string($doc/b2:resource[@id = $queueResource]/@name)
+          let $roleResource := ($state/b2:resourceRole[@name = "Role"])[1]/b2:resourceRef/text()
+          let $role := xs:string($doc/b2:resource[@id = $roleResource]/@name)
 
           let $route := xs:string($state/b2:outgoing[1]) (: TODO support split here? :)
           let $rc :=
@@ -562,25 +566,49 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
           let $sf := $start/b2:sequenceFlow[./@id = $rc]
           let $_ := xdmp:log("user task: " || xs:string($state/@id) || " out route: " || $route || ", target ref: " || xs:string($sf/@targetRef))
           return
-            p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
+            (p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
               "",(),
-              $failureState,(),
-              p:action("/workflowengine/actions/userTask.xqy","BPMN2 User Task: "||xs:string($state/@name),
-
-                <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
-                  <wf:type>{$type}</wf:type>
-                  {
-                    if (fn:not(fn:empty($user))) then <wf:assignee>{$user}</wf:assignee> else ()
-                  }
-                  {
-                    if (fn:not(fn:empty($queue))) then <wf:queue>{$queue}</wf:queue> else ()
-                  }
-                  <wf:state>{xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef))}</wf:state>
-                </p:options>
-                )
+              $failureState,(), () (: empty default action :)
               ,
-              ()
-            )
+              ( (: execute set :)
+                p:execute(
+                  p:condition("/workflowengine/conditions/hasEntered.xqy","Check if just entered",())
+                  ,
+                  p:action("/workflowengine/actions/userTask.xqy","BPMN2 User Task: "||xs:string($state/@name),
+
+                    <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+                      <wf:type>{$type}</wf:type>
+                      {
+                        if (fn:not(fn:empty($user))) then <wf:assignee>{$user}</wf:assignee> else ()
+                      }
+                      {
+                        if (fn:not(fn:empty($queue))) then <wf:queue>{$queue}</wf:queue> else ()
+                      }
+                      {
+                        if (fn:not(fn:empty($role))) then <wf:role>{$role}</wf:role> else ()
+                      }
+                    </p:options>
+                  ) (: p action :)
+                  ,"Apply set up user task action on entry"
+                ) (: p:execute :)
+                ,
+                p:execute(
+                  p:condition("/workflowengine/conditions/isComplete.xqy","Check if complete",())
+                  ,
+                  p:action("/workflowengine/actions/genericComplete.xqy",
+                    "Wait for user completion: "||xs:string($state/@name),
+                    <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+                      <wf:state>{xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef))}</wf:state>
+                    </p:options>
+                  ),
+                  "Apply default complete action"
+                ) (: p execute :)
+
+
+              ) (: execute set :)
+            ) (: state transition :)
+          ) (: state transition set :)
+
 
           ,
 
