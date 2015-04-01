@@ -248,6 +248,9 @@ declare function m:metric($processUri as xs:string,$state as xs:string,$start as
 };
 
 declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:namespace)*,$xpath as xs:string) as xs:boolean {
+
+  let $_ := xdmp:log("In wfu:evaluate")
+
   (: TODO handle version 8 javascript conditions :)
   let $xp :=
     if (fn:substring($xpath,1,1) = "/") then
@@ -256,14 +259,20 @@ declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:n
       $xpath
 
   (: replacements of shorthand variable names :)
-  let $xp := fn:replace($xp,"$wf:process/",'fn:doc("' || $processUri || '")/')
-  let $xp := fn:replace($xp, "$processData/",'fn:doc("' || $processUri || '")/wf:data/')
+  let $xp := fn:replace($xp,"\$wf:process/",'fn:doc("' || $processUri || '")/wf:process/')
+  let $xp := fn:replace($xp, "\$processData/",'fn:doc("' || $processUri || '")/wf:process/wf:data/')
 
-  let $_ := xdmp:log($xp)
+  let $_ := xdmp:log("wfu:evaluate: Condition: "||$xp)
   let $ns :=
     for $namespace in $namespaces
     return ($namespace/@short/text(),$namespace/@long/text())
+  let $_ := xdmp:log("Namespaces:-")
   let $_ := xdmp:log($ns)
+
+  let $result := xdmp:with-namespaces($ns, xdmp:eval('declare namespace wf="http://marklogic.com/workflow"; ' || $xp,(),()))
+  let $_ := xdmp:log("wfu:evaluate: result:-")
+  let $_ := xdmp:log($result)
+
   return
-    xdmp:with-namespaces($ns, xdmp:eval('declare namespace wf="http://marklogic.com/workflow"; ' || $xp,(),()))
+    $result
 };

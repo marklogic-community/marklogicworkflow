@@ -12,8 +12,13 @@ echo "Testing the MarkLogic Workflow REST API..."
 
 . ./08-processinbox-read.sh
 
+sleep 15
+
 . ./09-process-update.sh
 . ./10-processqueue-read.sh
+
+sleep 15
+
 . ./11-process-update.sh
 . ./12-process-read.sh
 

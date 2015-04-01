@@ -514,6 +514,13 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
                 p:action("/workflowengine/actions/exclusiveGateway.xqy","BPMN2 Exclusive Gateway: "||xs:string($state/@name),
                   <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
                     {
+                      if (fn:not(fn:empty($state/@default))) then
+                        let $sf := $start/b2:sequenceFlow[./@id = $state/@default]
+                        return
+                          <wf:default-route-state>{xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef))}</wf:default-route-state>
+                      else ()
+                    }
+                    {
                       for $route in $state/b2:outgoing
                       let $rc :=
                         if (fn:contains($route,":")) then

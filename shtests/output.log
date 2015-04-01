@@ -1,0 +1,24 @@
+Testing the MarkLogic Workflow REST API...
+starting 01-processmodel-create.sh
+01-processmodel-create.sh complete
+starting 02-processmodel-read.sh
+02-processmodel-read.sh complete
+starting 03-processmodel-update.sh
+03-processmodel-update.sh complete
+starting 04-processmodel-publish.sh
+04-processmodel-publish.sh complete
+starting 06-process-create.sh
+06-process-create.sh complete
+starting 07-process-read.sh
+07-process-read.sh complete
+starting 08-processinbox-read.sh
+08-processinbox-read.sh complete
+starting 09-process-update.sh
+09-process-update.sh complete
+starting 10-processqueue-read.sh
+10-processqueue-read.sh complete
+starting 11-process-update.sh
+11-process-update.sh complete
+starting 12-process-read.sh
+12-process-read.sh complete
+Completed all tests for MarkLogic Workflow

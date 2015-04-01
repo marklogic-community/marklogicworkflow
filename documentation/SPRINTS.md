@@ -39,9 +39,9 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - DONE BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
 - DONE Evaluation: Support for /xpath/path to process model data
 - DONE Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
-- TEST Evaluation: Support for fn:doc(/process/attachments/attachment[@name="default"]/uri/text())/some/path/to/property style evaluation
-- TEST Evaluation: replace $processData or $wf:process with fn:doc($processUri) everywhere in xpath expression
-- TEST can use fn:current-dateTime - Evaluation: Support for 'now' date time assignment to variable
+- DONE Evaluation: Support for fn:doc(/process/attachments/attachment[@name="default"]/uri/text())/some/path/to/property style evaluation
+- DONE Evaluation: replace $processData or $wf:process with fn:doc($processUri) everywhere in xpath expression
+- DONE can use fn:current-dateTime - Evaluation: Support for 'now' date time assignment to variable
 - Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
  - See if there is an equivalent BPMN2 method - may just be a variable assignment on each step instead
  - Create import step for this BPMN2 method

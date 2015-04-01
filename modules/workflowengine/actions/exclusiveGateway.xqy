@@ -51,23 +51,31 @@ try {
   (: Default namespace is same as process doc :) (: TODO mix in those from BPMN2 doc :)
 
   (: Evaluate each condition in turn :)
+
+
   let $_ :=
     for $route in $cpf:options/wf:route
     return
       if (fn:not(fn:empty(map:get($map,"route")))) then
         ()
       else
-        if (wfu:evaluate($cpf:document-uri,$ns,$route/wf:condition/text())) then
-          (: If true, set route choice state :)
-          map:put($map,"route",$route/wf:state/text())
+        if (fn:not(fn:empty($route/wf:condition))) then
+          if (wfu:evaluate($cpf:document-uri,$ns,$route/wf:condition/text())) then
+            (: If true, set route choice state :)
+            map:put($map,"route",xs:anyURI($route/wf:state/text()))
+          else
+            ()
         else
           ()
+
   let $_ :=
-    if (fn:not(fn:empty($cpf:options/wf:default-route))) then
-      (: If none return true, set state to default route state, if available :)
-      map:put($map,"route",$cpf:options/wf:default-route/text())
-    else
-      ()
+    if (fn:empty(map:get($map,"route")) and fn:not(fn:empty($cpf:options/wf:default-route-state)) ) then
+      map:put($map,"route",xs:anyURI(xs:string($cpf:options/wf:default-route-state)))
+    else ()
+
+  let $_ := xdmp:log("Map of route:-")
+  let $_ := xdmp:log($map)
+
 
   (: If still none, throw failure message (misconfiguration) :)
   return

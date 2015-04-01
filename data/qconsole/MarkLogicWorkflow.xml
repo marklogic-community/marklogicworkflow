@@ -1,317 +1,272 @@
-<export><workspace name="MarkLogicWorkflow"><query name="SCXML test 1" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-import module namespace sc = "http://marklogic.com/scxmltocpf" at "/app/models/scxmltocpf.xqy";
-
-(: WARNING: MUST be executed on the Triggers database, NOT the content or modules database :)
-
-sc:scxml-to-cpf("/processengine/models/scxml/two-sample-transitions.scxml","1","0",
-
-&lt;scxml initial="Open" version="0.9" xmlns="http://www.w3.org/2005/07/scxml"&gt;&lt;!--   node-size-and-position x=0 y=0 w=1070 h=884  --&gt;
- &lt;state id="Open"&gt;&lt;!--   node-size-and-position x=180 y=240 w=75 h=75  --&gt;
-  &lt;transition target="InProgress"&gt;&lt;/transition&gt;
- &lt;/state&gt;
- &lt;final id="Closed"&gt;&lt;!--   node-size-and-position x=616 y=209 w=75 h=75  --&gt;&lt;/final&gt;
- &lt;state id="InProgress"&gt;&lt;!--   node-size-and-position x=372 y=246 w=75 h=75  --&gt;
-  &lt;transition target="Closed"&gt;&lt;/transition&gt;
- &lt;/state&gt;
-&lt;/scxml&gt;
-
-) </query><query name="Install SCXML 01" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-import module namespace wf = "http://marklogic.com/workflow" at "/app/models/workflow.xqy";
-
-wf:convert-to-cpf("/workflow/models/scxml/two-sample-transitions.xml","1","0")
-</query><query name="fetch pipeline" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-fn:doc("http://marklogic.com/cpf/pipelines/3931705940801376760.xml")</query><query name="list pipelines" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
-(:
-p:pipelines()
-:)
-
-p:get("015-restapi-tests__1__2") (:/fn:base-uri(.):)
-
-(:
-p:get-by-id(6788378635556780445)
-:)</query><query name="remove pipeline" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
-
-
-p:remove("/workflow/models/bpmn2/011_gateways_test.bpmn__1__0")
-</query><query name="list domains" focus="false" active="false" mode="xquery"></query><query name="remove domain" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
-
-dom:remove("/workflow/models/bpmn2/011_gateways_test.bpmn")
-</query><query name="Initiate Process 01" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
+<export><workspace name="Workspace"><query name="Query 1" focus="false" active="false" mode="xquery"></query><query name="list triples" focus="false" active="false" mode="sparql"></query><query name="insert triples" focus="false" active="false" mode="xquery"></query><query name="fetch triple doc" focus="false" active="false" mode="xquery"></query><query name="deltriples" focus="false" active="false" mode="xquery"></query><query name="Insert Document 1" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+declare namespace nic = "http://newinsurance.com/ns/nic";
+declare namespace h = "http://www.w3.org/1999/xhtml";
 
-import module namespace wfu = "http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
-
-wfu:create("/workflow/models/bpmn2/001_two_sample_transitions.bpmn",(),())
-
-(:
-xdmp:document-insert("/workflow/models/bpmn2/001_two_sample_transitions.bpmn/" || sem:uuid-string() || ".xml",
-  &lt;process xmlns="http://marklogic.com/workflow/process"&gt;
-    &lt;data&gt;
-    &lt;/data&gt;
-    &lt;attachments&gt;
-      &lt;attachment name="InitiatingAttachment" cardinality="1"&gt;
-        &lt;uri&gt;/some/sample/doc.xml&lt;/uri&gt;
-      &lt;/attachment&gt;
-    &lt;/attachments&gt;
-  &lt;/process&gt;,
-  xdmp:default-permissions(),
-  (xdmp:default-collections(),"http://marklogic.com/workflow/processes","testprocess01")
-)
-:)</query><query name="Insert sample doc" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-xdmp:document-insert("/some/sample/doc.xml",
-  &lt;mydoc&gt;
-   &lt;some&gt;element&lt;/some&gt;
-   &lt;text&gt;wibble&lt;/text&gt;
-  &lt;/mydoc&gt;
-)</query><query name="List Processes" focus="true" active="true" mode="xquery">xquery version "1.0-ml";
-declare namespace cpf = "http://marklogic.com/cpf";
-declare namespace prop = "http://marklogic.com/xdmp/property";
-
-declare namespace wf="http://marklogic.com/workflow";
-
-for $uri in fn:collection("http://marklogic.com/workflow/processes")/wf:process/fn:base-uri(.)
-return
-($uri,fn:doc($uri),xdmp:document-properties($uri))
-(:
-  for $p in xdmp:document-properties($uri)[./prop:properties/cpf:processing-status = "active"]
-  return ($uri,$p)
-:)</query><query name="install broken" focus="false" active="false" mode="xquery">xquery version "1.0-ml";
-
-import module namespace wf = "http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
-
-wf:convert-to-cpf("/workflow/models/scxml/broken.xml","1","0")
-</query><query name="Initiate Broken" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
+xdmp:document-insert("/docs/1.html",
+&lt;h:html&gt;&lt;h:head&gt;&lt;h:title&gt;First doc&lt;/h:title&gt;
+&lt;sem:triples&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT/CLIENT_ID=2011&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://marklogic.com/semantics/ontology/mentioned_in&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;/docs/1.html&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;/docs/1.html&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;http://marklogic.com/semantics/ontology/Document&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+&lt;/sem:triples&gt;
+&lt;/h:head&gt;&lt;h:body&gt;
+ &lt;h:p&gt;Dear Sir, I'm writing to claim for an accident I had when I hit a pedestrian in my car.&lt;/h:p&gt;
+ &lt;h:p&gt;My Client ID is &lt;nic:client-id&gt;2011&lt;/nic:client-id&gt;&lt;/h:p&gt;
+&lt;/h:body&gt;
+&lt;/h:html&gt;,
+xdmp:default-permissions(),(xdmp:default-collections(),"mynamedgraph"))</query><query name="fetch doc subject pedestrian" focus="false" active="false" mode="xquery"></query><query name="Insert Document 2" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+declare namespace nic = "http://newinsurance.com/ns/nic";
+declare namespace h = "http://www.w3.org/1999/xhtml";
 
-xdmp:document-insert("/workflow/processes/workflow/models/scxml/broken.xml/" || sem:uuid-string() || ".xml",
-  &lt;process xmlns="http://marklogic.com/workflow/process"&gt;
-    &lt;data&gt;
-    &lt;/data&gt;
-    &lt;attachments&gt;
-      &lt;attachment name="InitiatingAttachment" cardinality="1"&gt;
-        &lt;uri&gt;/some/sample/doc.xml&lt;/uri&gt;
-      &lt;/attachment&gt;
-    &lt;/attachments&gt;
-  &lt;/process&gt;,
-  xdmp:default-permissions(),
-  (xdmp:default-collections(),"http://marklogic.com/workflow/processes","testprocessbroken")
-)</query><query name="Install BPMN2 01" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+xdmp:document-insert("/docs/2.html",
+&lt;h:html&gt;&lt;h:head&gt;&lt;h:title&gt;Second doc&lt;/h:title&gt;
+&lt;sem:triples&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT/CLIENT_ID=2011&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://marklogic.com/semantics/ontology/mentioned_in&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;/docs/2.html&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;/docs/2.html&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;http://marklogic.com/semantics/ontology/Document&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+&lt;/sem:triples&gt;
+&lt;/h:head&gt;&lt;h:body&gt;
+ &lt;h:p&gt;Dear Sir, I recently reversed in to a fench and wish to make a claim.&lt;/h:p&gt;
+ &lt;h:p&gt;My Client ID is &lt;nic:client-id&gt;2011&lt;/nic:client-id&gt;&lt;/h:p&gt;
+&lt;/h:body&gt;
+&lt;/h:html&gt;,
+xdmp:default-permissions(),(xdmp:default-collections(),"mynamedgraph"))</query><query name="query both" focus="false" active="false" mode="xquery"></query><query name="Inferencing" focus="false" active="false" mode="sparql">CONSTRUCT {
+  _:1 a &lt;http://www.ourcompany.com/ontology/JointCustomer&gt; .
+  _:1 &lt;http://www.ourcompany.com/ontology/NationalKensingtonBank/CUSTOMER&gt; ?c1 .
+  _:1 &lt;http://www.ourcompany.com/ontology/NewInsuranceCo/CLIENT&gt; ?c2 .
+} WHERE {
+  ?c1 a &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER&gt; .
+  ?c1 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#DATE_OF_BIRTH&gt; ?dob1 .
+  ?c1 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#SURNAME&gt; ?fam1 .
+  ?c1 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#FIRST_NAME&gt; ?first1 .
+  ?c2 a &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT&gt; .
+  ?c2 &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT#DOB&gt; ?dob2 .
+  ?c2 &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT#FAMILY_NAME&gt; ?fam2 .
+  ?c2 &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT#FIRST_NAME&gt; ?first2 .
+  FILTER (?dob1 = ?dob2) FILTER ( ?fam1 = ?fam2) FILTER( ?first1 = ?first2  )
+} LIMIT 10</query><query name="Inferencing Insert" focus="false" active="true" mode="xquery">import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
-import module namespace wf = "http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
-
-wf:convert-to-cpf("/workflow/models/bpmn2/011_gateways_test.bpmn","1","1")
-</query><query name="get process" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-let $uri := "/workflow/processes/011_gateways_test__1__0/807bf5b6-01c8-4056-b5da-3e2ca8f924b4-2015-01-28T17:12:52.23589-08:00.xml"
-return (
-xdmp:document-properties($uri),
-fn:doc($uri)
-)</query><query name="add alert" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-(: configure an alert so a document in a folder starts a process, and data is mapped :)
-
-
-import module namespace wfu = "http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
-declare namespace wf = "http://marklogic.com/workflow";
-import module namespace wfi = "http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
-import module namespace a = "http://marklogic.com/alerts/alerts" at "/app/models/lib-alerts.xqy";
-
-a:add-alert("Test document subscription for BPMN 01",(&lt;e&gt;{cts:word-query("wibble")}&lt;/e&gt;)/element(),
-()
-,"/app/models/alert-action-process.xqy",xdmp:database("workflow-modules"),(&lt;wf:process-name&gt;/workflow/processes/workflow/models/bpmn2/001_two_sample_transitions.bpmn&lt;/wf:process-name&gt;)
-)
-</query><query name="Initiate 011 gateways" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
-
-import module namespace wfu = "http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
-
-wfu:create("011_gateways_test__1__0",(&lt;choiceA&gt;B&lt;/choiceA&gt;,&lt;choiceB&gt;C&lt;/choiceB&gt;),())</query><query name="unpath test" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-declare namespace wf="http://marklogic.com/workflow";
-
-xdmp:eval('declare namespace wf="http://marklogic.com/workflow"; fn:doc("/workflow/processes/workflow/models/bpmn2/011_gateways_test.bpmn/4b9fb948-7f43-44ae-a63f-fc0f1c7188b5.xml")/wf:process/wf:data/choiceA = "A"',
-  (),&lt;options xmlns="xdmp:eval"&gt;&lt;isolation&gt;different-transaction&lt;/isolation&gt;&lt;/options&gt;
-)</query><query name="get SC pipeline" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; 
-
-xs:unsignedLong(p:pipelines()[p:pipeline-name = "Status Change Handling"]/p:pipeline-id)
-(:/p:pipeline-name
-:)
-(:[./p:pipeline-name/text() = "Status Change Handling"]
-:)
-(:/pipeline-id:)
-(:
-)
-:)</query><query name="get domain" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
-let $processmodeluri := "/workflow/models/bpmn2/011_gateways_test.bpmn"
-(:
-dom:domains()
-:)
-return
-  fn:not(fn:empty(dom:get($processmodeluri)))</query><query name="get props" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-declare namespace cpf = "http://marklogic.com/cpf";
-declare namespace prop = "http://marklogic.com/xdmp/property";
-let $uri := "/workflow/processes/workflow/models/bpmn2/011_gateways_test.bpmn/77237531-9087-4fe4-8110-580c63ea42ce.xml"
-return 
-xdmp:document-properties($uri)/prop:properties/cpf:state
-(: use /prop:properties/symptom_word - if it returns data, then your ns in search options should be "" not xdmp/property :)</query><query name="Get Test Procs" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-declare namespace wf="http://marklogic.com/workflow";
-
-for $proc in fn:collection("http://marklogic.com/workflow/processes")/wf:process
-return
- (fn:base-uri($proc),$proc,xdmp:document-properties(fn:base-uri($proc)))
- </query><query name="del procs" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-declare namespace wf="http://marklogic.com/workflow";
-
-for $uri in fn:collection("http://marklogic.com/workflow/processes")/wf:process/fn:base-uri(.)
-return
- xdmp:document-delete($uri)</query><query name="parse" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-module namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
-
-declare namespace roxy = "http://marklogic.com/roxy";
-
-
-(:
- : Get the latest process model
- :  ?[major=numeric[&amp;minor=numeric]]&amp;uri=uri
- :)
-declare
-%roxy:params("")
-function ext:get(
-  $context as map:map,
-  $params  as map:map
-) as document-node()*
-{
-
-  (
-    map:put($context, "output-types", "text/xml"),
-    xdmp:set-response-code(200, "OK"),
-
-    document {
-    }
-  )
-};
-
-(:
- : Publish the process model
- :  ?[major=numeric[&amp;minor=numeric]]&amp;name=name
- :)
-declare
-%roxy:params("")
-function ext:put(
-    $context as map:map,
-    $params  as map:map,
-    $input   as document-node()*
-) as document-node()?
-{
-  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
-
-  let $_ := xdmp:log($input)
-
-  let $modelid := wfu:install-and-convert(map:get($params,"name"),$input,(map:get($params,"major"),"1")[1],(map:get($params,"minor"),"0")[1] )
-
-  let $out := &lt;ext:createResponse&gt;&lt;ext:outcome&gt;SUCCESS&lt;/ext:outcome&gt;&lt;ext:modelId&gt;{$modelid}&lt;/ext:modelId&gt;&lt;/ext:createResponse&gt;
-
+let $tripmaps := sem:sparql("SELECT *
+ WHERE {
+  ?c1 a &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER&gt; .
+  ?c1 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#DATE_OF_BIRTH&gt; ?dob1 .
+  ?c1 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#SURNAME&gt; ?fam1 .
+  ?c1 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#TITLE&gt; ?title1 .
+  ?c1 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#FIRST_NAME&gt; ?first1 .
+  ?c2 a &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT&gt; .
+  ?c2 &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT#DOB&gt; ?dob2 .
+  ?c2 &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT#FAMILY_NAME&gt; ?fam2 .
+  ?c2 &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT#FIRST_NAME&gt; ?first2 .
+  FILTER (?dob1 = ?dob2) FILTER ( ?fam1 = ?fam2) FILTER( ?first1 = ?first2  )
+}")
+let $semtriples :=
+  for $tripmap in $tripmaps
+  let $rnd := fn:concat("/triples/inferencing/JointCustomer/",xs:string(xdmp:random(1000000000000)))
+  let $fullname := fn:concat(map:get($tripmap,"title1")," ",map:get($tripmap,"first1")," ",map:get($tripmap,"fam1"))
   return
   (
-    map:put($context, "output-types", "application/json"),
-    xdmp:set-response-code(200, "OK"),
-    document { "PUT called on rest api"
-      (: 1. Take the process model document and convert to a CPF pipeline document :)
-      (: 2. Add a CPF pipeline by using a directory scope of /cpf/processes/ (&lt;PROCURI&gt;/&lt;UUID.xml&gt;) depth infinite :)
-      (: 3. Optionally enable :)
-
-        if ("application/xml" = $preftype) then
-          $out
-        else
-          "{TODO:'TODO'}"
-    }
-
+    sem:triple(sem:iri($rnd),sem:iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),sem:iri("http://www.ourcompany.com/ontology/JointCustomer")),
+    sem:triple(sem:iri($rnd),sem:iri("http://www.ourcompany.com/ontology/NationalKensingtonBank/CUSTOMER"),sem:iri(map:get($tripmap,"c1"))),
+    sem:triple(sem:iri($rnd),sem:iri("http://www.ourcompany.com/ontology/NewInsuranceCo/CLIENT"),sem:iri(map:get($tripmap,"c2"))),
+    sem:triple(sem:iri($rnd),sem:iri("http://www.ourcompany.com/ontology/JointCustomer/name"),sem:typed-literal($fullname,sem:iri("xs:string")))
   )
-};
+return sem:graph-insert(sem:iri("inferencing"),$semtriples)
+</query><query name="Inferencing Query" focus="false" active="false" mode="sparql">SELECT ?s ?kenid ?nicid ?balance WHERE {
+  ?s a &lt;http://www.ourcompany.com/ontology/JointCustomer&gt; .
+  ?s &lt;http://www.ourcompany.com/ontology/NationalKensingtonBank/CUSTOMER&gt; ?ken .
+  ?s &lt;http://www.ourcompany.com/ontology/NewInsuranceCo/CLIENT&gt; ?nic .
+  
+  ?ken &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#CUSTOMER_ID&gt; ?kenid .
+  ?acc &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#ref-CUSTOMER_ID&gt; ?ken .
+  ?acc &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#BALANCE&gt; ?balance .
+  
+  ?nic &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT#CLIENT_ID&gt; ?nicid .
+ 
+}</query><query name="All rdf types" focus="false" active="false" mode="sparql"></query><query name="list unique graphs" focus="false" active="false" mode="sparql"></query><query name="del inferences" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+for $docuri in fn:collection(("inferencing","inferencing-documents","inferencing-account"))/fn:base-uri(.)
+return xdmp:document-delete($docuri)</query><query name="query bnode" focus="false" active="false" mode="sparql"></query><query name="get facts" focus="false" active="false" mode="sparql"></query><query name="List Joint Customers" focus="false" active="false" mode="sparql"></query><query name="get trips" focus="false" active="false" mode="xquery">xquery version "1.0-ml";
+fn:doc("/triplestore/97a9e7ac8044072a.xml")</query><query name="Query 2" focus="false" active="false" mode="sparql"></query><query name="doc 3" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+declare namespace nic = "http://newinsurance.com/ns/nic";
+declare namespace h = "http://www.w3.org/1999/xhtml";
 
-(:
- : Add a new process model version.
- : ?major=numeric&amp;minor=numeric&amp;name=name
- :)
-declare
-%roxy:params("")
-function ext:post(
-    $context as map:map,
-    $params  as map:map,
-    $input   as document-node()*
-) as document-node()*
-{
-  (
-    map:put($context, "output-types", "application/json"),
-    xdmp:set-response-code(200, "OK"),
-    document { "POST called on rest api" }
-  )
-};
+xdmp:document-insert("/docs/3.html",
+&lt;h:html&gt;&lt;h:head&gt;&lt;h:title&gt;Third doc&lt;/h:title&gt;
+&lt;sem:triples&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT/CLIENT_ID=2162&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://marklogic.com/semantics/ontology/mentioned_in&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;/docs/3.html&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;/docs/3.html&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;http://marklogic.com/semantics/ontology/Document&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+&lt;/sem:triples&gt;
+&lt;/h:head&gt;&lt;h:body&gt;
+ &lt;h:p&gt;I had a prang a couple of weeks ago on a roundabout with my car and another vehicle.&lt;/h:p&gt;
+ &lt;h:p&gt;My Client ID is &lt;nic:client-id&gt;2162&lt;/nic:client-id&gt;&lt;/h:p&gt;
+&lt;/h:body&gt;
+&lt;/h:html&gt;,
+xdmp:default-permissions(),(xdmp:default-collections(),"mynamedgraph"))</query><query name="NKB Account Inferencing" focus="false" active="true" mode="xquery">import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+
+ sem:graph-insert(sem:iri("inferencing-account"),sem:sparql("
+CONSTRUCT {
+  ?customer &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#ref-ACCOUNT_ID&gt; ?account .
+} WHERE {
+  ?customer a &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER&gt; .
+  ?account &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#ref-CUSTOMER_ID&gt; ?customer .
+}"))
+</query><query name="solution sparql" focus="false" active="false" mode="sparql">PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt; 
+PREFIX rdfs: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; 
+PREFIX so: &lt;http://www.schema.org/&gt; 
+SELECT distinct ?jointcustomer WHERE { 
+  ?jointcustomer rdfs:type &lt;http://www.ourcompany.com/ontology/JointCustomer&gt; . 
+  ?jointcustomer &lt;http://www.ourcompany.com/ontology/NationalKensingtonBank/CUSTOMER&gt; ?nkbcustomer1 . 
+  ?nkbcustomer1 rdfs:type &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER&gt; . 
+  ?nkbcustomer1 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#ref-ACCOUNT_ID&gt; ?nkbaccount2 . 
+  ?nkbaccount2 rdfs:type &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT&gt; . 
+  ?nkbaccount2 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#BALANCE&gt; ?balance . 
+  #FILTER (?a83400 &lt; "1000"^^&lt;xs:integer&gt; ) .
+  ?jointcustomer &lt;http://www.ourcompany.com/ontology/NewInsuranceCo/CLIENT&gt; ?nicclient3 . 
+  ?nicclient3 rdfs:type &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT&gt; . 
+} OFFSET 0 LIMIT 10</query><query name="Query 3" focus="false" active="false" mode="sparql">PREFIX rdfs: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; 
+select * WHERE {
+  ?nkbaccount2 rdfs:type &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT&gt; . 
+  ?nkbaccount2 &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#BALANCE&gt; ?balance . 
+        FILTER (?balance &lt; "100"^^&lt;xs:double&gt; ) .
+  #?nkbaccount2 ?p ?o .
+} LIMIT 50</query><query name="find balance" focus="false" active="false" mode="xquery">import module namespace search="http://marklogic.com/appservices/search"
+                    at "/MarkLogic/appservices/search/search.xqy";
+search:search("http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#BALANCE")</query><query name="sem double" focus="false" active="false" mode="xquery">xquery version "1.0-ml";
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+
+sem:graph-insert(sem:iri("double-test"),
+sem:triple(sem:iri("doublesubject"),sem:iri("doublepredicate"),sem:unknown("72.31", sem:iri("xs:double")))
+)</query><query name="Query 4" focus="false" active="false" mode="xquery">xquery version "1.0-ml";
+fn:doc("/triplestore/292dd2a45c6a15a8.xml")</query><query name="Query 5" focus="false" active="false" mode="xquery">xquery version "1.0-ml";
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
 
+xdmp:estimate(fn:doc()//sem:triple/sem:object[@datatype = "xs:double"])</query><query name="docinferencing" focus="false" active="true" mode="xquery">
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
-(:
- : Remove the specified process model from execution
- :  ?[major=numeric[&amp;minor=numeric]]&amp;modelid=modelid
- :)
-declare function ext:delete(
-    $context as map:map,
-    $params  as map:map
-) as document-node()? {
-  let $name := map:get($params,"something")
-  let $l := xdmp:log("DELETE /v1/resources/processmodel CALLED")
-  let $l := xdmp:log($params)
-  let $l := xdmp:log($context)
-  return (xdmp:set-response-code(200,"OK"),document {
+ sem:graph-insert(sem:iri("inferencing-documents"),sem:sparql(
+"
+CONSTRUCT {
+  ?jc &lt;http://marklogic.com/semantics/ontology/mentioned_in&gt; ?docuri .
+} WHERE {
+  ?jc a &lt;http://www.ourcompany.com/ontology/JointCustomer&gt; .
+  ?jc &lt;http://www.ourcompany.com/ontology/NewInsuranceCo/CLIENT&gt; ?c .
+  ?c a &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT&gt; .
+  ?c &lt;http://marklogic.com/semantics/ontology/mentioned_in&gt; ?docuri .
+}
+"
+))</query><query name="Query 6" focus="false" active="false" mode="sparql">select * WHERE {
+  ?jc a &lt;http://www.ourcompany.com/ontology/JointCustomer&gt; .
+  ?jc &lt;http://www.ourcompany.com/ontology/NewInsuranceCo/CLIENT&gt; ?c .
+  ?c a &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT&gt; .
+  ?c &lt;http://marklogic.com/semantics/ontology/mentioned_in&gt; ?docuri .
+}</query><query name="final sparql" focus="false" active="false" mode="sparql"></query><query name="Doc 5" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+declare namespace nic = "http://newinsurance.com/ns/nic";
+declare namespace h = "http://www.w3.org/1999/xhtml";
 
+xdmp:document-insert("/docs/5.html",
+&lt;h:html&gt;&lt;h:head&gt;&lt;h:title&gt;Fifth doc&lt;/h:title&gt;
+&lt;sem:triples&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT/CLIENT_ID=2239&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://marklogic.com/semantics/ontology/mentioned_in&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;/docs/5.html&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;/docs/5.html&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;http://marklogic.com/semantics/ontology/Document&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+&lt;/sem:triples&gt;
+&lt;/h:head&gt;&lt;h:body&gt;
+ &lt;h:p&gt;I am writing to claim for an accident I recently had in my car. A drunk pedestrian on a night out stumbled in to the road from between two parked cars. I had no time to swerve, so hit him.&lt;/h:p&gt;
+ &lt;h:p&gt;My Client ID is &lt;nic:client-id&gt;2239&lt;/nic:client-id&gt;&lt;/h:p&gt;
+&lt;/h:body&gt;
+&lt;/h:html&gt;,
+xdmp:default-permissions(),(xdmp:default-collections(),"mynamedgraph"))</query><query name="Doc 6 P" focus="true" active="true" mode="xquery">xquery version "1.0-ml";
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+declare namespace nic = "http://newinsurance.com/ns/nic";
+declare namespace h = "http://www.w3.org/1999/xhtml";
 
+xdmp:document-insert("/docs/6.html",
+&lt;h:html&gt;&lt;h:head&gt;&lt;h:title&gt;Sixth doc&lt;/h:title&gt;
+&lt;sem:triples&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT/CLIENT_ID=2256&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://marklogic.com/semantics/ontology/mentioned_in&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;/docs/6.html&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;/docs/6.html&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;http://marklogic.com/semantics/ontology/Document&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+&lt;/sem:triples&gt;
+&lt;/h:head&gt;&lt;h:body&gt;
+ &lt;h:p&gt;I'm contacting you today about a claim where I hit a pedestrian down a dark lane near my house.&lt;/h:p&gt;
+ &lt;h:p&gt;My Client ID is &lt;nic:client-id&gt;2256&lt;/nic:client-id&gt;&lt;/h:p&gt;
+&lt;/h:body&gt;
+&lt;/h:html&gt;,
+xdmp:default-permissions(),(xdmp:default-collections(),"mynamedgraph"))</query><query name="Doc 7 NP" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
+import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
+declare namespace nic = "http://newinsurance.com/ns/nic";
+declare namespace h = "http://www.w3.org/1999/xhtml";
 
-   })
-};
-</query><query name="mod" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-import module namespace ext = "http://marklogic.com/rest-api/resource/processmodel" at "/marklogic.rest.resource/processmodel/assets/resource.xqy";
-
-ext:get((),())</query><query name="inbox" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-declare namespace wf="http://marklogic.com/workflow";
-
-for $uri in cts:search(fn:collection("http://marklogic.com/workflow/processes"),
-      cts:and-query(
-        (: TODO add cpf-active check, wf:status running check, wf:locked-user blank :)
-        cts:properties-query(
-          cts:element-query(xs:QName("wf:currentStep"),
-            cts:element-value-query(xs:QName("wf:assignee"),(xdmp:get-current-user())[1])
-          )
-        )
-      ),("unfiltered") (: TODO ordering, prioritisation support, and so on :)
-    )/fn:base-uri(.)
-return
-($uri,fn:doc($uri),xdmp:document-properties($uri))
-    </query><query name="typ patch" focus="false" active="false" mode="xquery">xquery version "1.0-ml";
-xdmp:document-get-properties</query><query name="xdp" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-declare namespace wf="http://marklogic.com/workflow";
-declare namespace prop="http://marklogic.com/xdmp/property";
-
-  xdmp:document-properties((fn:collection("http://marklogic.com/workflow/processes")/wf:process[./@id = "31f22abb-2805-4748-99ff-a636c7e69ddb-2015-03-10T02:17:50.637642-07:00"]/fn:base-uri(.)))/prop:properties</query><query name="Query 1" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-fn:doc("http://marklogic.com/cpf/pipelines/14663474739977627415.xml")/*:pipeline/*:state-transition[5]</query><query name="cpf force eval" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-"/workflow/processes/015-restapi-tests__1__2/32a56c71-22f2-4b25-a313-6d3d5c5d19ba-2015-03-10T06:32:38.850199-07:00.xml"</query><query name="Query 2" focus="false" active="true" mode="xquery">xquery version "1.0-ml";
-
-p:get("015-restapi-tests__1__2")</query></workspace></export>
+xdmp:document-insert("/docs/7.html",
+&lt;h:html&gt;&lt;h:head&gt;&lt;h:title&gt;Seventh doc&lt;/h:title&gt;
+&lt;sem:triples&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT/CLIENT_ID=2027&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://marklogic.com/semantics/ontology/mentioned_in&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;/docs/7.html&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+ &lt;sem:triple&gt;
+  &lt;sem:subject&gt;/docs/7.html&lt;/sem:subject&gt;
+  &lt;sem:predicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/sem:predicate&gt;
+  &lt;sem:object&gt;http://marklogic.com/semantics/ontology/Document&lt;/sem:object&gt;
+ &lt;/sem:triple&gt;
+&lt;/sem:triples&gt;
+&lt;/h:head&gt;&lt;h:body&gt;
+ &lt;h:p&gt;I damaged my car recently in my garage.&lt;/h:p&gt;
+ &lt;h:p&gt;My Client ID is &lt;nic:client-id&gt;2027&lt;/nic:client-id&gt;&lt;/h:p&gt;
+&lt;/h:body&gt;
+&lt;/h:html&gt;,
+xdmp:default-permissions(),(xdmp:default-collections(),"mynamedgraph"))</query><query name="download" focus="false" active="false" mode="sparql">SELECT  distinct ?jc ?fullname ?nicclientid ?nkbcustomerid ?nkbaccountsortcode ?nkbaccountnumber ?nkbaccountbalance WHERE { 
+  ?jc a &lt;http://www.ourcompany.com/ontology/JointCustomer&gt; . 
+  ?jc &lt;http://www.ourcompany.com/ontology/NationalKensingtonBank/CUSTOMER&gt; ?nkbcustomer . 
+  ?jc &lt;http://www.ourcompany.com/ontology/NewInsuranceCo/CLIENT&gt; ?nicclient . 
+  ?jc &lt;http://www.ourcompany.com/ontology/JointCustomer/name&gt; ?fullname . 
+  ?nicclient &lt;http://marklogic.com/semantics/ontology/mentioned_in&gt; ?docuri . 
+  FILTER (?docuri IN ( &lt;/docs/7.html&gt;,&lt;/docs/1.html&gt;,&lt;/docs/2.html&gt;,&lt;/docs/3.html&gt;,&lt;/docs/5.html&gt;,&lt;/docs/6.html&gt;)) . 
+  ?nicclient &lt;http://marklogic.com/rdb2rdf/NewInsuranceCo/CLIENT#CLIENT_ID&gt; ?nicclientid . 
+  ?nkbcustomer &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#ref-ACCOUNT_ID&gt; ?nkbaccount . 
+  ?nkbcustomer &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/CUSTOMER#CUSTOMER_ID&gt; ?nkbcustomerid . 
+  ?nkbaccount &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#BALANCE&gt; ?nkbaccountbalance . 
+  ?nkbaccount &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#SORT-CODE&gt; ?nkbaccountsortcode . 
+  ?nkbaccount &lt;http://marklogic.com/rdb2rdf/NationalKensingtonBank/ACCOUNT#ACCOUNT-NUMBER&gt; ?nkbaccountnumber . 
+}</query></workspace></export>
