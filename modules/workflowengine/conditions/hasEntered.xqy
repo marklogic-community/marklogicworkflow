@@ -13,7 +13,7 @@ declare variable $cpf:options as element() external;
 
 let $result := fn:empty(xdmp:document-properties($cpf:document-uri)/prop:properties/wf:currentStep/wf:step-status)
 return (
-   cpf:log( fn:concat("MarkLogic Workflow hasEntered result=", fn:string($result), " for ", $cpf:document-uri), "finest" ),
+   xdmp:log( fn:concat("MarkLogic Workflow hasEntered result=", fn:string($result), " for ", $cpf:document-uri) ),
    $result
 )
 

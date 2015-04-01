@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://marklogic.com/workflow">
+  <bpmn2:resource id="Resource_1" name="admin"/>
+  <bpmn2:message id="Message_2" name="RejectedEMail"/>
+  <bpmn2:message id="Message_3" name="ApprovedEmail"/>
+  <bpmn2:message id="Message_4" name="ReviewedDocument"/>
+  <bpmn2:message id="Message_5" name="ReviewedDocument"/>
+  <bpmn2:interface id="Interface_1" implementationRef="EmailInterface" name="EmailInterface">
+    <bpmn2:operation id="Operation_1" implementationRef="SendEmail" name="Send Email"/>
+  </bpmn2:interface>
+  <bpmn2:interface id="Interface_2" implementationRef="MarkLogic" name="MarkLogic">
+    <bpmn2:operation id="_Operation_2" implementationRef="LaunchAlert" name="LaunchAlert"/>
+  </bpmn2:interface>
+  <bpmn2:process id="021-initiating-attachment" name="Document Approval Example" isExecutable="true" processType="Public">
+    <bpmn2:ioSpecification id="InputOutputSpecification_1"/>
+    <bpmn2:startEvent id="StartEvent_1">
+      <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
+      <bpmn2:dataOutput id="DataOutput_3" name="Message_3_Output"/>
+      <bpmn2:dataOutputAssociation id="DataOutputAssociation_2">
+        <bpmn2:sourceRef>DataOutput_3</bpmn2:sourceRef>
+      </bpmn2:dataOutputAssociation>
+      <bpmn2:outputSet id="OutputSet_6" name="Output Set 6">
+        <bpmn2:dataOutputRefs>DataOutput_3</bpmn2:dataOutputRefs>
+      </bpmn2:outputSet>
+      <bpmn2:messageEventDefinition id="MessageEventDefinition_3" messageRef="Message_5">
+        <bpmn2:operationRef>_Operation_2</bpmn2:operationRef>
+      </bpmn2:messageEventDefinition>
+    </bpmn2:startEvent>
+    <bpmn2:task id="Task_1" name="Get Document Collections">
+      <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:sequenceFlow id="SequenceFlow_2" sourceRef="StartEvent_1" targetRef="Task_1"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_3" sourceRef="Task_1" targetRef="ExclusiveGateway_1"/>
+    <bpmn2:endEvent id="EndEvent_2" name="Already Approved or Rejected">
+      <bpmn2:incoming>SequenceFlow_5</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:exclusiveGateway id="ExclusiveGateway_1" name="Is Unapproved" gatewayDirection="Diverging">
+      <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_4</bpmn2:outgoing>
+      <bpmn2:outgoing>SequenceFlow_5</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:sequenceFlow id="SequenceFlow_4" name="Not yet checked" sourceRef="ExclusiveGateway_1" targetRef="UserTask_1">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_7" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/collections ne (&quot;Approved&quot;,&quot;Rejected&quot;)</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="SequenceFlow_5" name="Approved or Rejected" sourceRef="ExclusiveGateway_1" targetRef="EndEvent_2">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_6" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/collections eq (&quot;Approved&quot;,&quot;Rejected&quot;)</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sendTask id="SendTask_1" name="Ask for resubmission" implementation="##unspecified" messageRef="Message_2" operationRef="Operation_1">
+      <bpmn2:incoming>SequenceFlow_6</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_13</bpmn2:outgoing>
+    </bpmn2:sendTask>
+    <bpmn2:task id="Task_3" name="Set Collection to Approved">
+      <bpmn2:incoming>SequenceFlow_10</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_11</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_2" name="Set Collection to Rejected">
+      <bpmn2:incoming>SequenceFlow_9</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_6</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:sequenceFlow id="SequenceFlow_6" sourceRef="Task_2" targetRef="SendTask_1"/>
+    <bpmn2:sendTask id="SendTask_2" name="Inform of approval" implementation="##unspecified" operationRef="Operation_1">
+      <bpmn2:incoming>SequenceFlow_11</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_12</bpmn2:outgoing>
+      <bpmn2:ioSpecification id="InputOutputSpecification_17">
+        <bpmn2:inputSet id="InputSet_2" name="Input Set 2"/>
+        <bpmn2:outputSet id="OutputSet_3" name="Output Set 3"/>
+      </bpmn2:ioSpecification>
+    </bpmn2:sendTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_11" sourceRef="Task_3" targetRef="SendTask_2"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_12" sourceRef="SendTask_2" targetRef="EndEvent_1"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_13" sourceRef="SendTask_1" targetRef="EndEvent_1"/>
+    <bpmn2:endEvent id="EndEvent_1" name="Completed Process">
+      <bpmn2:incoming>SequenceFlow_12</bpmn2:incoming>
+      <bpmn2:incoming>SequenceFlow_13</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:userTask id="UserTask_1" name="Approve or Reject">
+      <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_8</bpmn2:outgoing>
+      <bpmn2:resourceRole id="ResourceRole_1" name="Assignee">
+        <bpmn2:resourceRef>Resource_1</bpmn2:resourceRef>
+      </bpmn2:resourceRole>
+    </bpmn2:userTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_8" sourceRef="UserTask_1" targetRef="ExclusiveGateway_2"/>
+    <bpmn2:exclusiveGateway id="ExclusiveGateway_2" name="Approved or Rejected" gatewayDirection="Diverging">
+      <bpmn2:incoming>SequenceFlow_8</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_9</bpmn2:outgoing>
+      <bpmn2:outgoing>SequenceFlow_10</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:sequenceFlow id="SequenceFlow_9" name="Rejected" sourceRef="ExclusiveGateway_2" targetRef="Task_2">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_8" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/wf:action eq &quot;Rejected&quot;</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="SequenceFlow_10" name="Approved" sourceRef="ExclusiveGateway_2" targetRef="Task_3">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="FormalExpression_9" language="http://www.w3.org/1999/XPath">/wf:process/wf:data/wf:action eq &quot;Approved&quot;</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:textAnnotation id="TextAnnotation_2">
+      <bpmn2:text>This check is necessary because later on in this Workflow we change the document's collection. This could inadvertantly trigger a new instance of this Workflow based on the document updated event in the CPF Domain. We use Collections to ensure we don't run approval multiple times if already approved or rejected. NB It is assumed a resubmission sets the collection to 'Resubmission'.</bpmn2:text>
+    </bpmn2:textAnnotation>
+    <bpmn2:association id="Association_2" sourceRef="TextAnnotation_2" targetRef="ExclusiveGateway_1"/>
+    <bpmn2:textAnnotation id="TextAnnotation_3">
+      <bpmn2:text>Start event contains a Message definition for a MarkLogic LaunchAlert Operation. This associates an Initiating Attachment with a named attachment field in this process, and launches the process. Internally this is actually an alert configured to create a process data document, followed by a Domain to start the process based on this process data document.</bpmn2:text>
+    </bpmn2:textAnnotation>
+    <bpmn2:association id="Association_3" sourceRef="TextAnnotation_3" targetRef="StartEvent_1"/>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1" name="Document Approval Example">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="021-initiating-attachment">
+      <bpmndi:BPMNShape id="BPMNShape_2" bpmnElement="EndEvent_1">
+        <dc:Bounds height="36.0" width="36.0" x="1125.0" y="240.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1" bpmnElement="StartEvent_1">
+        <dc:Bounds height="36.0" width="36.0" x="120.0" y="240.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_1" bpmnElement="Task_1">
+        <dc:Bounds height="50.0" width="110.0" x="240.0" y="233.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_ExclusiveGateway_1" bpmnElement="ExclusiveGateway_1" isMarkerVisible="true">
+        <dc:Bounds height="50.0" width="50.0" x="395.0" y="233.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_EndEvent_1" bpmnElement="EndEvent_2">
+        <dc:Bounds height="36.0" width="36.0" x="402.0" y="395.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_SendTask_1" bpmnElement="SendTask_1">
+        <dc:Bounds height="50.0" width="110.0" x="980.0" y="184.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_3" bpmnElement="Task_3">
+        <dc:Bounds height="50.0" width="110.0" x="810.0" y="282.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_2" bpmnElement="Task_2">
+        <dc:Bounds height="50.0" width="110.0" x="810.0" y="184.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_ExclusiveGateway_2" bpmnElement="ExclusiveGateway_2" isMarkerVisible="true">
+        <dc:Bounds height="50.0" width="50.0" x="701.0" y="233.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_SendTask_2" bpmnElement="SendTask_2">
+        <dc:Bounds height="50.0" width="110.0" x="980.0" y="282.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_TextAnnotation_2" bpmnElement="TextAnnotation_2">
+        <dc:Bounds height="100.0" width="261.0" x="290.0" y="70.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_UserTask_1" bpmnElement="UserTask_1">
+        <dc:Bounds height="50.0" width="110.0" x="540.0" y="233.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_TextAnnotation_3" bpmnElement="TextAnnotation_3">
+        <dc:Bounds height="100.0" width="271.0" x="0.0" y="320.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_2" bpmnElement="SequenceFlow_2" sourceElement="BPMNShape_1" targetElement="BPMNShape_Task_1">
+        <di:waypoint xsi:type="dc:Point" x="156.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="193.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="193.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="240.0" y="258.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_3" bpmnElement="SequenceFlow_3" sourceElement="BPMNShape_Task_1" targetElement="BPMNShape_ExclusiveGateway_1">
+        <di:waypoint xsi:type="dc:Point" x="350.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="370.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="370.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="395.0" y="258.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_4" bpmnElement="SequenceFlow_4" sourceElement="BPMNShape_ExclusiveGateway_1" targetElement="BPMNShape_UserTask_1">
+        <di:waypoint xsi:type="dc:Point" x="446.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="488.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="488.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="540.0" y="258.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_5" bpmnElement="SequenceFlow_5" sourceElement="BPMNShape_ExclusiveGateway_1" targetElement="BPMNShape_EndEvent_1">
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="284.0"/>
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="333.0"/>
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="333.0"/>
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="395.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_6" bpmnElement="SequenceFlow_6" sourceElement="BPMNShape_Task_2" targetElement="BPMNShape_SendTask_1">
+        <di:waypoint xsi:type="dc:Point" x="920.0" y="209.0"/>
+        <di:waypoint xsi:type="dc:Point" x="947.0" y="209.0"/>
+        <di:waypoint xsi:type="dc:Point" x="947.0" y="209.0"/>
+        <di:waypoint xsi:type="dc:Point" x="980.0" y="209.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_8" bpmnElement="SequenceFlow_8" sourceElement="BPMNShape_UserTask_1" targetElement="BPMNShape_ExclusiveGateway_2">
+        <di:waypoint xsi:type="dc:Point" x="650.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="672.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="672.0" y="258.0"/>
+        <di:waypoint xsi:type="dc:Point" x="701.0" y="258.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_9" bpmnElement="SequenceFlow_9" sourceElement="BPMNShape_ExclusiveGateway_2" targetElement="BPMNShape_Task_2">
+        <di:waypoint xsi:type="dc:Point" x="726.0" y="233.0"/>
+        <di:waypoint xsi:type="dc:Point" x="726.0" y="209.0"/>
+        <di:waypoint xsi:type="dc:Point" x="810.0" y="209.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_10" bpmnElement="SequenceFlow_10" sourceElement="BPMNShape_ExclusiveGateway_2" targetElement="BPMNShape_Task_3">
+        <di:waypoint xsi:type="dc:Point" x="726.0" y="284.0"/>
+        <di:waypoint xsi:type="dc:Point" x="726.0" y="307.0"/>
+        <di:waypoint xsi:type="dc:Point" x="810.0" y="307.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_11" bpmnElement="SequenceFlow_11" sourceElement="BPMNShape_Task_3" targetElement="BPMNShape_SendTask_2">
+        <di:waypoint xsi:type="dc:Point" x="920.0" y="307.0"/>
+        <di:waypoint xsi:type="dc:Point" x="947.0" y="307.0"/>
+        <di:waypoint xsi:type="dc:Point" x="947.0" y="307.0"/>
+        <di:waypoint xsi:type="dc:Point" x="980.0" y="307.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_12" bpmnElement="SequenceFlow_12" sourceElement="BPMNShape_SendTask_2" targetElement="BPMNShape_2">
+        <di:waypoint xsi:type="dc:Point" x="1090.0" y="307.0"/>
+        <di:waypoint xsi:type="dc:Point" x="1143.0" y="307.0"/>
+        <di:waypoint xsi:type="dc:Point" x="1143.0" y="276.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_13" bpmnElement="SequenceFlow_13" sourceElement="BPMNShape_SendTask_1" targetElement="BPMNShape_2">
+        <di:waypoint xsi:type="dc:Point" x="1090.0" y="209.0"/>
+        <di:waypoint xsi:type="dc:Point" x="1143.0" y="209.0"/>
+        <di:waypoint xsi:type="dc:Point" x="1143.0" y="240.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Association_2" bpmnElement="Association_2" sourceElement="BPMNShape_TextAnnotation_2" targetElement="BPMNShape_ExclusiveGateway_1">
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="170.0"/>
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="198.0"/>
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="198.0"/>
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="233.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Association_3" bpmnElement="Association_3" sourceElement="BPMNShape_TextAnnotation_3" targetElement="BPMNShape_1">
+        <di:waypoint xsi:type="dc:Point" x="135.0" y="320.0"/>
+        <di:waypoint xsi:type="dc:Point" x="135.0" y="301.0"/>
+        <di:waypoint xsi:type="dc:Point" x="138.0" y="301.0"/>
+        <di:waypoint xsi:type="dc:Point" x="138.0" y="276.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

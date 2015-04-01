@@ -29,12 +29,15 @@ be transitioned. In Workflow an out of CPF action may need to complete a state. 
 that a CPF action (genericComplete.xqy) can move the state onwards. This CANNOT be done outside of a CPF action (despite
   what the MarkLogic documentation website says).
 
-In order to do this an element (/prop:properties/wf:currentStep/wf:step-status) is initially set to ENTERED, then when
-the set up action (E.g. add to a queue) completes, this is set to IN PROGRESS. When the out of sequence action (user task,
-  web service call) wants the state to complete it sets this to COMPLETE. CPF then in turn runs the isComplete.xqy
-condition, which returns true, running the genericComplete.xqy action, which calls wfu:complete.
+In order to do this :-
+- In your initiating CPF action (E.g. userTask.xqy) set an element (/prop:properties/wf:currentStep/wf:step-status) to ENTERED
+- Then something out of process happens, setting just this property to either IN PROGRESS, then eventually COMPLETE
+- The restart.xqy status change action fires, spots COMPLETE, and forces CPF to the state specified in prop:properties/wf:currentStep/wf:state
+- This also calls wfu:complete, which deletes prop:properties/wf:currentStep
+- CPF then transitions to the new state, which is where you should have an action to run any cleanup for your out of process activity
+- Also, you must call the genericComplete.xqy action, which in turn calls wfu:complete, moving on to the success state specified
 
-NEVER call wfu:complete or wfu:completeById outside of a CPF action.
+NEVER call wfu:complete or wfu:completeById outside of a CPF action - only wfu:finallyComplete (as done in process POST rest api call)
 
 ## Notes on the CPF configuration of custom steps
 

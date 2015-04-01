@@ -36,6 +36,7 @@ try {
       <wf:step-type>userTask</wf:step-type>
       <wf:step-status>ENTERED</wf:step-status>
     </wf:currentStep>)
+    ,cpf:success($cpf:document-uri,$cpf:transition,())
   )
   (: WARNING the above currentStep properties are the MINIMUM required of all late-completing process steps :)
   (: Note the state transition is a full path as a string, so in the WF namespace, not the pipeline namespace :)

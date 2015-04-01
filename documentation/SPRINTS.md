@@ -16,6 +16,7 @@ This PoC development will occur in small sprints until a useful PoC system is av
  - SLA timer and routing on failure
  - Email notification
  - Assigning tasks to MarkLogic roles
+ - Assigning Role dynamically via XQuery expression
 - UK-D-I
 
 ## Theoretical requirements
@@ -34,7 +35,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 ## Sprint 1 - Basic workflow
 
 - DONE BPMN2: generic blank task
-- TEST BPMN2: user task -> aka human step
+- DONE BPMN2: user task -> aka human step
 - DONE BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
 - DONE Evaluation: Support for /xpath/path to process model data
 - DONE Evaluation: Support for fn:not(fn:empty(/xpath/evaluation)) style boolean evaluation for true/false conditions in BPMN2 model
@@ -46,7 +47,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
  - Create import step for this BPMN2 method
  - Create CPF step to represent this
 - TEST Evaluation: Support for (/some/path/one,/some/path/two)[1] style evaluation for set task
-- TEST Tools: Process Data model XSD (for modeler import)
+- DONE Tools: Process Data model XSD (for modeler import)
 - IN PROGRESS Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
 - DEFERRED UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
 - TEST Start process using an Alert (content subscription)
@@ -61,10 +62,10 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
   - DONE GET fetch the current state of a business process
  - TEST processsubscription.xqy
   - TEST PUT create a process subscription (alert) to create a new process instance (creating a content doc creates a process doc with an initiating attachment)
- - TEST processinbox.xqy
- - TEST processqueue.xqy
+ - DONE processinbox.xqy
+ - DONE processqueue.xqy
  - TEST support for roles (processroleinbox.xqy) on user tasks (For BD)
-- TEST Test scripts for automating install, create, get, update, complete via REST API
+- DONE Test scripts for automating install, create, get, update, complete via REST API
 - DONE Bug: Change process model URI folder to include major and minor - else doing process doc update may run new pipeline instead of old one
 - DONE Bug: Multiple wf:status properties on in process process, complete and running
 - BPMN2 specification test process models modified and tested to MarkLogic executable standard

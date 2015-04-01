@@ -3,6 +3,7 @@ xquery version "1.0-ml";
 module namespace m="http://marklogic.com/workflow-actions";
 
 import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 
 declare namespace prop = "http://marklogic.com/xdmp/property";
 declare namespace wf="http://marklogic.com/workflow";
@@ -60,16 +61,18 @@ declare function complete-generic($processId as xs:string) as empty-sequence() {
   let $_ := xdmp:log("In wfa:complete-generic: processId: "||$processId)
   let $props := wfu:getProperties($processId)
   let $_ := xdmp:log($props)
-  let $next := $props/wf:currentStep/wf:state/text()
+  (:
+  let $next := $props/prop:properties/wf:currentStep/wf:state/text()  (: WHERE SHOULD THIS BE FROM INSTEAD ? :)
   let $_ := xdmp:log($next)
-  let $transition := $props/wf:currentStep/wf:state-transition/text()
-  let $_ := xdmp:log($transition)
-  let $startTime := xs:dateTime($props/wf:currentStep/wf:startTime)
-  let $_ := xdmp:log($startTime)
+  :)
+  let $transition := $props/cpf:state/text()
+  let $_ := xdmp:log("wfa:complete-generic: transition: " || $transition)
+(:)  let $startTime := xs:dateTime($props/prop:properties/wf:currentStep/wf:startTime):)
+  (:let $_ := xdmp:log($startTime):)
   (:let $update := xdmp:document-remove-properties(wfu:getProcessUri($processId),xs:QName("wf:currentStep")) :)
   (:let $update := xdmp:node-delete($props/wf:currentStep)
   let $_ := xdmp:log($update) :)
   return
     (: wfu:completeById($processId,$transition,xs:anyURI($next),$startTime) :)
-    wfu:inProgress($processId,$transition)
+    wfu:finallyComplete($processId,$transition)
 };

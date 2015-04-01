@@ -151,7 +151,11 @@ declare function m:complete($processUri as xs:string,$transition as node(),$stat
   let $_ := xdmp:log($startTime)
   let $_ := xdmp:log("  transition")
   let $_ := xdmp:log($transition)
-  let $_ := xdmp:node-replace(xdmp:document-properties($processUri)/prop:properties/wf:status,<wf:status>COMPLETE</wf:status>)
+
+  (: clean up BPMN2 activity step properties :)
+  let $cs := xdmp:document-properties($processUri)/prop:properties/wf:currentStep
+  let $_ := if (fn:not(fn:empty($cs))) then xdmp:node-delete($cs) else ()
+
   let $_ := m:metric($processUri,$transition/p:state/text(),$startTime,fn:current-dateTime(),fn:true())
   (: Add audit event :)
   let $_ := m:audit($processUri,$transition/p:state/text(),"ProcessEngine","Completed step",())
@@ -171,13 +175,28 @@ declare function m:completeById($processId as xs:string,$transition as xs:string
 };
 
 (:
- : Can be called from out of sequence (non CPF) modules - forces a CPF re-evaluation, then complete, in conjunction with the genericComplete.xqy action
+ : Can be called from out of sequence (non CPF) modules - forces a CPF re-evaluation, then complete, in conjunction with the restart.xqy action
  :)
 declare function m:finallyComplete($processId as xs:string,$transition as xs:string) as empty-sequence() {
   let $processUri := m:getProcessUri($processId)
-  let $_ := m:audit($processUri,$transition/p:state/text(),"ProcessEngine","Marking as Complete",())
+  let $props := xdmp:document-properties($processUri)/prop:properties
+  let $_ := m:audit($processUri,$transition,"ProcessEngine","Marking as Complete",())
   return
-    xdmp:node-replace(xdmp:document-properties($processUri)/prop:properties/wf:currentStep/wf:step-status,<wf:step-status>COMPLETE</wf:step-status>)
+    (
+    xdmp:node-replace($props/wf:currentStep/wf:step-status,<wf:step-status>COMPLETE</wf:step-status>)
+    (:,
+    xdmp:node-replace($props/cpf:status,<cpf:processing-status>active</cpf:processing-status>)
+    :)
+    (:
+    ),
+    xdmp:node-replace($props/cpf:status,<cpf:state>{$props/wf:currentStep/wf:state/text()}</cpf:state>)
+    :)
+    (:
+    ,
+    (: god awful hack to test CPF updated status change handling :)
+    xdmp:node-insert-after(fn:doc($processUri)/wf:process/wf:data,<tag>You're it</tag>)
+    :)
+    )
 };
 
 (:
@@ -186,7 +205,7 @@ declare function m:finallyComplete($processId as xs:string,$transition as xs:str
  :)
 declare function m:inProgress($processId as xs:string,$transition as xs:string) as empty-sequence() {
   let $processUri := m:getProcessUri($processId)
-  let $_ := m:audit($processUri,$transition/p:state/text(),"ProcessEngine","In Progress",())
+  let $_ := m:audit($processUri,$transition,"ProcessEngine","In Progress",())
   return
     xdmp:node-replace(xdmp:document-properties($processUri)/prop:properties/wf:currentStep/wf:step-status,<wf:step-status>IN PROGRESS</wf:step-status>)
 };

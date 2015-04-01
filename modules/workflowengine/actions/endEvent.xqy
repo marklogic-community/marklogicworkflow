@@ -37,6 +37,8 @@ try {
       )
     )
     ,
+    xdmp:node-replace(xdmp:document-properties($cpf:document-uri)/prop:properties/wf:status,<wf:status>COMPLETE</wf:status>)
+    ,
     wfu:complete( $cpf:document-uri, $cpf:transition, (), $st )
   )
 } catch ($e) {

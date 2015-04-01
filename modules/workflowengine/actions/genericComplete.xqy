@@ -11,12 +11,14 @@ declare variable $cpf:transition as node() external;
 declare variable $cpf:options as element() external;
 
 try {
+  let $st := fn:current-dateTime()
+  let $_ := xdmp:log("MarkLogic Workflow generic complete CPF action called for: "||$cpf:document-uri)
   let $props := xdmp:document-properties($cpf:document-uri)/prop:properties
   let $_ := xdmp:log($props)
-  let $next := $cpf:options/wf:state/text()
-  let $_ := xdmp:log($next)
-  let $startTime := xs:dateTime($props/wf:currentStep/wf:startTime)
-  return wfu:complete( $cpf:document-uri, $cpf:transition, $next, $startTime )
+
+  (: Allow state transition to happen :)
+
+  return wfu:complete( $cpf:document-uri, $cpf:transition, (), $st )
 } catch ($e) {
   wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

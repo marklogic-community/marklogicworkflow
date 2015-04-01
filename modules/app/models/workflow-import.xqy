@@ -435,7 +435,17 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
   return
     p:create($pname,$pname,
       p:action("/MarkLogic/cpf/actions/success-action.xqy",(),()),
-      $failureAction,(),
+      $failureAction,
+      (
+        p:status-transition("updated","Restart process on external action",() (: success :), $failureState,500,
+          p:action("/workflowengine/actions/restart.xqy",
+            "Check for restarting process.",() (: options :)
+          )
+          ,
+          () (: rules :)
+        )
+      ) (: status transitions :)
+      ,
       (
 
           (: create entry CPF action :)
@@ -587,10 +597,13 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
                       {
                         if (fn:not(fn:empty($role))) then <wf:role>{$role}</wf:role> else ()
                       }
+                      <wf:state>{xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)||"__complete")}</wf:state>
                     </p:options>
                   ) (: p action :)
                   ,"Apply set up user task action on entry"
                 ) (: p:execute :)
+
+                (:
                 ,
                 p:execute(
                   p:condition("/workflowengine/conditions/isComplete.xqy","Check if complete",())
@@ -603,10 +616,37 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
                   ),
                   "Apply default complete action"
                 ) (: p execute :)
+                :)
 
 
               ) (: execute set :)
             ) (: state transition :)
+            ,
+            (:
+            p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)||"__inprogress"),
+              "",(),
+              $failureState,(),
+              () (: empty default action :)
+              ,
+              (
+
+
+              ) (: execute set :)
+            )
+            ,
+            :)
+            p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)||"__complete"),
+              "",xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef)),
+              $failureState,(),
+              p:action("/workflowengine/actions/genericComplete.xqy",
+                "User completion occurred: "||xs:string($state/@name),() (: options :)
+              ) (: empty default action :)
+              ,
+              (
+
+
+              ) (: execute set :)
+            )
           ) (: state transition set :)
 
 
