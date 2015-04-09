@@ -42,18 +42,26 @@ chances of your issue being dealt with quickly:
 
 ### Submitting a Pull Request
 
+We use [GitFlow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) to manage the
+progress so multiple dev teams can work at the same time. Below is a description.
+
 #### Fork MarkLogic Workflow
 
-Fork the project [on GitHub](https://github.com/adamfowleruk/marklogicworkflow/fork) and clone
-your copy.
+First ask Adam Fowler for access to the project, passing him your GitHub account name. Then:-
 
 ```sh
-$ git clone git@github.com:adamfowleruk/marklogicworkflow.git
+$ git clone ssh://user@github.com/adamfowleruk/marklogicworkflow.git
 $ cd marklogicworkflow
-$ git remote add upstream git://github.com/adamfowleruk/marklogicworkflow.git
+$ git checkout -b develop origin/develop
 ```
 
-All bug fixes and new features go into the dev branch.
+The following rules apply:-
+- master is used only for releases
+- A develop branch is used to merge in changes between releases
+- Feature branches (feature-ISSUEID) branch off of the develop branch
+- Release branches are forked off of develop and called release-sprint-004, testing and builds are done, then merged with master AND then develop
+ - Each release is tagged as v1 or v2 etc to match the sprint number until we catch up with the current MarkLogic release number, then we'll adopt v8-2-008 (MarkLogic V8.0-2, sprint 008)
+- Hotfix branches are taken off of master, fixed, then committed to master AND then develop
 
 We ask that you open an issue in the [issue tracker][] and get agreement from
 at least one of the project maintainers before you start coding.
@@ -62,16 +70,22 @@ Nothing is more frustrating than seeing your hard work go to waste because
 your vision does not align with that of a project maintainer.
 
 
-#### Create a branch for your changes
+#### Create a branch for your feature
 
-Okay, so you have decided to fix something. Create a feature branch
-and start hacking:
+Okay, so you have decided to add something. Create an issue on GitHub if you haven't already, as you'll need the ID.
+Now create a feature branch and start hacking:
 
 ```sh
-$ git checkout -b my-feature-branch -t origin/dev
+$ git checkout -b feature-ISSUEID develop
 ```
 
-We recommend you use the [GitFlow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) method to create and maintain branches.
+Now develop as normal:-
+
+```sh
+$ git status
+$ git add myfile
+$ git commit
+```
 
 #### Formatting code
 
@@ -79,52 +93,7 @@ We use [.editorconfig][] to configure our editors for proper code formatting. If
 use a tool that supports editorconfig be sure to configure your editor to use the settings
 equivalent to our .editorconfig file.
 
-#### Commit your changes
-
-Make sure git knows your name and email address:
-
-```sh
-$ git config --global user.name "J. Random User"
-$ git config --global user.email "j.random.user@example.com"
-```
-
-Writing good commit logs is important. A commit log should describe what
-changed and why. Follow these guidelines when writing one:
-
-1. The first line should be 50 characters or less and contain a short
-   description of the change including the Issue number prefixed by a hash (#).
-2. Keep the second line blank.
-3. Wrap all other lines at 72 columns.
-
-A good commit log looks like this:
-
-```
-Fixing Issue #123: make the whatchamajigger work in MarkLogic 8
-
-Body of commit message is a few lines of text, explaining things
-in more detail, possibly giving some background about the issue
-being fixed, etc etc.
-
-The body of the commit message can be several paragraphs, and
-please do proper word-wrap and keep columns shorter than about
-72 characters or so. That way `git log` will show things
-nicely even when it is indented.
-```
-
-The header line should be meaningful; it is what other people see when they
-run `git shortlog` or `git log --oneline`.
-
-#### Rebase your repo
-
-Use `git rebase` (not `git merge`) to sync your work from time to time.
-
-```sh
-$ git fetch upstream
-$ git rebase upstream/dev
-```
-
-
-#### Test your code
+#### Test your code (pre-release mainly)
 
 We are working hard to improve MarkLogic Workflow's testing. If you add new actions
 in process models then please write unit tests in the shtests directory.
@@ -137,53 +106,26 @@ $ ./all.sh
 
 Make sure that all tests pass. Please, do not submit patches that fail.
 
-#### Push your changes
+
+#### Commit your complete feature
+
+When the feature is complete and ready to be integrated back in to the develop branch:-
 
 ```sh
-$ git push origin my-feature-branch
+$ git commit -m "Fixes #ISSUEID"
+$ git pull origin develop
+$ git checkout develop
+$ git merge feature-ISSUEID
+$ git push
+$ git branch -d feature-ISSUEID
 ```
 
-#### Submit the pull request
+Only do the last command if the others complete successfully. You may have to merge conflicts.
 
-Go to https://github.com/adamfowleruk/marklogicworkflow and select your feature branch. Click
-the 'Pull Request' button and fill out the form.
+You're now done! Adding the 'Fixes #ISSUEID' comment to the last commit automatically closes the issue with a reference
+to your code.
 
-Pull requests are usually reviewed within a few days. If you get comments
-that need to be to addressed, apply your changes in a separate commit and push that to your
-feature branch. Post a comment in the pull request afterwards; GitHub does
-not send out notifications when you add commits to existing pull requests.
-
-That's it! Thank you for your contribution!
-
-
-#### After your pull request is merged
-
-After your pull request is merged, you can safely delete your branch and pull the changes
-from the main (upstream) repository:
-
-* Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:
-
-    ```shell
-    git push origin --delete my-feature-branch
-    ```
-
-* Check out the dev branch:
-
-    ```shell
-    git checkout dev -f
-    ```
-
-* Delete the local branch:
-
-    ```shell
-    git branch -D my-feature-branch
-    ```
-
-* Update your dev with the latest upstream version:
-
-    ```shell
-    git pull --ff upstream dev
-    ```
+### Further information
 
 [issue tracker]: https://github.com/adamfowleruk/marklogicworkflow/issues
 [.editorconfig]: http://editorconfig.org/
