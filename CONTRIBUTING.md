@@ -87,6 +87,14 @@ $ git add myfile
 $ git commit
 ```
 
+To share the branch so others can see it (although advised not to work on it) do this:-
+
+```sh
+$ git push --set-upstream origin feature-ISSUEID
+```
+
+Now your feature branch [will be visible on GitHub](https://github.com/adamfowleruk/marklogicworkflow/branches).
+
 #### Formatting code
 
 We use [.editorconfig][] to configure our editors for proper code formatting. If you don't
