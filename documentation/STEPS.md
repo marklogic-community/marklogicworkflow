@@ -77,6 +77,42 @@ Finally, configure your route criteria
 
 See *XQuery Expressions* later in this document for details on expressions, and examples.
 
+## Send Task
+
+This task can send SOAP, HTTP-REST and Email messages (amongst others). It is currently in development, with smtp
+email sending support scheduled first, and other features being added as needed later.
+
+See the CPF action sendTask.xqy for the implementation.
+
+First, create a Send Task:-
+- Drop a Send Task on to the process diagram
+- Click on Propeties -> Send task
+
+Note that you have to assign an operation and a message. These are actually created at the top level of the process diagram.
+
+To create an operation:-
+- Left click on the background of the process diagram
+- In the bottom window, click Properties
+- Click on the Interfaces tab
+- Under 'Interface List', click the plus icon
+- Create an interface with the EXACT name EmailInterface with Implementation set to EXACTLY EmailInterface
+- Add an operation for each individual email template you wish to send (E.g. send rejected, send accepted)
+- You can name these anything you like, be sure to provide a name and an implementation name
+- Set the Out Message to point to an XML Schema definition that consists of your message
+
+TODO Document how the VALUE not SCHEMA for this message is created (read BPMN2 spec and examples).
+
+Now go back and edit the Send Task:-
+- Left click on the send task
+- Click on Propeties
+- Click on the 'Send Task' tab
+- In attributes:-
+ - Set implementation to Unknown
+ - Set Operation to EmailInterface/SendRejected (or whatever you called it)
+ - Message should be automatically selected (RejectedEmail in my example 021-initiating-attachment.bpmn)
+
+Save the process diagram (validates your configuration of the task - no red stars mean it's configured properly).
+
 ## Additional notes
 
 There are some configuration elements that are true across multiple steps. These are documented below.

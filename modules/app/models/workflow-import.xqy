@@ -659,7 +659,7 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
 
           ,
 
-          (: Send email example :)
+          (: Send email example - sendTask.xqy :)
           for $state in $start/b2:sendTask
           let $message := $doc/b2:message[@id = $state/@messageRef]
           let $item := $doc/b2:itemDefinition[@id = $message/@itemRef]
@@ -688,6 +688,24 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
               )
 
           ,
+
+
+
+
+
+
+
+
+          (: DEV ADD YOUR CUSTOM TASK DEFINITION IMPORTS ABOVE HERE!!! BE SURE TO NOT FORGET THE TRAILING COMMA!!! :)
+
+
+
+
+
+
+
+
+
 
           (: *** TODO SPRINT 2: CPF CUSTOM ACTIVITY SUPPORT *** :)
 
