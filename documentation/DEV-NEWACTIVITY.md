@@ -84,22 +84,22 @@ Additional generic
 MarkLogic Specific
 
 - Map variables (to/from process/attachment, support for multiples)
-- Send email (SMTP message?) with optional attachments
-- Attach document
-- Attach search results
-- Attach search
+- DONE Send email (SMTP message?) with optional attachments
+- Sprint-006 - Attach document
+- Sprint-006 - Attach search results
+- Sprint-006 - Attach search
 - Attach collection
 - Attach folder
-- Detach
-- Get document element/attr (XPath)
-- Set document element/attr (XPath)
-- Append child element
-- Get property
-- Set property
-- Invoke CPF pipeline for attachment
+- Sprint-006 - Detach
+- NA done via XPath expression - Get document element/attr (XPath)
+- Sprint-006 - Set document element/attr (XPath)
+- Sprint-006 - Append child element
+- NA Get property
+- NA Set property
+- Sprint-008 - Invoke CPF pipeline for attachment
 - Delete document (and remove from attachment)
 - Insert document (from attachment and content with mime type)
-- Set document security
+- Sprint-006 - Set document security
 - Remove role access
 - Add role access
 - Set role access

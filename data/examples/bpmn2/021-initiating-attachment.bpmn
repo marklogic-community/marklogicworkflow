@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://marklogic.com/workflow">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns1="http://www.example.org/BPMNTestProcessData" id="Definitions_1" targetNamespace="http://marklogic.com/workflow">
+  <bpmn2:import importType="http://www.w3.org/2001/XMLSchema" location="platform:/resource/MarkLogic%20Workflow/data/definitions/BPMNTestProcessData.xsd" namespace="http://www.example.org/BPMNTestProcessData"/>
+  <bpmn2:itemDefinition id="ItemDefinition_1" structureRef="ns1__choiceA"/>
+  <bpmn2:itemDefinition id="_ItemDefinition_6" structureRef="ns1:choiceA"/>
+  <bpmn2:itemDefinition id="_ItemDefinition_7" structureRef="ns1:choiceB"/>
   <bpmn2:resource id="Resource_1" name="admin"/>
-  <bpmn2:message id="Message_2" name="RejectedEMail"/>
+  <bpmn2:message id="Message_2" itemRef="_ItemDefinition_6" name="RejectedEMail"/>
   <bpmn2:message id="Message_3" name="ApprovedEmail"/>
   <bpmn2:message id="Message_4" name="ReviewedDocument"/>
   <bpmn2:message id="Message_5" name="ReviewedDocument"/>
   <bpmn2:interface id="Interface_1" implementationRef="EmailInterface" name="EmailInterface">
-    <bpmn2:operation id="Operation_1" implementationRef="SendEmail" name="Send Email"/>
+    <bpmn2:operation id="Operation_1" implementationRef="SendEmailRejected" name="Send Email Rejected">
+      <bpmn2:outMessageRef>Message_2</bpmn2:outMessageRef>
+    </bpmn2:operation>
+    <bpmn2:operation id="_Operation_3" implementationRef="SendEmailSucceeded" name="Send Email Succeeded">
+      <bpmn2:outMessageRef>Message_3</bpmn2:outMessageRef>
+    </bpmn2:operation>
   </bpmn2:interface>
   <bpmn2:interface id="Interface_2" implementationRef="MarkLogic" name="MarkLogic">
     <bpmn2:operation id="_Operation_2" implementationRef="LaunchAlert" name="LaunchAlert"/>
   </bpmn2:interface>
-  <bpmn2:process id="021-initiating-attachment" name="Document Approval Example" isExecutable="true" processType="Public">
+  <bpmn2:process id="021-initiating-attachment" name="DocumentApprovalExample" isExecutable="true" processType="Public">
     <bpmn2:ioSpecification id="InputOutputSpecification_1"/>
     <bpmn2:startEvent id="StartEvent_1">
       <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
@@ -59,11 +68,14 @@
       <bpmn2:outgoing>SequenceFlow_6</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:sequenceFlow id="SequenceFlow_6" sourceRef="Task_2" targetRef="SendTask_1"/>
-    <bpmn2:sendTask id="SendTask_2" name="Inform of approval" implementation="##unspecified" operationRef="Operation_1">
+    <bpmn2:sendTask id="SendTask_2" name="Inform of approval" implementation="##unspecified" messageRef="Message_3" operationRef="_Operation_3">
       <bpmn2:incoming>SequenceFlow_11</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_12</bpmn2:outgoing>
       <bpmn2:ioSpecification id="InputOutputSpecification_17">
-        <bpmn2:inputSet id="InputSet_2" name="Input Set 2"/>
+        <bpmn2:dataInput id="DataInput_3" name="Data Input 3"/>
+        <bpmn2:inputSet id="InputSet_2" name="Input Set 2">
+          <bpmn2:dataInputRefs>DataInput_3</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
         <bpmn2:outputSet id="OutputSet_3" name="Output Set 3"/>
       </bpmn2:ioSpecification>
     </bpmn2:sendTask>
@@ -102,7 +114,7 @@
     </bpmn2:textAnnotation>
     <bpmn2:association id="Association_3" sourceRef="TextAnnotation_3" targetRef="StartEvent_1"/>
   </bpmn2:process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1" name="Document Approval Example">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1" name="DocumentApprovalExample">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="021-initiating-attachment">
       <bpmndi:BPMNShape id="BPMNShape_2" bpmnElement="EndEvent_1">
         <dc:Bounds height="36.0" width="36.0" x="1125.0" y="240.0"/>

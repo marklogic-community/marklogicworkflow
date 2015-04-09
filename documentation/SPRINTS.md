@@ -45,7 +45,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
  - See if there is an equivalent BPMN2 method - may just be a variable assignment on each step instead
  - Create import step for this BPMN2 method
- - Create CPF step to represent this
+ - Create CPF action to represent this
 - TEST Evaluation: Support for (/some/path/one,/some/path/two)[1] style evaluation for set task
 - DONE Tools: Process Data model XSD (for modeler import)
 - IN PROGRESS Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
@@ -65,6 +65,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
  - DONE processinbox.xqy
  - DONE processqueue.xqy
  - TEST support for roles (processroleinbox.xqy) on user tasks (For BD)
+- TEST BPMN2: send task -> 1 of 2: send Email (Implemented as an example message driven task)
 - DONE Test scripts for automating install, create, get, update, complete via REST API
 - DONE Bug: Change process model URI folder to include major and minor - else doing process doc update may run new pipeline instead of old one
 - DONE Bug: Multiple wf:status properties on in process process, complete and running
@@ -108,7 +109,11 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
   - Call activity
   - Nobel prize process
 
-## Sprint 3 - Event driven
+## Sprint 3 - UK-D-E
+
+- Any requirements from this UK MarkLogic project for D-E and D-F
+
+## Sprint 4 - Event driven
 
 - BPMN2: error event
 - BPMN2: escalation event
@@ -117,14 +122,21 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - BPMN2: event based gateway
 - Update Eclipse Modeler palette
 
-## Sprint 4 - MarkLogic functionality
+## Sprint 5 - Project A
+
+- TBD
+
+## Sprint 6 - MarkLogic functionality
 
 - MarkLogic: Search, results populate attachment array field, configurable limit
 - MarkLogic: Set document element value (XPath)
-- MarkLogic: Get document element value (XPath)
+- NA Done via XPath expression - MarkLogic: Get document element value (XPath)
 
+## Sprint 7 - Project B
 
-## Sprint 5 - CPF modelling
+- TBD
+
+## Sprint 8 - CPF modelling
 
 - MarkLogic specific Activity types for pure CPF processes
  - CPF Action (module, options)
@@ -143,7 +155,7 @@ The following are other common BPMN2 elements that won't be implemented
 - BPMN2: Script task
 - BPMN2: Business rule task -> Requires BRE implementation
 - BPMN2: receive task -> Requires service endpoint implementation
-- BPMN2: send task -> invoke web service as fire and forget
+- BPMN2: send task -> 2 of 2: invoke web service as fire and forget
 - BPMN2: transaction -> commit or cancel transaction
 - BPMN2: gateway -> all can fork or rendezvous processes
 - BPMN2: message event

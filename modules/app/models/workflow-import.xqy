@@ -659,6 +659,36 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
 
           ,
 
+          (: Send email example :)
+          for $state in $start/b2:sendTask
+          let $message := $doc/b2:message[@id = $state/@messageRef]
+          let $item := $doc/b2:itemDefinition[@id = $message/@itemRef]
+          let $structureRef := xs:string($item/@structureRef)
+          let $messageXml := () (: TODO get actual message value, followed by replacement(s) :)
+          let $operation := $doc/b2:interface/b2:operation[@id = $state/@operationRef]
+          let $route := xs:string($state/b2:outgoing[1]) (: TODO support split here? :)
+          let $rc :=
+            if (fn:contains($route,":")) then
+              fn:substring-after($route,":")
+            else
+              $route
+          let $sf := $start/b2:sequenceFlow[./@id = $rc]
+          return
+              p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
+                "",xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($sf/@targetRef)),
+                $failureState,(),
+                p:action("/workflowengine/actions/sendTask.xqy","BPMN2 Send Task: "||xs:string($state/@name),
+                  <options xmlns="/workflowengine/actions/sendTask.xqy">
+                    { (: Message :)
+                      $messageXml
+                      (: TODO distinguish between email message and web service invocation (fire and forget) :)
+                    }
+                  </options>
+                ),()
+              )
+
+          ,
+
           (: *** TODO SPRINT 2: CPF CUSTOM ACTIVITY SUPPORT *** :)
 
           (: *** TODO SPRINT 3: ADVANCED BPMN2 PROCESS ORCHESTRATION ACTIVITY SUPPORT *** :)
