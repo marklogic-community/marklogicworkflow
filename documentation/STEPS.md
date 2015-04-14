@@ -100,7 +100,16 @@ To create an operation:-
 - You can name these anything you like, be sure to provide a name and an implementation name
 - Set the Out Message to point to an XML Schema definition that consists of your message
 
-TODO Document how the VALUE not SCHEMA for this message is created (read BPMN2 spec and examples).
+
+*WARNING: If you type 'RejectedEmail' as the name of the Out Message, then MarkLogic workflow will check the MODULES
+database for a document called /workflowengine/assets/PROCESSNAME/MAJORVERSION/MINORVERSION/RejectedEmail.xml. If this
+document does not exist, it will check in the major version folder, and failing that in the process name folder. This is
+because (unbelievably) BPMN2 does not support data modelling, and such the structure of the message is out of scope of
+the modelling tool. It is possible to add a 'structure' definition in BPMN2 that points to a fixed XML message, BUT this
+is not supported by any modelling tool! Only XML Schema (for the structure of the email, not the template) is supported.*
+
+The format of the outgoing email message (Out Message) can be found in the
+[xdmp:email online docs](http://docs.marklogic.com/xdmp:email).
 
 Now go back and edit the Send Task:-
 - Left click on the send task
@@ -112,6 +121,10 @@ Now go back and edit the Send Task:-
  - Message should be automatically selected (RejectedEmail in my example 021-initiating-attachment.bpmn)
 
 Save the process diagram (validates your configuration of the task - no red stars mean it's configured properly).
+
+For configuring a local mail agent to test this task, see [The CentOS website](http://wiki.centos.org/HowTos/postfix#head-c02f30bf0669d9b47a6c14c114243338b5ea1f27). Don't forget to set an
+alias pointing 'admin' at your local linux machine's logged in user - you can then use Thunderbird to receive email
+from the sample processes.
 
 ## Additional notes
 

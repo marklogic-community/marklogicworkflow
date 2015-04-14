@@ -135,5 +135,5 @@ to your code.
 
 ### Further information
 
-[issue tracker]: https://github.com/adamfowleruk/marklogicworkflow/issues
-[.editorconfig]: http://editorconfig.org/
+- [issue tracker](https://github.com/adamfowleruk/marklogicworkflow/issues)
+- [.editorconfig](http://editorconfig.org/)

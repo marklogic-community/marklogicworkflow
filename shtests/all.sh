@@ -23,6 +23,12 @@ sleep 15
 . ./12-process-read.sh
 
 
+sleep 5
+
+. ./21-processmodel-create.sh
+. ./22-process-create.sh
+. ./23-process-read.sh
+
 
 # . ./x05-processmodel-delete.sh
 

@@ -42,7 +42,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - DONE Evaluation: Support for fn:doc(/process/attachments/attachment[@name="default"]/uri/text())/some/path/to/property style evaluation
 - DONE Evaluation: replace $processData or $wf:process with fn:doc($processUri) everywhere in xpath expression
 - DONE can use fn:current-dateTime - Evaluation: Support for 'now' date time assignment to variable
-- Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
+- DEFERRED Activity: Set process variable activity with multiple from and to (simple XPath evaluation)
  - See if there is an equivalent BPMN2 method - may just be a variable assignment on each step instead
  - Create import step for this BPMN2 method
  - Create CPF action to represent this
@@ -65,7 +65,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
  - DONE processinbox.xqy
  - DONE processqueue.xqy
  - TEST support for roles (processroleinbox.xqy) on user tasks (For BD)
-- TEST BPMN2: send task -> 1 of 2: send Email (Implemented as an example message driven task)
+- DONE BPMN2: send task -> 1 of 2: send Email (Implemented as an example message driven task)
 - DONE Test scripts for automating install, create, get, update, complete via REST API
 - DONE Bug: Change process model URI folder to include major and minor - else doing process doc update may run new pipeline instead of old one
 - DONE Bug: Multiple wf:status properties on in process process, complete and running
@@ -75,6 +75,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
   - Incident Management Account Manager Only
   - Incident Management Process Engine only
 - DONE basic documentation for supported step types and their configuration (STEPS.md)
+- DONE Scripting - change $wf:process/ replacement to $wf:process external variable declaration (much less buggy to implement)
 
 ## Sprint 2 - Process Orchestration
 
@@ -85,7 +86,6 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - BPMN2: call activity (process or global task)
 - BPMN2: parallel gateway -> fork to or synchronise from all flow paths
 - BPMN2: complex gateway -> E.g. 3 of 5 incoming routes required in order to activate gateway
-- CPF: Invoke CPF pipeline
 - BPMN2: service task -> invoke service and process response
 - Update Eclipse Modeler palette
 - Enterprise features
