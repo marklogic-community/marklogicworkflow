@@ -1,0 +1,28 @@
+<em:Message
+ xmlns:em="URN:ietf:params:email-xml:"
+ xmlns:rf="URN:ietf:params:rfc822:">
+  <rf:subject>Test Email</rf:subject>
+  <rf:from>
+    <em:Address>
+      <em:name>MarkLogic Admin</em:name>
+      <em:adrs>admin@example.com</em:adrs>
+    </em:Address>
+  </rf:from>
+  <rf:to>
+    <em:Address>
+      <em:name>Admin</em:name>
+      <em:adrs>admin@example.com</em:adrs>
+    </em:Address>
+  </rf:to>
+  <em:content>
+    <html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+        <title>Test email message</title>
+      </head>
+      <body>
+        <h1>Email message</h1>
+        <p>Your document {xs:string($wf:process/wf:attachments/wf:attachment[1]/@uri)} was attached.</p>
+      </body>
+    </html>
+  </em:content>
+</em:Message>
