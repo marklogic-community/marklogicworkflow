@@ -3,7 +3,7 @@
    <description name="MarkLogic Workflow GitHub Eclipse Update Site" url="https://github.com/adamfowleruk/marklogicworkflow/raw/master/eclipse/MarkLogicWorkflowUpdateSite">
       MarkLogic Workflow Eclipse BPMN2 Modeler extension plug in. See http://github.com/adamfowleruk/marklogicworkflow for details.
    </description>
-   <feature url="features/MarkLogicWorkflow_1.0.0.201504170009.jar" id="MarkLogicWorkflow" version="1.0.0.201504170009">
+   <feature url="features/MarkLogicWorkflow_1.0.0.201504170037.jar" id="MarkLogicWorkflow" version="1.0.0.201504170037">
       <category name="EclipseBPMN2Modeler"/>
    </feature>
    <category-def name="EclipseBPMN2Modeler" label="Eclipse BPMN2 Modeler"/>

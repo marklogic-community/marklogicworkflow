@@ -228,6 +228,7 @@ public class NewWorkflowProcessWizard extends Wizard implements INewWizard {
 			"  <bpmn2:process processType=\"Public\" isExecutable=\"true\""+ //$NON-NLS-1$
 			" id=\""+processName+"\""+ //$NON-NLS-1$ //$NON-NLS-2$
 			" name=\""+processName+"\""+ //$NON-NLS-1$ //$NON-NLS-2$
+			" packageName=\"MarkLogicWorkflow\""+ //$NON-NLS-1$ //$NON-NLS-2$
 			" >\n"+ //$NON-NLS-1$
 			
 
