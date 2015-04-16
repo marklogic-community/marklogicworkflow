@@ -18,4 +18,4 @@ show.advanced.properties=false
 show.descriptions=true
 show.id.attribute=false
 simplify.lists=true
-target.runtime=org.jboss.runtime.jbpm5
+target.runtime=org.eclipse.bpmn2.modeler.runtime.marklogic.workflow

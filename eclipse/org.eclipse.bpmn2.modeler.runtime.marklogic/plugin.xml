@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+
+
+
+
+	<extension point="org.eclipse.bpmn2.modeler.runtime">
+		<runtime name="%runtime.name" versions="7.0,8.0"
+			id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow"
+			class="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.MarkLogicWorkflowRuntimeExtension"
+			description="%runtime.description">
+		</runtime>
+  <toolPalette
+        id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.Workflow"
+        profile="Workflow"
+        runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow">
+     <category
+           id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.workflow.Tasks"
+           name="%category.name">
+        <tool
+              name="%tool.name.31"
+              object="Task">
+        </tool>
+        <tool
+              name="%tool.name.3"
+              object="UserTask">
+        </tool>
+        <tool
+              name="%tool.name.6"
+              object="SendTask">
+        </tool>
+     </category>
+     <category
+           id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.workflow.Connection"
+           name="%category.name.1">
+        <tool
+              name="%tool.name.10"
+              object="SequenceFlow">
+        </tool>
+     </category>
+     <category
+           id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.workflow.Events"
+           name="%category.name.2">
+        <tool
+              name="%tool.name.11"
+              object="StartEvent">
+        </tool>
+        <tool
+              name="%tool.name.12"
+              object="EndEvent">
+        </tool>
+     </category>
+     <category
+           id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.workflow.Gateways"
+           name="%category.name.3">
+        <tool
+              name="%tool.name.15"
+              object="ExclusiveGateway">
+        </tool>
+     </category>
+     <category
+           id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.workflow.Artifacts"
+           name="%category.name.10">
+        <tool
+              name="%tool.name.39"
+              object="Group">
+        </tool>
+        <tool
+              name="%tool.name.40"
+              object="TextAnnotation">
+        </tool>
+     </category>
+  </toolPalette>
+  <expressionLanguage
+        name="XPath 1.0"
+        uri="http://www.w3.org/1999/XPath">
+  </expressionLanguage>
+  
+  
+  <!--
+  
+  <modelEnablement
+        id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.CPF"
+        profile="CPF"
+        ref="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow:CPF"
+        runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow">
+     <disable
+           object="AdHocSubProcess">
+     </disable>
+     <disable
+           object="Assignment">
+     </disable>
+     <disable
+           object="BPSimDataType">
+     </disable>
+     <disable
+           feature="isForCompensation"
+           object="BusinessRuleTask">
+     </disable>
+     <disable
+           feature="extensionValues"
+           object="CallActivity">
+     </disable>
+     <disable
+           feature="isForCompensation"
+           object="CallActivity">
+     </disable>
+     <disable
+           object="CompensateEventDefinition">
+     </disable>
+     <disable
+           object="ConditionalEventDefinition">
+     </disable>
+     <disable
+           object="DataInputAssociation">
+     </disable>
+     <disable
+           object="DataObject">
+     </disable>
+     <disable
+           object="DataOutputAssociation">
+     </disable>
+     <disable
+           object="DataState">
+     </disable>
+     <disable
+           object="Documentation">
+     </disable>
+     <disable
+           object="Error">
+     </disable>
+     <disable
+           object="ErrorEventDefinition">
+     </disable>
+     <disable
+           object="Escalation">
+     </disable>
+     <disable
+           object="Interface">
+     </disable>
+     <disable
+           object="InputSet">
+     </disable>
+     <disable
+           object="IntermediateThrowEvent">
+     </disable>
+     <disable
+           object="Lane">
+     </disable>
+     <disable
+           object="LinkEventDefinition">
+     </disable>
+     <disable
+           object="ManualTask">
+     </disable>
+     <disable
+           object="Message">
+     </disable>
+     <disable
+           object="MessageEventDefinition">
+     </disable>
+     <disable
+           object="OutputSet">
+     </disable>
+     <disable
+           feature="isExecutable"
+           object="Process">
+     </disable>
+     <disable
+           object="ReceiveTask">
+     </disable>
+     <disable
+           feature="isForCompensation"
+           object="ScriptTask">
+     </disable>
+     <disable
+           object="SendTask">
+     </disable>
+     <disable
+           feature="isForCompensation"
+           object="SubProcess">
+     </disable>
+     <disable
+           feature="triggeredByEvent"
+           object="SubProcess">
+     </disable>
+     <disable
+           feature="extensionValues"
+           object="Task">
+     </disable>
+     <disable
+           feature="extensionValues"
+           object="UserTask">
+     </disable>
+     <disable
+           feature="adHoc"
+           object="Process">
+     </disable>
+     <enable
+           feature="attachedToRef"
+           object="BoundaryEvent">
+     </enable>
+     <enable
+           feature="cancelActivity"
+           object="BoundaryEvent">
+     </enable>
+     <enable
+           feature="eventDefinitions"
+           object="BoundaryEvent">
+     </enable>
+     <enable
+           feature="name"
+           object="BoundaryEvent">
+     </enable>
+     <enable
+           object="GlobalType">
+     </enable>
+     <enable
+           object="ImportType">
+     </enable>
+     <enable
+           object="OnEntryScriptType">
+     </enable>
+     <enable
+           object="OnExitScriptType">
+     </enable>
+  </modelEnablement>
+-->
+
+<!-- Property Tabs -->
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+		
+		
+
+<!-- Property Extension Adapters -->
+
+
+
+		
+		
+
+
+
+
+
+
+
+		
+		<!-- Things that have ItemDefinition references (data types) need to include the java native types in combo boxes and such -->
+
+
+		
+
+
+
+		
+		
+<!-- Graphiti Feature Container Overrides -->
+		
+		
+		
+		
+				
+
+
+
+
+
+
+
+
+				
+
+				
+				
+		
+<!-- BPMN Model Element Extensions -->
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<!-- do not automatically generate name labels for these objects when created -->
+		
+		
+		
+		
+		
+
+		<!-- customized User Task -->
+		
+
+<!-- Model Enablements and Profiles -->
+
+		
+		
+		
+<!-- Tool Palettes -->
+
+		
+		
+		
+
+		
+	</extension>
+ <extension
+       point="org.eclipse.bpmn2.modeler.runtime">
+    <runtime
+          class="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.MarkLogicCPFRuntimeExtension"
+          description="MarkLogic Content Processing Framework (CPF) Process Engine"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf"
+          name="MarkLogic CPF Process Engine"
+          versions="7.0,8.0">
+    </runtime>
+    <toolPalette
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf.toolpalette.CPF"
+          profile="CPF"
+          runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf">
+       <category
+             id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.cpf.Connection"
+             name="%category.name.1">
+          <tool
+                name="%tool.name.10"
+                object="SequenceFlow">
+          </tool>
+       </category>
+       <category
+             id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.cpf.Events"
+             name="%category.name.2">
+          <tool
+                name="%tool.name.93"
+                object="CPFInitial">
+          </tool>
+          <tool
+                name="%tool.name.94"
+                object="CPFFinal">
+          </tool>
+          <tool
+                name="%tool.name.96"
+                object="CPFDomain">
+          </tool>
+       </category>
+       <category
+             id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.cpf.Gateways"
+             name="%category.name.3">
+          <tool
+                name="%tool.name.91"
+                object="CPFCondition">
+          </tool>
+       </category>
+       <category
+             id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.cpf.Artifacts"
+             name="%category.name.10">
+          <tool
+                name="%tool.name.39"
+                object="Group">
+          </tool>
+          <tool
+                name="%tool.name.40"
+                object="TextAnnotation">
+          </tool>
+       </category>
+       <category
+             description="MarkLogic Content Processing Framework Activities"
+             id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.cpf.CPF"
+             name="%category.name.22">
+          <tool
+                name="%tool.name.95"
+                object="CPFStatus">
+          </tool>
+          <tool
+                name="%tool.name.90"
+                object="CPFState">
+          </tool>
+          <tool
+                name="%tool.name.92"
+                object="CPFAction">
+          </tool>
+       </category>
+    </toolPalette>
+    <customTask
+          category="CPF"
+          description="CPF Initial State"
+          featureContainer="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.features.CPFInitialFeatureContainer"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.initialTask"
+          name="CPFInitial"
+          runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf"
+          type="StartEvent">
+       <property
+             name="type"
+             value="CPFInitial">
+       </property>
+    </customTask>
+    <customTask
+          category="CPF"
+          description="CPF State Transition"
+          featureContainer="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.features.CPFStateFeatureContainer"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.stateTask"
+          name="CPFState"
+          runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf"
+          type="Task">
+       <property
+             name="type"
+             value="CPFState">
+       </property>
+    </customTask>
+    <customTask
+          category="CPF"
+          description="CPF Condition"
+          featureContainer="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.features.CPFConditionFeatureContainer"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.conditionTask"
+          name="CPFCondition"
+          runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf"
+          type="ExclusiveGateway">
+       <property
+             name="type"
+             value="CPFCondition">
+       </property>
+    </customTask>
+    <customTask
+          category="CPF"
+          description="CPF Domain"
+          featureContainer="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.features.CPFDomainFeatureContainer"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.domainTask"
+          name="CPFDomain"
+          runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf"
+          type="Message">
+       <property
+             name="type"
+             value="CPFDomain">
+       </property>
+    </customTask>
+    <customTask
+          category="CPF"
+          description="CPF Action"
+          featureContainer="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.features.CPFActionFeatureContainer"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.actionTask"
+          name="CPFAction"
+          runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf"
+          type="Task">
+       <property
+             name="type"
+             value="CPFAction">
+       </property>
+    </customTask>
+    <customTask
+          category="CPF"
+          description="CPF Final State"
+          featureContainer="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.features.CPFFinalFeatureContainer"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.finalTask"
+          name="CPFFinal"
+          runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf"
+          type="EndEvent">
+       <property
+             name="type"
+             value="CPFFinal">
+       </property>
+    </customTask>
+    <customTask
+          category="CPF"
+          description="CPF Status Transition"
+          featureContainer="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.features.CPFStatusFeatureContainer"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.statusTask"
+          name="CPFStatus"
+          runtimeId="org.eclipse.bpmn2.modeler.runtime.marklogic.cpf"
+          type="Task">
+       <property
+             name="type"
+             value="CPFStatus">
+       </property>
+    </customTask>
+    <expressionLanguage
+          name="XPath 1.0"
+          uri="http://www.w3.org/1999/XPath">
+    </expressionLanguage>
+ </extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          category="org.eclipse.bpmn2.modeler.BPMN2"
+          class="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.preferences.WorkflowPreferencePage"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.preferences"
+          name="%PREFERENCE_PAGE_WORKFLOW">
+    </page>
+ </extension>
+ <extension
+       point="org.eclipse.ui.newWizards">
+    <category
+          id="org.eclipse.bpmn2.wizardCategory"
+          name="%category.name.21">
+    </category>
+    <wizard
+          category="org.eclipse.bpmn2.wizardCategory"
+          class="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.wizards.NewWorkflowProcessWizard"
+          icon="icons/wizard.gif"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.wizards.NewWorkflowProcessWizard"
+          name="%wizard.name.1">
+    </wizard>
+    <wizard
+          category="org.eclipse.bpmn2.wizardCategory"
+          class="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.wizards.NewCPFProcessWizard"
+          icon="icons/wizard.gif"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.wizards.NewCPFProcessWizard"
+          name="%wizard.name.2">
+    </wizard>
+ </extension>
+ <extension
+       point="org.eclipse.graphiti.ui.imageProviders">
+    <imageProvider
+          class="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.ImageProvider"
+          id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.ImageProvider">
+    </imageProvider>
+ </extension>
+
+	
+
+  
+   
+   
+	
+</plugin>

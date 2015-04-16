@@ -48,7 +48,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
  - Create CPF action to represent this
 - TEST Evaluation: Support for (/some/path/one,/some/path/two)[1] style evaluation for set task
 - DONE Tools: Process Data model XSD (for modeler import)
-- IN PROGRESS Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
+- DONE Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
 - DEFERRED UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
 - TEST Start process using an Alert (content subscription)
 - TEST REST API: Basic process initiation, update and tracking methods
@@ -69,7 +69,7 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - DONE Test scripts for automating install, create, get, update, complete via REST API
 - DONE Bug: Change process model URI folder to include major and minor - else doing process doc update may run new pipeline instead of old one
 - DONE Bug: Multiple wf:status properties on in process process, complete and running
-- BPMN2 specification test process models modified and tested to MarkLogic executable standard
+- DEFERRED BPMN2 specification test process models modified and tested to MarkLogic executable standard
  - Basic
   - Incident Management Level 1
   - Incident Management Account Manager Only
