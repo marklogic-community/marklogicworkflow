@@ -1,0 +1,28 @@
+<em:Message
+ xmlns:em="URN:ietf:params:email-xml:"
+ xmlns:rf="URN:ietf:params:rfc822:">
+  <rf:subject>Document Rejected</rf:subject>
+  <rf:from>
+    <em:Address>
+      <em:name>MarkLogic Admin</em:name>
+      <em:adrs>admin@example.com</em:adrs>
+    </em:Address>
+  </rf:from>
+  <rf:to>
+    <em:Address>
+      <em:name>{$wf:process/wf:data/RecipientName/text()}</em:name>
+      <em:adrs>{$wf:process/wf:data/RecipientEmail/text()}</em:adrs>
+    </em:Address>
+  </rf:to>
+  <em:content>
+    <html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+        <title>V1 sample rejection message</title>
+      </head>
+      <body>
+        <h1>Document rejected</h1>
+        <p>Your document was rejected.</p>
+      </body>
+    </html>
+  </em:content>
+</em:Message>

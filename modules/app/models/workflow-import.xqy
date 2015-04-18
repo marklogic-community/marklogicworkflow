@@ -659,13 +659,16 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
 
           ,
 
-          (: Send email example :)
+          (: Send email example - sendTask.xqy :)
           for $state in $start/b2:sendTask
-          let $message := $doc/b2:message[@id = $state/@messageRef]
+          let $messageText := xs:string($doc/b2:message[@id = $state/@messageRef]/@name)
+          (:
           let $item := $doc/b2:itemDefinition[@id = $message/@itemRef]
           let $structureRef := xs:string($item/@structureRef)
-          let $messageXml := () (: TODO get actual message value, followed by replacement(s) :)
+
           let $operation := $doc/b2:interface/b2:operation[@id = $state/@operationRef]
+          :)
+
           let $route := xs:string($state/b2:outgoing[1]) (: TODO support split here? :)
           let $rc :=
             if (fn:contains($route,":")) then
@@ -679,15 +682,30 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
                 $failureState,(),
                 p:action("/workflowengine/actions/sendTask.xqy","BPMN2 Send Task: "||xs:string($state/@name),
                   <options xmlns="/workflowengine/actions/sendTask.xqy">
-                    { (: Message :)
-                      $messageXml
-                      (: TODO distinguish between email message and web service invocation (fire and forget) :)
-                    }
+                    <wf:message>{$messageText}</wf:message>
                   </options>
                 ),()
               )
 
           ,
+
+
+
+
+
+
+
+
+          (: DEV ADD YOUR CUSTOM TASK DEFINITION IMPORTS ABOVE HERE!!! BE SURE TO NOT FORGET THE TRAILING COMMA!!! :)
+
+
+
+
+
+
+
+
+
 
           (: *** TODO SPRINT 2: CPF CUSTOM ACTIVITY SUPPORT *** :)
 

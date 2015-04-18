@@ -34,10 +34,27 @@ declare function m:create($pipelineName as xs:string,$data as element()*,$attach
 };
 
 (:
+ : You must create one or more CPF domains for folders or collections that alerts can be evaluated within.
+ :)
+declare function m:createAlertingDomain($name as xs:string,$type as xs:string,$path as xs:string,$depth as xs:string) as xs:unsignedLong {
+  ss:create-domain($name,$type,$path,$depth,("Status Change Handling","Alerting"),xdmp:database-name(xdmp:modules-database()))
+};
+
+(:
  : Create a new process subscription
  :)
-declare function m:createSubscription($pipelineName as xs:string,$name as xs:string,$query as element(cts:query)) as xs:string {
-  ss:add-alert($name,$query,(),"/app/models/alert-action-process.xqy",(),(<wf:process-name>{$pipelineName}</wf:process-name>))
+declare function m:createSubscription($pipelineName as xs:string,$name as xs:string,$domainname as xs:string,$query as cts:query) as xs:string {
+  let $alert-uri := ss:add-alert($name,$query,(),"/app/models/alert-action-process.xqy",xdmp:database-name(xdmp:modules-database()),
+    (<wf:process-name>{$pipelineName}</wf:process-name>))
+  let $alert-enabled := ss:cpf-enable($alert-uri,$domainname)
+  return $alert-uri
+};
+
+(:
+ : Fetches a process subscription
+ :)
+declare function m:getSubscription($name as xs:string) as element()? {
+  ss:get-alert("/config/alerts/" || $name)
 };
 
 (:
@@ -56,6 +73,24 @@ declare function m:getProperties($processId as xs:string) as element(prop:proper
 
 declare function m:getProcessUri($processId as xs:string) as xs:string? {
   (fn:collection("http://marklogic.com/workflow/processes")/wf:process[./@id = $processId]/fn:base-uri(.))
+};
+
+declare function m:getProcessAsset($processUri as xs:string,$assetname as xs:string) as node()? {
+  xdmp:eval(
+    'xquery version "1.0-ml";declare namespace wf="http://marklogic.com/workflow";' ||
+    'declare variable $wf:process as element(wf:process) external;' ||
+    'declare variable $wf:assetname as xs:string external;' ||
+    '(fn:doc("/workflowengine/assets/" || xs:string($wf:process/@name) || "/" || xs:string($wf:process/@major) || "/" || xs:string($wf:process/@minor) || "/" || $wf:assetname ),' ||
+    '  fn:doc("/workflowengine/assets/" || xs:string($wf:process/@name) || "/" || xs:string($wf:process/@major) || "/" || $wf:assetname ),' ||
+    '  fn:doc("/workflowengine/assets/" || xs:string($wf:process/@name) || "/" || $wf:assetname )' ||
+    ')[1]'
+    ,
+      (xs:QName("wf:process"),fn:doc($processUri)/wf:process,xs:QName("wf:assetname"),$assetname),
+      <options xmlns="xdmp:eval">
+        <database>{xdmp:modules-database()}</database>
+        <isolation>different-transaction</isolation>
+      </options>
+    )  (: MUST be executed in the modules DB - where the assets live :)
 };
 
 
@@ -133,7 +168,27 @@ declare function m:roleinbox($role as xs:string) as element(wf:queue) {
   </wf:queue>
 };
 
-
+(:
+ : Lists all processes, or all those with a specific PROCESS__MAJOR__MINOR name
+ :)
+declare function m:list($processName as xs:string?) as element(wf:list) {
+  <wf:list>
+  {
+    for $process in cts:search(fn:collection("http://marklogic.com/workflow/processes"),
+      cts:and-query(
+        if (fn:not(fn:empty($processName))) then
+          cts:element-attribute-value-query(xs:QName("wf:process"),xs:QName("title"),$processName)
+        else
+          cts:not-query(())
+      ),("unfiltered") (: TODO ordering, prioritisation support, and so on :)
+    )
+    return
+      <wf:listitem processid="{xs:string($process/wf:process/@id)}">
+        {$process}
+      </wf:listitem>
+  }
+  </wf:list>
+};
 
 
 
@@ -247,7 +302,10 @@ declare function m:metric($processUri as xs:string,$state as xs:string,$start as
   )
 };
 
-declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:namespace)*,$xpath as xs:string) as xs:boolean {
+(:
+ : The below has been replaced by an eval (m:evaluate), which bypasses the string replacement approach
+
+declare function m:evaluateOLD($processUri as xs:string,$namespaces as element(wf:namespace)*,$xpath as xs:string) as xs:boolean {
 
   let $_ := xdmp:log("In wfu:evaluate")
 
@@ -275,4 +333,43 @@ declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:n
 
   return
     $result
+};
+:)
+
+declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:namespace)*,$xpath as xs:string) as xs:boolean {
+  let $ns :=
+    for $namespace in $namespaces
+    return
+      if (fn:not(fn:empty($namespace/@short/text())) and fn:not(fn:empty($namespace/@long/text()))) then
+        "declare namespace " || $namespace/@short/text() || ' = "' || $namespace/@long/text() || '"; '
+      else ""
+  let $xquery :=
+    'xquery version "1.0-ml";declare namespace wf="http://marklogic.com/workflow";' || $ns ||
+    'declare variable $wf:process as element(wf:process) external;' ||
+    $xpath
+  let $_ := xdmp:log($xquery)
+  return
+    xdmp:eval($xquery,
+      (xs:QName("wf:process"),fn:doc($processUri)/wf:process),
+      <options xmlns="xdmp:eval">
+        <isolation>different-transaction</isolation>
+      </options>
+    )
+};
+
+declare function m:evaluateXml($processUri as xs:string,$namespaces as element(wf:namespace)*,$xmlText as xs:string,$params as node()*) as node()* {
+  let $xquery := 'xquery version "1.0-ml";declare namespace wf="http://marklogic.com/workflow";' ||
+      'declare variable $wf:process as element(wf:process) external;' || $xmlText
+  let $_ := xdmp:log("wfu:evaluateXml: xquery: " || $xquery)
+  let $result :=
+   xdmp:eval($xquery,
+      (xs:QName("wf:process"),fn:doc($processUri)/wf:process), (: TODO accept external params without having blank params of () in the eval call :)
+      <options xmlns="xdmp:eval">
+        <isolation>different-transaction</isolation>
+      </options>
+    )
+  let $_ := xdmp:log("wfu:evaluateXml: result:-")
+  let $_ := xdmp:log($result)
+  let $_ := xdmp:log("wfu:evaluateXml: Complete. Returning...")
+  return $result
 };

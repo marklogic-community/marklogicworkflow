@@ -6,7 +6,8 @@
     {"name": "processinbox", "methods": ["GET"]},
     {"name": "processqueue", "methods": ["GET"]},
     {"name": "processmodel", "methods": ["GET","POST","PUT"]},
-    {"name": "processsubscription", "methods": ["PUT"]}
+    {"name": "processsubscription", "methods": ["PUT"]},
+    {"name": "processsearch", "methods": ["PUT"]}
   ],
   "transforms": [],
   "triggers": [

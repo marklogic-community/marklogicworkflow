@@ -7,4 +7,4 @@ This section of the documentation is very much a work in progress. See the [REST
 details right now.
 
 - [Creating a Process Subscription](USING-SUBSCRIPTIONS.md)
-- Starting a process without a content document
+- Starting a process without a content document - see the above link, last paragraph
