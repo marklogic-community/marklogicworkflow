@@ -26,8 +26,8 @@ sleep 15
 sleep 5
 
 . ./21-processmodel-create.sh
-. ./22-process-create.sh
-. ./23-process-read.sh
+. ./22-processmodel-publish.sh
+. ./23-process-create.sh
 . ./24-process-read.sh
 . ./25-processsubscription-create.sh
 . ./26-processsubscription-read.sh

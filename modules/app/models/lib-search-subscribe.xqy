@@ -312,7 +312,8 @@ declare function ss:do-create-action($alert-name as xs:string,$alert-module as x
   )
 };
 
-declare function ss:check-remove-config($alert-name as xs:string) {
+declare function ss:check-remove-config($shortname as xs:string) {
+  let $alert-name := "/config/alerts/" || $shortname
   let $config := alert:config-get($alert-name)
   return
     if (fn:not(fn:empty($config))) then
