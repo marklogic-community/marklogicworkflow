@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ext:readResponse xmlns:ext="http://marklogic.com/rest-api/resource/processsubscription"><ext:outcome>SUCCESS</ext:outcome><ext:subscription><alert:config xmlns:alert="http://marklogic.com/xdmp/alert">
+      <alert:config-id>12511346018778504173</alert:config-id>
+      <alert:config-uri>/config/alerts/email-sub-test</alert:config-uri>
+      <alert:config-name>/config/alerts/email-sub-test configuration</alert:config-name>
+      <alert:config-description>/config/alerts/email-sub-test configuration</alert:config-description>
+      <alert:triggers/>
+      <alert:cpf-domains>
+	<alert:cpf-domain id="8432039648806138724">Some folder alerting domain</alert:cpf-domain>
+      </alert:cpf-domains>
+      <alert:options/>
+    </alert:config></ext:subscription></ext:readResponse>

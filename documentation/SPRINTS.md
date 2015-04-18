@@ -34,6 +34,8 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 
 ## Sprint 1 - Basic workflow
 
+Completed Sat 18 Apr 2015 14:30 BST by Adam Fowler
+
 - DONE BPMN2: generic blank task
 - DONE BPMN2: user task -> aka human step
 - DONE BPMN2: exclusive gateway -> Decision point with one outcome, multiple options
@@ -50,8 +52,8 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
 - DONE Tools: Process Data model XSD (for modeler import)
 - DONE Tools: Eclipse BPMN 2 Modeler Palette and Process diagram support, including new diagram creation for MarkLogic
 - DEFERRED UI: Ridiculously basic HTML widget in MLJS for rendering step and choosing action (for ease of testing)
-- TEST Start process using an Alert (content subscription)
-- TEST REST API: Basic process initiation, update and tracking methods
+- DONE Start process using an Alert (content subscription)
+- DONE REST API: Basic process initiation, update and tracking methods
  - DONE processmodel.xqy
   - DONE PUT create and publish process model, accepting BPMN2 content type .bpmn2, and to update process model without publishing
   - DONE GET to fetch process model
@@ -60,8 +62,8 @@ steps if a duplicate is found. Requires search (by property hash AND not (same u
   - DONE PUT create instance of a process (starts a process)
   - DONE POST complete a human task
   - DONE GET fetch the current state of a business process
- - TEST processsubscription.xqy
-  - TEST PUT create a process subscription (alert) to create a new process instance (creating a content doc creates a process doc with an initiating attachment)
+ - DONE processsubscription.xqy
+  - DONE PUT create a process subscription (alert) to create a new process instance (creating a content doc creates a process doc with an initiating attachment)
  - DONE processinbox.xqy
  - DONE processqueue.xqy
  - TEST support for roles (processroleinbox.xqy) on user tasks (For BD)

@@ -16,6 +16,8 @@ The Eclipse BPMN2 modeller is a good option, with support for pluggable runtime 
 easy to define a MarkLogic runtime and set of custom tasks, and hide any BPMN2 tasks that we do not support the
 execution of.
 
+To install the MarkLogic Workflow BPMN2 Eclipse modeler extension, see the [Modelling Development page](DEV-MODELER.md).
+
 Also view the [BPMN2 specification summary document](bpmn2-spec.md)
 
 Also take a look at the [Step documentation](STEPS.md) for information on individual steps and supported parameters.

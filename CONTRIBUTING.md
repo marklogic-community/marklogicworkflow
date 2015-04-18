@@ -73,7 +73,7 @@ your vision does not align with that of a project maintainer.
 #### Create a branch for your feature
 
 Okay, so you have decided to add something. Create an issue on GitHub if you haven't already, as you'll need the ID.
-Now create a feature branch and start hacking:
+Now create a feature branch and start hacking. You can do this on your own fork, or the main site if a 'Contributor':
 
 ```sh
 $ git checkout -b feature-ISSUEID develop
@@ -93,7 +93,8 @@ To share the branch so others can see it (although advised not to work on it) do
 $ git push --set-upstream origin feature-ISSUEID
 ```
 
-Now your feature branch [will be visible on GitHub](https://github.com/adamfowleruk/marklogicworkflow/branches).
+Now your feature branch [will be visible on GitHub](https://github.com/adamfowleruk/marklogicworkflow/branches) if you
+are a contributor.
 
 #### Formatting code
 
@@ -119,16 +120,23 @@ Make sure that all tests pass. Please, do not submit patches that fail.
 
 When the feature is complete and ready to be integrated back in to the develop branch:-
 
+1. If on your own Fork (99% of people):-
 ```sh
 $ git commit -m "Fixes #ISSUEID"
 $ git pull origin develop
 $ git checkout develop
 $ git merge feature-ISSUEID
 $ git push
-$ git branch -d feature-ISSUEID
 ```
 
-Only do the last command if the others complete successfully. You may have to merge conflicts.
+2. If an assigned admin user (contributor) on the main project, do this instead:-
+```sh
+$ git commit -m "Fixes #ISSUEID"
+$ git push
+```
+
+Now issue a pull request for your changes to the main project.
+
 
 You're now done! Adding the 'Fixes #ISSUEID' comment to the last commit automatically closes the issue with a reference
 to your code.

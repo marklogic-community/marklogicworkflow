@@ -26,14 +26,39 @@ you access to everything you need.
 Until this happens, or if you need the very latest MarkLogic Workflow model element support whilst working on a new
 project, you will need to execute the extension manually.
 
-To execute the latest extension:-
-- Checkout or download the zip of the latest (develop branch) of MarkLogic Workflow at http://github.com/adamfowleruk/marklogicworkflow
+### Latest from source (any branch) for Plugin development
+
+Note: If following the Contributing guide, you should have logged an issue and created a new branch from develop using
+```sh
+$ git checkout -b feature-ISSUEID develop
+```
+
+To execute the latest extension from source:-
+- Checkout or download the zip of the latest (develop or feature branch) of MarkLogic Workflow at http://github.com/adamfowleruk/marklogicworkflow
 - Open Eclipse Luna (4.4) or above
 - Go to File -> Import project
 - Navigate to ./marklogicworkflow/eclipse/org.eclipse.bpmn2.modeler.runtime.marklogic (NOT just ./marklogicworkflow)
 - Import this workspace
 - Double click on the 'plugin.xml' file
 - In the top right of the edit dialogue for this file, click the green Play button. This launches Eclipse Luna with this extension
+
+### Current published In Development version
+
+- In Eclipse Luna (4.4) or above, go to Help -> Install new software
+- In the update site field type https://raw.githubusercontent.com/adamfowleruk/marklogicworkflow/develop/eclipse/MarkLogicWorkflowUpdateSite
+- It will take a few seconds to download plugin information
+- Select the Eclipse BPMN2 Modeler - MarkLogic Workflow Runtime Extension Feature
+- Click Next
+- Follow the prompts
+ - NOTE: If you are warned about the project not being signed, click on 'OK' and NOT 'Cancel' to proceed with installation
+- Restart Eclipse Luna
+
+### Current published released version
+
+- As for Current published in development version, except use this URL: https://raw.githubusercontent.com/adamfowleruk/marklogicworkflow/master/eclipse/MarkLogicWorkflowUpdateSite
+
+## Creating a new Workflow process diagram
+
 - Now go to File - Import or File - New Project to create your new modelling project
 - Right click the root folder and select New - Other
 - Open the 'BPMN2' category and select either 'MarkLogic CPF Process Diagram' or 'MarkLogic Workflow Process Diagram'
@@ -52,10 +77,16 @@ In the future MarkLogic Workflow will allow any arbitrary CPF pipeline to be exp
 modeler. This will allow for full round trip re-engineering of MarkLogic CPF processes.
 
 *WARNING: It should be noted that CPF diagram support is very much an Alpha product and not scheduled to be fully
-implemented for a while.* 
+implemented for a while.*
 
 ## Related information
 
-For the custom runtime/task videos, see this first:-
+The best source for Eclipse extension tutorials is:-
+https://wiki.eclipse.org/BPMN2-Modeler/DeveloperTutorials
 
-http://bobsbizbuzz.blogspot.it/2014/06/blog-post_10.html
+These have been updated for the latest Luna version of the Eclipse BPMN2 modeler
+
+You may also find it instructive to download the 'jBPM Runtime Extension' project from the above project's GitHub site.
+ I use this for many examples.
+
+A developer forum is also available: https://www.eclipse.org/forums/index.php/f/226/

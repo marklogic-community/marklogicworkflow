@@ -1,6 +1,6 @@
 
 
-See also MODELLING.md for the REST API to install a MarkLogic workflow process model.
+See also the [Modelling Overview](MODELLING.md) for the REST API to install a MarkLogic workflow process model.
 
 
 ## How the workflow engine works
