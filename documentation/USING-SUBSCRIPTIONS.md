@@ -21,8 +21,8 @@ The above is why I decided to have a process document that CPF runs against, rat
 ## How it works
 
 1. A user, or application, creates a new document in MarkLogic - say a Bank Account Opening E-form
-2. A 'Process Subscription' (basically a MarkLogic alert that uses the alert-action-process.xqy action) fires, creating a new Account Opening process document
-3. A CPF Domain (set up by enabling/publishing a MarkLogic Workflow BPMN2 model) fires for this document, invoking the Account Opening V1.2 CPF pipeline process
+2. A 'Process Subscription' (basically a MarkLogic alert that uses the alert-action-process.xqy action) fires, creating a new Account Opening process document, and attaching the account opening form as the InitiatingAttachment attachment
+3. A CPF Domain (set up by enabling/publishing a MarkLogic Workflow BPMN2 model) fires for this process document, invoking the Account Opening V1.2 CPF pipeline process
 4. CPF manages the state transitions and execution of BPMN2 CPF actions throughout the process lifecycle
 5. Process eventually completes (or fails), leaving the process document as an audit record of what happened, with metrics for performance analysis
 
@@ -39,13 +39,19 @@ Several reasons.
 ## Isn't it a bit convoluted?
 
 If you had to create all these things by hand, yes. This is why the Workflow REST API provides a single endpoint
-(POST /v1/resource/process) to take a BPMN2 model, create a set of CPF pipelines, and create a
+(POST /v1/resources/process) to take a BPMN2 model, create a set of CPF pipelines, and create a
 domain configuration, for you.
 
 All you then need to do then is separately configure one or more Alerts (aka Process Subscriptions) via calls to
-PUT /v1/resource/processsubscription to start the relevant workflow based on criteria about a new or updated document
+PUT /v1/resources/processsubscription to start the relevant workflow based on criteria about a new or updated document
 in marklogic.
 
-Alternatively, manually start a process via PUT /v1/resource/process without needing a Process Subscription. This is useful
+Alternatively, manually start a process via PUT /v1/resources/process without needing a Process Subscription. This is useful
 if starting a process via an ESB or application. A good example is starting a process to tell a person to create a
 new document that doesn't exist yet.
+
+## Examples
+
+For examples of how to configure and call the REST extensions for alerting, see the /shtests/ folder, specifically:-
+- Automated start: 25-payload.xml and 25-processsubscription-create.sh
+- Manual start: 06-payload.xml 06-process-create.sh

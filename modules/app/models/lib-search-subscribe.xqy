@@ -252,20 +252,26 @@ declare function ss:create-rule-notify($alert-name as xs:string,$alert-detail as
 
 
 
-declare function ss:add-alert($shortname as xs:string,$query as element(cts:query),
+declare function ss:add-alert($shortname as xs:string,$query as cts:query,
   $ruleoptions as element()*,$module as xs:string,$moduledbname as xs:string?,$actionoptions as element()*) as xs:string {
 
   let $name := ss:do-create-config($shortname)
-  return
-    (
-      ss:do-create-rule($name,$query,$ruleoptions),
-      ss:do-create-action($name,$module,$moduledbname,$actionoptions),
-      $name
-    )
+  let $_ := (
+    ss:do-create-action($name,$module,$moduledbname,$actionoptions)
+    ,
+    ss:do-create-rule($name,$query,$ruleoptions)
+  )
+  return $name
+};
+
+declare function ss:get-alert($shortname as xs:string) as element(alert:config)? {
+  alert:config-get($shortname)
 };
 
 
 declare function ss:do-create-config($shortname as xs:string) as xs:string {
+  let $rem := ss:check-remove-config($shortname)
+  return
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
     'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";' ||
@@ -277,16 +283,16 @@ declare function ss:do-create-config($shortname as xs:string) as xs:string {
   )
 };
 
-declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,$options as element()*) {
+declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,$options as element()*) as empty-sequence() {
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
     'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";' ||
     'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
     'declare variable $my:alert-name as xs:string external;' ||
     'declare variable $my:query as cts:query external;' ||
-    'declare variable $my:options as element* external;' ||
-    'ah:create-rule($my:alert-name,$my:query,$my:options)',
-    (xs:QName("my:alert-name"),$alert-name,xs:QName("my:query"),$query,xs:QName("my:options"),$options),
+    (:)'declare variable $my:options as element()* external;' ||:)
+    'ah:create-rule($my:alert-name,$my:query,())',
+    (xs:QName("my:alert-name"),$alert-name,xs:QName("my:query"),$query (:,xs:QName("my:options"),($options) :) ),
     <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
   )
 };
@@ -299,11 +305,39 @@ declare function ss:do-create-action($alert-name as xs:string,$alert-module as x
     'declare variable $my:alert-name as xs:string external;' ||
     'declare variable $my:alert-module as xs:string external;' ||
     'declare variable $my:dbname as xs:string external;' ||
-    'declare variable $my:options as element* external;' ||
+    'declare variable $my:options as element()* external;' ||
     'ah:create-action($my:alert-name,$my:alert-module,$my:dbname,$my:options)',
-    (xs:QName("my:alert-name"),$alert-name,xs:QName("my:alert-module"),$alert-module,xs:QName("my:dbname"),$dbname,xs:QName("my:options"),$options),
+    (xs:QName("my:alert-name"),$alert-name,xs:QName("my:alert-module"),$alert-module,xs:QName("my:dbname"),$dbname,xs:QName("my:options"),($options)),
     <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
   )
+};
+
+declare function ss:check-remove-config($alert-name as xs:string) {
+  let $config := alert:config-get($alert-name)
+  return
+    if (fn:not(fn:empty($config))) then
+      (: Check if config used in a cpf domain, if so remove it from that domain :)
+      let $unreg := xdmp:eval(
+        'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
+        'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
+        'declare variable $my:alert-name as xs:string external;' ||
+        'alert:config-insert(' ||
+        '  alert:config-set-cpf-domain-names(alert:config-get($my:alert-name),())' ||
+        ')',
+        (xs:QName("my:alert-name"),$alert-name),
+        <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
+      )
+      (: Do this for each domain - NA all done in one hit:)
+      (: Now remove the alert config :)
+      return xdmp:eval(
+        'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
+        'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
+        'declare variable $my:alert-name as xs:string external;' ||
+        'alert:config-delete($my:alert-name)',
+        (xs:QName("my:alert-name"),$alert-name),
+        <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
+      )
+    else ()
 };
 
 declare function ss:create-config($shortname as xs:string) as xs:string {
@@ -318,7 +352,7 @@ declare function ss:create-config($shortname as xs:string) as xs:string {
   return $alert-name
 };
 
-declare function ss:create-rule($alert-name as xs:string,$query as cts:query,$options as element()*) {
+declare function ss:create-rule($alert-name as xs:string,$query as cts:query,$options as element()*) as empty-sequence() {
 
   let $rule := alert:make-rule(
       fn:concat($alert-name,"-rule"),
@@ -347,7 +381,6 @@ declare function ss:create-action($alert-name as xs:string,$alert-module as xs:s
 
 
 
-(: TODO add method for creating cpf domain, and enabling cpf on the database automatically - see 8001 admin code :)
 
 
 declare function ss:cpf-enable($alert-name as xs:string,$cpf-domain as xs:string) {
@@ -355,4 +388,78 @@ declare function ss:cpf-enable($alert-name as xs:string,$cpf-domain as xs:string
     alert:config-set-cpf-domain-names(
       alert:config-get($alert-name),
       ($cpf-domain)))
+};
+
+declare function ss:create-domain($domainname as xs:string,$domaintype as xs:string,$domainpath as xs:string,$domaindepth as xs:string,$pipeline-names as xs:string*,$modulesdb as xs:string) as xs:unsignedLong {
+
+    (: check if domain already exists and recreate :)
+    let $remove :=
+      try {
+        if (fn:not(fn:empty(
+          xdmp:eval(
+           'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external; dom:get($m:processmodeluri)'
+           ,
+            (xs:QName("my:processmodeluri"),$domainname),
+            <options xmlns="xdmp:eval">
+              <database>{xdmp:triggers-database()}</database>
+              <isolation>different-transaction</isolation>
+            </options>
+          )
+        ))) then
+          let $_ := xdmp:log(" GOT DOMAIN TO REMOVE")
+          return
+            xdmp:eval(
+              'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;'
+              ||
+              'dom:remove($m:processmodeluri)'
+              ,
+              (xs:QName("my:processmodeluri"),$domainname),
+              <options xmlns="xdmp:eval">
+                <database>{xdmp:triggers-database()}</database>
+                <isolation>different-transaction</isolation>
+              </options>
+            )
+        else
+          ()
+      } catch ($e) { ( xdmp:log("Error trying to remove domain: " || $domainname),xdmp:log($e) ) } (: catching domain throwing error if it doesn't exist. We can safely ignore this :)
+
+
+       (: Create domain :)
+
+         (: Configure domain :)
+    return
+      xdmp:eval(
+        'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts";' ||
+        'import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; '||
+        'import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy"; ' ||
+        'declare variable $m:pname as xs:string external;declare variable $m:pnames as xs:string* external;' ||
+        'declare variable $m:mdb as xs:unsignedLong external;'||
+        'declare variable $m:type as xs:string external;' ||
+        'declare variable $m:path as xs:string external;' ||
+        'declare variable $m:otherpipeline as xs:string external;' ||
+        'declare variable $m:depth as xs:string external;' ||
+        'let $_ := xdmp:log("In eval") ' ||
+        (:)'let $pids := for $pn in $m:pnames ' ||
+        '  return xs:unsignedLong(p:pipelines()[p:pipeline-name = $pn]/p:pipeline-id) ' || :)
+        'let $pids := ' ||
+        '(xs:unsignedLong(p:pipelines()[p:pipeline-name = "Status Change Handling"]/p:pipeline-id),xs:unsignedLong(p:pipelines()[p:pipeline-name = $m:otherpipeline]/p:pipeline-id))' ||
+        'let $_ := xdmp:log("second point")' ||
+        'let $ds := dom:domain-scope($m:type,$m:path,$m:depth) ' ||
+        'let $_ := xdmp:log("third point")' ||
+        'let $ec := dom:evaluation-context($m:mdb,"/")' ||
+        'let $_ := xdmp:log("fourth point")' ||
+        'let $dc := dom:create($m:pname,"Domain for "||$m:pname,' ||
+        '  $ds,$ec,$pids,())' ||
+        'let $_ := xdmp:log("fifth point")' ||
+        'return $dc'
+        ,
+        (xs:QName("my:otherpipeline"),($pipeline-names[2]),xs:QName("my:mdb"),xdmp:database($modulesdb),xs:QName("my:pname"),$domainname,
+         xs:QName("my:type"),$domaintype,xs:QName("my:path"),$domainpath,xs:QName("my:depth"),$domaindepth
+        ),
+        <options xmlns="xdmp:eval">
+          <database>{xdmp:triggers-database()}</database>
+          <isolation>different-transaction</isolation>
+        </options>
+      ) (: end eval :)
+
 };

@@ -21,13 +21,12 @@ declare variable $alert:action as element(alert:action) external;
 (: Create a process instance for this document :)
 
 (: Find appropriate process from alert action option :)
-let $procname := $alert-action/alert:options/wf:process-name/text()
-return
-  wfu:create($procname,$alert:doc/element(),
-    <attachment name="InitiatingAttachment" cardinality="1">
-      <uri>{fn:base-uri($alert:doc)}</uri>
-    </attachment>
+let $procname := xs:string($alert:action/alert:options/wf:process-name)
+let $pid :=   wfu:create($procname,$alert:doc/element(),
+      (<wf:attachment name="InitiatingAttachment" uri="{fn:base-uri($alert:doc)}" cardinality="1"/>)
   )
+return ()
+
 
 (:)
   xdmp:document-insert($procname || "/" || sem:uuid-string() || ".xml",

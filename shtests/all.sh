@@ -28,6 +28,12 @@ sleep 5
 . ./21-processmodel-create.sh
 . ./22-process-create.sh
 . ./23-process-read.sh
+. ./24-process-read.sh
+. ./25-processsubscription-create.sh
+. ./26-processsubscription-read.sh
+. ./27-document-create.sh
+# Search needs to be immediately after - it executes too quick otherwise!!! (A blank result may mean processes already finished, not just haven't started)
+. ./28-processsearch-read.sh
 
 
 # . ./x05-processmodel-delete.sh

@@ -34,10 +34,27 @@ declare function m:create($pipelineName as xs:string,$data as element()*,$attach
 };
 
 (:
+ : You must create one or more CPF domains for folders or collections that alerts can be evaluated within.
+ :)
+declare function m:createAlertingDomain($name as xs:string,$type as xs:string,$path as xs:string,$depth as xs:string) as xs:unsignedLong {
+  ss:create-domain($name,$type,$path,$depth,("Status Change Handling","Alerting"),xdmp:database-name(xdmp:modules-database()))
+};
+
+(:
  : Create a new process subscription
  :)
-declare function m:createSubscription($pipelineName as xs:string,$name as xs:string,$query as element(cts:query)) as xs:string {
-  ss:add-alert($name,$query,(),"/app/models/alert-action-process.xqy",(),(<wf:process-name>{$pipelineName}</wf:process-name>))
+declare function m:createSubscription($pipelineName as xs:string,$name as xs:string,$domainname as xs:string,$query as cts:query) as xs:string {
+  let $alert-uri := ss:add-alert($name,$query,(),"/app/models/alert-action-process.xqy",xdmp:database-name(xdmp:modules-database()),
+    (<wf:process-name>{$pipelineName}</wf:process-name>))
+  let $alert-enabled := ss:cpf-enable($alert-uri,$domainname)
+  return $alert-uri
+};
+
+(:
+ : Fetches a process subscription
+ :)
+declare function m:getSubscription($name as xs:string) as element()? {
+  ss:get-alert("/config/alerts/" || $name)
 };
 
 (:
@@ -151,7 +168,27 @@ declare function m:roleinbox($role as xs:string) as element(wf:queue) {
   </wf:queue>
 };
 
-
+(:
+ : Lists all processes, or all those with a specific PROCESS__MAJOR__MINOR name
+ :)
+declare function m:list($processName as xs:string?) as element(wf:list) {
+  <wf:list>
+  {
+    for $process in cts:search(fn:collection("http://marklogic.com/workflow/processes"),
+      cts:and-query(
+        if (fn:not(fn:empty($processName))) then
+          cts:element-attribute-value-query(xs:QName("wf:process"),xs:QName("title"),$processName)
+        else
+          cts:not-query(())
+      ),("unfiltered") (: TODO ordering, prioritisation support, and so on :)
+    )
+    return
+      <wf:listitem processid="{xs:string($process/wf:process/@id)}">
+        {$process}
+      </wf:listitem>
+  }
+  </wf:list>
+};
 
 
 
