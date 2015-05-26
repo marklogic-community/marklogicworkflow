@@ -22,6 +22,10 @@ sleep 15
 . ./11-process-update.sh
 . ./12-process-read.sh
 
+sleep 15
+
+. ./13-process-update.sh
+. ./14-process-read.sh
 
 sleep 5
 

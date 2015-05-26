@@ -565,6 +565,8 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
               "queue"
             else if ($state/b2:resourceRole/@name = "Role") then
               "role"
+            else if (fn:not(fn:empty($state/b2:humanPerformer))) then
+              "dynamicUser"
             else
               "unknown"
           let $userResource := ($state/b2:resourceRole[@name = "Assignee"])[1]/b2:resourceRef/text()
@@ -573,6 +575,7 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
           let $queue := xs:string($doc/b2:resource[@id = $queueResource]/@name)
           let $roleResource := ($state/b2:resourceRole[@name = "Role"])[1]/b2:resourceRef/text()
           let $role := xs:string($doc/b2:resource[@id = $roleResource]/@name)
+          let $dynamicUser := xs:string($state/b2:humanPerformer/b2:resourceAssignmentExpression/b2:formalExpression)
 
           let $route := xs:string($state/b2:outgoing[1]) (: TODO support split here? :)
           let $rc :=
@@ -603,6 +606,9 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
                       }
                       {
                         if (fn:not(fn:empty($role))) then <wf:role>{$role}</wf:role> else ()
+                      }
+                      {
+                        if (fn:not(fn:empty($dynamicUser))) then <wf:dynamicUser>{$dynamicUser}</wf:dynamicUser> else ()
                       }
                       <wf:state>{xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)||"__complete")}</wf:state>
                     </p:options>

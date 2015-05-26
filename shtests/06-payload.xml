@@ -3,6 +3,7 @@
   <ext:data>
     <choiceA>B</choiceA>
     <choiceB>C</choiceB>
+    <newassignee>admin</newassignee>
   </ext:data>
   <ext:attachments>
     <wf:attachment name="Menace" uri="/some/squid.xml" />

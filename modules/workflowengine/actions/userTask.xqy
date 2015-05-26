@@ -31,7 +31,19 @@ try {
   (xdmp:log("IN USER TASK ACTION: " || $cpf:document-uri),xdmp:log($cpf:options),
   xdmp:document-set-property($cpf:document-uri,
     <wf:currentStep>
-      {$cpf:options/*}
+      {
+        if (fn:not(fn:empty($cpf:options/wf:dynamicUser))) then
+          let $ns := ($cpf:options/wf:namespaces/wf:namespace,<wf:namespace short="wf" long="http://marklogic.com/workflow" />)
+          return
+          (: decide who the user is now :)
+          (
+            <wf:user>{wfu:evaluate($cpf:document-uri,$ns,xs:string($cpf:options/wf:dynamicUser))}</wf:user>,
+            $cpf:options/wf:type,
+            $cpf:options/wf:state
+          )
+        else
+          $cpf:options/*
+      }
       <wf:startTime>{fn:current-dateTime()}</wf:startTime>
       <wf:step-type>userTask</wf:step-type>
       <wf:step-status>ENTERED</wf:step-status>
