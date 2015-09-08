@@ -11,7 +11,7 @@ declare namespace roxy = "http://marklogic.com/roxy";
 
 
 (:
- : Get the process asset by exact name and version. Will return top level default is no versioned asset exists.
+ : Get the process asset by exact name and version. Will return top level default if no versioned asset exists.
  :  ?asset=name&model=name[&major=numeric[&minor=numeric]]
  :  E.g. ?asset=RejectedEmail.txt&model=021-initiating-attachment&majorversion=1&minorversion=0
  :  TODO if no asset name specific, list assets for process model

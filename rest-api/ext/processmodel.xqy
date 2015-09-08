@@ -2,6 +2,8 @@ xquery version "1.0-ml";
 
 module namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 
+import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
+
 import module namespace wfi="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
 
@@ -34,7 +36,11 @@ function ext:get(
             if ("application/xml" = $preftype) then
               $out
             else
-              "{TODO:'TODO'}"
+              let $config := json:config("custom")
+              let $cx := map:put($config, "text-value", "label" )
+              let $cx := map:put($config , "camel-case", fn:true() )
+              return
+                json:transform-to-json($out, $config)
 
     }
   )
@@ -79,7 +85,11 @@ function ext:put(
         if ("application/xml" = $preftype) then
           $out
         else
-          "{TODO:'TODO'}"
+          let $config := json:config("custom")
+          let $cx := map:put($config, "text-value", "label" )
+          let $cx := map:put($config , "camel-case", fn:true() )
+          return
+            json:transform-to-json($out, $config)
     }
 
   )
@@ -119,7 +129,11 @@ function ext:post(
         if ("application/xml" = $preftype) then
           $out
         else
-          "{TODO:'TODO'}"
+          let $config := json:config("custom")
+          let $cx := map:put($config, "text-value", "label" )
+          let $cx := map:put($config , "camel-case", fn:true() )
+          return
+            json:transform-to-json($out, $config)
     }
 
   )
@@ -148,7 +162,11 @@ declare function ext:delete(
             if ("application/xml" = $preftype) then
               $out
             else
-              "{TODO:'TODO'}"
+              let $config := json:config("custom")
+              let $cx := map:put($config, "text-value", "label" )
+              let $cx := map:put($config , "camel-case", fn:true() )
+              return
+                json:transform-to-json($out, $config)
 
 
    })
