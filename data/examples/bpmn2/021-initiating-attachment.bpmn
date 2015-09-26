@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- origin at X=0.0 Y=0.0 -->
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ext="http://org.eclipse.bpmn2/ext" xmlns:ns1="http://www.example.org/BPMNTestProcessData" xmlns:ns.xsd="http://www.example.org/BPMNTestProcessData" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="Definitions_1" exporter="org.eclipse.bpmn2.modeler.core" exporterVersion="1.1.3.201503241414" targetNamespace="http://marklogic.com/workflow">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ext="http://org.eclipse.bpmn2/ext" xmlns:ns1="http://www.example.org/BPMNTestProcessData" xmlns:ns.xsd="http://www.example.org/BPMNTestProcessData" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="Definitions_1" exporter="org.eclipse.bpmn2.modeler.core" exporterVersion="1.1.4.201509111742" targetNamespace="http://marklogic.com/workflow">
   <bpmn2:import importType="http://www.w3.org/2001/XMLSchema" location="platform:/resource/MarkLogic%20Workflow/data/definitions/BPMNTestProcessData.xsd" namespace="http://www.example.org/BPMNTestProcessData"/>
-  <bpmn2:itemDefinition id="ItemDefinition_1_1" isCollection="false" structureRef="ns1__choiceA"/>
   <bpmn2:itemDefinition id="_ItemDefinition_6" isCollection="false" structureRef="ns1:choiceA"/>
   <bpmn2:itemDefinition id="_ItemDefinition_7" isCollection="false" structureRef="ns1:choiceB"/>
   <bpmn2:itemDefinition id="ItemDefinition_1" isCollection="false" structureRef="ns.xsd:choiceA"/>
@@ -215,9 +214,9 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_TextAnnotation_2" bpmnElement="TextAnnotation_2">
-        <dc:Bounds height="100.0" width="261.0" x="290.0" y="70.0"/>
+        <dc:Bounds height="111.0" width="261.0" x="290.0" y="70.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_11">
-          <dc:Bounds height="94.0" width="249.0" x="296.0" y="73.0"/>
+          <dc:Bounds height="105.0" width="249.0" x="296.0" y="70.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_UserTask_1" bpmnElement="UserTask_1">
@@ -314,9 +313,8 @@
         <bpmndi:BPMNLabel id="BPMNLabel_24" labelStyle="BPMNLabelStyle_1"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_Association_2" bpmnElement="Association_2" sourceElement="BPMNShape_TextAnnotation_2" targetElement="BPMNShape_ExclusiveGateway_1">
-        <di:waypoint xsi:type="dc:Point" x="420.0" y="170.0"/>
-        <di:waypoint xsi:type="dc:Point" x="420.0" y="198.0"/>
-        <di:waypoint xsi:type="dc:Point" x="420.0" y="198.0"/>
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="181.0"/>
+        <di:waypoint xsi:type="dc:Point" x="420.0" y="200.0"/>
         <di:waypoint xsi:type="dc:Point" x="420.0" y="233.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_25" labelStyle="BPMNLabelStyle_1"/>
       </bpmndi:BPMNEdge>

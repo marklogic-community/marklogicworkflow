@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- origin at X=0.0 Y=0.0 -->
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns1="http://www.example.org/BPMNTestProcessData" xmlns:ns2="http://marklogic.com/workflow" xmlns:ns.xsd="http://marklogic.com/workflow" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="Definitions_1" exporter="org.eclipse.bpmn2.modeler.core" exporterVersion="1.1.3.201503241414" targetNamespace="http://marklogic.com/workflow">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns1="http://www.example.org/BPMNTestProcessData" xmlns:ns2="http://marklogic.com/workflow" xmlns:ns.xsd="http://marklogic.com/workflow" xmlns:xs="http://www.w3.org/2001/XMLSchema" id="Definitions_1" exporter="org.eclipse.bpmn2.modeler.core" exporterVersion="1.1.3.Final" targetNamespace="http://marklogic.com/workflow">
   <bpmn2:import importType="http://www.w3.org/2001/XMLSchema" location="platform:/resource/MarkLogic%20Workflow/documentation/marklogicworkflow.xsd" namespace="http://marklogic.com/workflow"/>
-  <bpmn2:itemDefinition id="ItemDefinition_1_1" isCollection="false" structureRef="ns1_schema"/>
+  <bpmn2:itemDefinition id="ItemDefinition_4" isCollection="false" structureRef="ns1_schema"/>
   <bpmn2:itemDefinition id="ItemDefinition_2" isCollection="false" structureRef="ns2__process"/>
-  <bpmn2:itemDefinition id="_ItemDefinition_2" isCollection="false" structureRef="process"/>
   <bpmn2:itemDefinition id="ItemDefinition_3" isCollection="false" structureRef="ns2__attachmentType_uri"/>
   <bpmn2:itemDefinition id="ItemDefinition_1" isCollection="false" structureRef="process"/>
   <bpmn2:signal id="Signal_1" name="InitiatingAttachment" structureRef="ItemDefinition_3"/>

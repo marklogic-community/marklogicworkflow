@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- origin at X=0.0 Y=0.0 -->
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns="http://www.w3.org/2001/XMLSchema" id="Definitions_1" exporter="org.eclipse.bpmn2.modeler.core" exporterVersion="1.1.3.201504140132" targetNamespace="http://marklogic.com/workflow">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns="http://www.w3.org/2001/XMLSchema" id="Definitions_1" exporter="org.eclipse.bpmn2.modeler.core" exporterVersion="1.1.4.201509111742" targetNamespace="http://marklogic.com/workflow">
+  <bpmn2:itemDefinition id="ItemDefinition_1" isCollection="false" structureRef="xs:string"/>
+  <bpmn2:message id="Message_1" itemRef="ItemDefinition_1" name="InitiatingAttachment"/>
   <bpmn2:interface id="Interface_1" implementationRef="MarkLogic" name="MarkLogic">
-    <bpmn2:operation id="_Operation_3" implementationRef="LaunchDomain" name="LaunchDomain"/>
+    <bpmn2:operation id="_Operation_3" implementationRef="LaunchDomain" name="LaunchDomain">
+      <bpmn2:inMessageRef>Message_1</bpmn2:inMessageRef>
+    </bpmn2:operation>
   </bpmn2:interface>
   <bpmn2:process id="domain" name="Domain Launched" isExecutable="true" processType="Public">
     <bpmn2:startEvent id="StartEvent_1">
       <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
-      <bpmn2:dataOutput id="DataOutput_1" name="Message_1_Output"/>
+      <bpmn2:dataOutput id="DataOutput_1" itemSubjectRef="ItemDefinition_1" name="Message_1_Output"/>
       <bpmn2:dataOutputAssociation id="DataOutputAssociation_1">
         <bpmn2:sourceRef>DataOutput_1</bpmn2:sourceRef>
+        <bpmn2:targetRef>Property_1</bpmn2:targetRef>
       </bpmn2:dataOutputAssociation>
       <bpmn2:outputSet id="OutputSet_1" name="Output Set 1">
         <bpmn2:dataOutputRefs>DataOutput_1</bpmn2:dataOutputRefs>
       </bpmn2:outputSet>
-      <bpmn2:messageEventDefinition id="MessageEventDefinition_1">
+      <bpmn2:messageEventDefinition id="MessageEventDefinition_1" messageRef="Message_1">
         <bpmn2:operationRef>_Operation_3</bpmn2:operationRef>
       </bpmn2:messageEventDefinition>
     </bpmn2:startEvent>
@@ -27,6 +32,7 @@
       <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:sequenceFlow id="SequenceFlow_2" sourceRef="Task_1" targetRef="EndEvent_1"/>
+    <bpmn2:property id="Property_1" itemSubjectRef="ItemDefinition_1" name="InitiatingAttachment"/>
     <bpmn2:textAnnotation id="TextAnnotation_1">
       <bpmn2:text>Start event includes a Message definition, configured for a MarkLogic LaunchDomain. This is a CPF Domain linked to a URI folder (depth 1) for a particular process data document. (NOT an initiating attachment - see 021-initiating-attachment for that)</bpmn2:text>
     </bpmn2:textAnnotation>
@@ -49,9 +55,9 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_TextAnnotation_1" bpmnElement="TextAnnotation_1">
-        <dc:Bounds height="100.0" width="291.0" x="160.0" y="180.0"/>
+        <dc:Bounds height="81.0" width="291.0" x="160.0" y="180.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_4">
-          <dc:Bounds height="94.0" width="279.0" x="166.0" y="183.0"/>
+          <dc:Bounds height="75.0" width="279.0" x="166.0" y="180.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="SequenceFlow_1" sourceElement="BPMNShape_1" targetElement="BPMNShape_Task_1">
@@ -66,8 +72,8 @@
         <bpmndi:BPMNLabel id="BPMNLabel_6" labelStyle="BPMNLabelStyle_1"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_Association_1" bpmnElement="Association_1" sourceElement="BPMNShape_TextAnnotation_1" targetElement="BPMNShape_1">
-        <di:waypoint xsi:type="dc:Point" x="160.0" y="230.0"/>
-        <di:waypoint xsi:type="dc:Point" x="118.0" y="230.0"/>
+        <di:waypoint xsi:type="dc:Point" x="160.0" y="220.0"/>
+        <di:waypoint xsi:type="dc:Point" x="118.0" y="220.0"/>
         <di:waypoint xsi:type="dc:Point" x="118.0" y="136.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_7" labelStyle="BPMNLabelStyle_1"/>
       </bpmndi:BPMNEdge>

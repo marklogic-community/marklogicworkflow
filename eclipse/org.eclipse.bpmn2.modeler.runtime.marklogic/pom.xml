@@ -20,7 +20,7 @@
 
   <groupId>org.eclipse.bpmn2.modeler.plugins</groupId>
   <artifactId>org.eclipse.bpmn2.modeler.runtime.marklogic.workflow</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   <name>BPMN2 Modeler Plugins: MarkLogic Workflow Runtime</name>
   <description>BPMN2 Modeler Runtime Specialization for MarkLogic Workflow</description>
