@@ -114,7 +114,12 @@ declare function m:inbox($username as xs:string?) as element(wf:inbox) {
     )
     return
       <wf:task processid="{xs:string($process/wf:process/@id)}">
-        {$process}
+        <wf:process-data>
+        {$process/wf:process}
+        </wf:process-data>
+        <wf:process-properties>
+        {xdmp:properties-document(fn:base-uri($process))}
+        </wf:process-properties>
       </wf:task>
   }
   </wf:inbox>
@@ -138,7 +143,12 @@ declare function m:queue($queue as xs:string) as element(wf:queue) {
     )
     return
       <wf:task processid="{xs:string($process/wf:process/@id)}">
-        {$process}
+        <wf:process-data>
+        {$process/wf:process}
+        </wf:process-data>
+        <wf:process-properties>
+        {xdmp:properties-document(fn:base-uri($process))}
+        </wf:process-properties>
       </wf:task>
   }
   </wf:queue>
@@ -162,7 +172,12 @@ declare function m:roleinbox($role as xs:string) as element(wf:queue) {
     )
     return
       <wf:task processid="{xs:string($process/wf:process/@id)}">
-        {$process}
+        <wf:process-data>
+        {$process/wf:process}
+        </wf:process-data>
+        <wf:process-properties>
+        {xdmp:properties-document(fn:base-uri($process))}
+        </wf:process-properties>
       </wf:task>
   }
   </wf:queue>
@@ -184,7 +199,12 @@ declare function m:list($processName as xs:string?) as element(wf:list) {
     )
     return
       <wf:listitem processid="{xs:string($process/wf:process/@id)}">
-        {$process}
+        <wf:process-data>
+        {$process/wf:process}
+        </wf:process-data>
+        <wf:process-properties>
+        {xdmp:properties-document(fn:base-uri($process))}
+        </wf:process-properties>
       </wf:listitem>
   }
   </wf:list>
