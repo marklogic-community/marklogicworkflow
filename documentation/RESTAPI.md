@@ -58,14 +58,14 @@ E.g. for process administration and debugging purposes, or for a 'process histor
 
 Various endpoints have been created to initiate new process instances and manage the process engine.
 
-- TEST PUT /v1/resource/process - starts a new instance of a workflow
-- TEST GET /v1/resource/process - Fetches the current process status, and optionally the current process step definition and data (allows a human step to be rendered)
-- TEST POST /v1/resource/process - Completes a human process step and provides data to map to the step. Optionally also used to kick a process from an admin interface.
-- DELETE /v1/resource/process - Kills a process instance
-- GET /v1/resource/processinbox - Fetches the currently logged in user's work inbox (any human steps assigned to the current user) - summary level info only
-- GET /v1/resource/processstack - Fetches a list of, or human process steps assigned to, shared workflow work stacks - DO NOT IMPLEMENT use options on processinbox instead
-- POST /v1/resource/processstack - Used to lock a process instance for a particular user, or remove a lock - DO NOT IMPLEMENT use options on processinbox instead
-- GET /v1/resource/processsearch - Search API compatible interface that restricts results to process instances
+- DONE PUT /v1/resources/process - starts a new instance of a workflow
+- DONE GET /v1/resources/process - Fetches the current process status, and optionally the current process step definition and data (allows a human step to be rendered)
+- DONE POST /v1/resources/process - Completes a human process step and provides data to map to the step. Optionally also used to kick a process from an admin interface.
+- TODO DELETE /v1/resources/process - Kills a process instance
+- DONE GET /v1/resources/processinbox - Fetches the currently logged in user's work inbox (any human steps assigned to the current user) - summary level info only
+- DONE GET /v1/resources/processqueue - Fetches a list of, or human process steps assigned to, shared workflow work stacks - DO NOT IMPLEMENT use options on processinbox instead
+- TODO POST /v1/resources/processqueue - Used to lock a process instance for a particular user, or remove a lock - DO NOT IMPLEMENT use options on processinbox instead
+- TEST GET /v1/resources/processsearch - Search API compatible interface that restricts results to process instances
 
-- GET /v1/resource/processengine - Fetches the currently executing processes and their status, and general CPF running information, and installed processes
-- DELETE /v1/resource/processengine - Stops all MarkLogic Workflow (but NOT all CPF) processes, moving them by force to the 'killed' state
+- TEST GET /v1/resources/processengine - Fetches the currently executing processes and their status, and general CPF running information, and installed processes
+- TEST DELETE /v1/resources/processengine - Stops all MarkLogic Workflow (but NOT all CPF) processes, moving them by force to the 'killed' state
