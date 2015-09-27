@@ -40,6 +40,17 @@ sleep 5
 . ./28-processsearch-read.sh
 
 
+
+
+
+
+
+sleep 5
+# All the below are final tests, to be executed at the end of all tests only
+
+. ./91-processengine-read.sh
+
+
 # . ./x05-processmodel-delete.sh
 
 echo "Completed all tests for MarkLogic Workflow"
