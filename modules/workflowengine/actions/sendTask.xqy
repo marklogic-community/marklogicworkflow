@@ -41,7 +41,7 @@ try {
   let $_ := xdmp:log($message)
 
 
-  let $messageText := wfu:getProcessAsset($cpf:document-uri,$message || ".txt")/text() (: This is a text file!!! Not XML :)
+  let $messageText := wfu:getProcessInstanceAsset($cpf:document-uri,$message || ".txt")/text() (: This is a text file!!! Not XML :)
   let $_ := xdmp:log($messageText)
 
   (: Perform replacements across returned content :)
