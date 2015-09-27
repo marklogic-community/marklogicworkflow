@@ -64,8 +64,8 @@ public class NewCPFProcessWizard extends Wizard implements INewWizard {
 	private NewCPFProcessWizardPage1 page;
 	private ISelection selection;
 	private String processName;
-	private String processId;
-	private String packageName;
+	//private String processId;
+	//private String packageName;
 	private boolean isSetWorkflowRuntime;
 	//private MultiPageEditorPart p;
 
@@ -101,8 +101,8 @@ public class NewCPFProcessWizard extends Wizard implements INewWizard {
 		final String containerName = page.getContainerName();
 		final String fileName = page.getFileName();
 		processName = page.getProcessName();
-		processId = page.getProcessId();
-		packageName = page.getPackageName();
+		//processId = page.getProcessId();
+		//packageName = page.getPackageName();
 		isSetWorkflowRuntime = page.isSetWorkflowRuntime();
 		
 		IRunnableWithProgress op = new IRunnableWithProgress() {
@@ -206,7 +206,7 @@ public class NewCPFProcessWizard extends Wizard implements INewWizard {
 			"	targetNamespace=\"http://marklogic.com/cpf\"\n>"+ //$NON-NLS-1$
 			"\n"+ //$NON-NLS-1$
 			"  <bpmn2:process processType=\"Public\" isExecutable=\"true\""+ //$NON-NLS-1$
-			" id=\""+processId+"\""+ //$NON-NLS-1$ //$NON-NLS-2$
+			" id=\""+processName+"\""+ //$NON-NLS-1$ //$NON-NLS-2$
 			" name=\""+processName+"\""+ //$NON-NLS-1$ //$NON-NLS-2$
 			" >\n"+ //$NON-NLS-1$
 			
@@ -227,7 +227,7 @@ public class NewCPFProcessWizard extends Wizard implements INewWizard {
 			"\n"+ //$NON-NLS-1$
 			"  <bpmndi:BPMNDiagram>\n"+ //$NON-NLS-1$
 			
-		    "<bpmndi:BPMNPlane id=\"BPMNPlane_Process_1\" bpmnElement=\""+processId+"\">\n"+ //$NON-NLS-1$
+		    "<bpmndi:BPMNPlane id=\"BPMNPlane_Process_1\" bpmnElement=\""+processName+"\">\n"+ //$NON-NLS-1$
 		    "  <bpmndi:BPMNShape id=\"BPMNShape_StartEvent_1\" bpmnElement=\"StartEvent_1\">\n"+ //$NON-NLS-1$
 		    "    <dc:Bounds height=\"0.0\" width=\"0.0\" x=\"45.0\" y=\"45.0\"/>\n"+ //$NON-NLS-1$
 		    "    <bpmndi:BPMNLabel id=\"BPMNLabel_1\">\n"+ //$NON-NLS-1$
