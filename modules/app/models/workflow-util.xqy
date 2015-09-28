@@ -276,13 +276,17 @@ declare function m:complete($processUri as xs:string,$transition as node(),$stat
   let $_ := xdmp:log("  transition")
   let $_ := xdmp:log($transition)
 
+
+  (: check if we're in a subprocess, and check RV status on parent :)
+  let $audit-detail := m:rendezvous($processUri)
+
   (: clean up BPMN2 activity step properties :)
   let $cs := xdmp:document-properties($processUri)/prop:properties/wf:currentStep
   let $_ := if (fn:not(fn:empty($cs))) then xdmp:node-delete($cs) else ()
 
   let $_ := m:metric($processUri,$transition/p:state/text(),$startTime,fn:current-dateTime(),fn:true())
   (: Add audit event :)
-  let $_ := m:audit($processUri,$transition/p:state/text(),"ProcessEngine","Completed step",())
+  let $_ := m:audit($processUri,$transition/p:state/text(),"ProcessEngine","Completed step",$audit-detail)
   return
     (: Call CPF Success with next state :)
     (: ( :)
@@ -370,6 +374,92 @@ declare function m:metric($processUri as xs:string,$state as xs:string,$start as
     <wf:success>{$success}</wf:success></wf:metric>
   )
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(: BRANCHING, LOOPING, FORKING, AND RENDEZVOUS FUNCTIONS :)
+declare function m:branch($branchid as xs:string, $pipeline as xs:string,$status as xs:string?) as element(wf:branch) {
+  <wf:branch>
+    <wf:branch>{$branchid}</wf:branch>
+    <wf:pipeline>{$pipeline}</wf:pipeline>
+    <wf:status>{($status,"INPROGRESS")[1]}</wf:status>
+  </wf:branch>
+};
+
+declare function m:branches($branches as element(wf:branch)*,$rvmethod as xs:string) as element(wf:branches) {
+  <wf:branches>
+    <wf:rendezvous-method>{$rvmethod}</wf:rendezvous-method>
+    {$branches}
+  </wf:branches>
+};
+
+declare function m:fork($processUri as xs:string,$branches as element(wf:branches)) as empty-sequence() {
+  (: TODO complete method :)
+  (: Create document instance for each branch (under its current process name's version folder) :)
+  (: map over parent URI and (optional) loop count :)
+
+
+  (: Update parent process' properties to include passed in $branches settings, and parent status to INPROGRESS :)
+  let $parent-update-status := xdmp:document-set-property($processUri,
+    <wf:currentStep>
+      <wf:startTime>{fn:current-dateTime()}</wf:startTime>
+      <wf:step-type>fork</wf:step-type>
+      <wf:step-status>INPROGRESS</wf:step-status>
+    </wf:currentStep>
+  )
+  let $parent-update-branches := xdmp:document-set-property($processUri,$branches)
+
+  return ()
+};
+
+declare function m:rendezvous($childProcessUri as xs:string) as element()* {
+  (: TODO complete method :)
+  (: Check if parent URI property exists :)
+  (: Update parent branch for this child instance :)
+  (: Check if parent complete (don't forget there will be 1 incomplete child - this process instance! ACID!) :)
+  (: Get parent wf:branches element (with me complete) and return for audit purposes :)
+  ()
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 (:
  : The below has been replaced by an eval (m:evaluate), which bypasses the string replacement approach
