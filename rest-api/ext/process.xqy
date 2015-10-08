@@ -17,6 +17,8 @@ import module namespace wfa="http://marklogic.com/workflow-actions" at "/app/mod
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
 
+declare namespace rapi = "http://marklogic.com/rest-api";
+
 (:
  : To add parameters to the functions, specify them in the params annotations.
  : Example
@@ -135,6 +137,7 @@ function ext:get(
 (: POST - update a process instance, potentially completing it (e.g. human step) :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:post(
    $context as map:map,
    $params  as map:map,

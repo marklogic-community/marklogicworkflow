@@ -65,6 +65,62 @@ declare function m:get-model-by-name($name as xs:string) as node() {
   return fn:doc($uri)
 };
 
+declare function m:ensureWorkflowPipelinesInstalled() as empty-sequence() {
+  (: first check if pipeline does not exist :)
+  let $name := "MarkLogic Workflow Initial Selection"
+  return
+  try {
+    let $pexists := xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:name as xs:string external;p:get($m:name)',
+      (xs:QName("wf:name"),$name),
+      <options xmlns="xdmp:eval">
+        <database>{xdmp:triggers-database()}</database>
+        <isolation>different-transaction</isolation>
+      </options>
+    )
+    return ()
+  } catch ($e) {
+    (: Install pipeline as it must be missing :)
+
+    let $failureAction := p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),())
+    let $wfInitialPid :=
+          xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:name as xs:string external;'
+            ||
+            'p:create($m:name,$m:name,p:action("/MarkLogic/cpf/actions/success-action.xqy",(),()),p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),()),() (: status transitions :) ,('
+            ||
+            'p:state-transition(xs:anyURI("http://marklogic.com/states/initial"),"",(),xs:anyURI("http://marklogic.com/states/error"),(),p:action("/workflowengine/actions/workflowInitialSelection.xqy","BPMN2 Workflow initial process step selection",()),())'
+            || ') (: state transitions :)) '
+            ,
+            (xs:QName("wf:name"),$name),
+            <options xmlns="xdmp:eval">
+              <database>{xdmp:triggers-database()}</database>
+              <isolation>different-transaction</isolation>
+            </options>
+          )
+    let $_ := xdmp:log("Installing workflow initial pipeline " || $name)
+    let $_ := xdmp:log($wfInitialPid)
+    let $wfInitial :=
+      xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:name as xs:string external;p:get($m:name)',
+        (xs:QName("wf:name"),$name),
+        <options xmlns="xdmp:eval">
+          <database>{xdmp:triggers-database()}</database>
+          <isolation>different-transaction</isolation>
+        </options>
+      )
+    let $_ := xdmp:log("Workflow initial pipeline XML:-")
+    let $_ := xdmp:log($wfInitial)
+    let $installedPipelinePid :=
+
+      xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:xml as element(p:pipeline) external;p:insert($m:xml)',
+        (xs:QName("wf:xml"),$wfInitial),
+        <options xmlns="xdmp:eval">
+          <database>{xdmp:triggers-database()}</database>
+          <isolation>different-transaction</isolation>
+        </options>
+      )
+    return ()
+  } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
+};
+
 
 declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as xs:string* {
   (: Find document :)
@@ -81,6 +137,8 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
     )
   let $_ := xdmp:log("In wfi:convert-to-cpf: pipeline map:-")
   let $_ := xdmp:log($pmap)
+
+  let $_ := m:ensureWorkflowPipelinesInstalled()
 
   (:
    : Get the above to return the pipeline map and domain specs
@@ -350,7 +408,7 @@ declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$
       ||
       'dom:create($m:pname,"Execute process given a process data document for "||$m:pname,'
       ||
-      'dom:domain-scope("directory","/workflow/processes/"||$m:pname||"/","0"),dom:evaluation-context($m:mdb,"/"),(xs:unsignedLong(p:pipelines()[p:pipeline-name = "Status Change Handling"]/p:pipeline-id),$m:pid),())'
+      'dom:domain-scope("directory","/workflow/processes/"||$m:pname||"/","1"),dom:evaluation-context($m:mdb,"/"),((for $pipe in p:pipelines()[p:pipeline-name = ("Status Change Handling","MarkLogic Workflow Initial Selection")]/p:pipeline-id return xs:unsignedLong($pipe)),$m:pid),())'
       ||
       ')'
       ,
@@ -543,7 +601,7 @@ declare function m:b2pipeline($rootName as xs:string, $parentStep as xs:string?,
 
 (: NOTE: I suspect this is (NB IT IS) required for each pipeline, as technically each will have its own domain watching its own
    process' or sub-process' folder - not be invoked directly via the main process - each is independent with its own tracking doc :)
-            p:state-transition(xs:anyURI("http://marklogic.com/states/initial"), (: TOP LEVEL PROCESS ONLY!!! :)
+            p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"__start"), (: TOP LEVEL PROCESS ONLY!!! :)
               "Standard placeholder for initial state",xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($initial/@id)),
               $failureState,(),(),()
             )
