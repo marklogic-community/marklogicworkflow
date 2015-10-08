@@ -16,9 +16,14 @@ try {
   let $props := xdmp:document-properties($cpf:document-uri)/prop:properties
   let $_ := xdmp:log($props)
 
-  (: Allow state transition to happen :)
+  (: wf:state in cpf:options MAY contain an override of the next state :)
+  let $stateOverride :=
+    if (fn:not(fn:empty($cpf:options/wf:state))) then
+      xs:anyURI(xs:string($cpf:options/wf:state))
+    else ()
 
-  return wfu:complete( $cpf:document-uri, $cpf:transition, (), $st )
+  (: Allow state transition to happen :)
+  return wfu:complete( $cpf:document-uri, $cpf:transition, $stateOverride, $st )
 } catch ($e) {
   wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

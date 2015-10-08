@@ -16,7 +16,7 @@ declare namespace error="http://marklogic.com/xdmp/error";
 (:
  : Create a new process and activate it.
  :)
-declare function m:create($pipelineName as xs:string,$data as element()*,$attachments as element()*) as xs:string {
+declare function m:create($pipelineName as xs:string,$data as element()*,$attachments as element()*,$parent as xs:string?,$forkid as xs:string?,$branchid as xs:string?) as xs:string {
   let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
   let $uri := "/workflow/processes/"||$pipelineName||"/"||$id || ".xml"
   let $_ :=
@@ -26,11 +26,24 @@ declare function m:create($pipelineName as xs:string,$data as element()*,$attach
     <wf:attachments>{$attachments}</wf:attachments>
     <wf:audit-trail></wf:audit-trail>
     <wf:metrics></wf:metrics>
+    <wf:process-definition-name>{$pipelineName}</wf:process-definition-name>
+    {if (fn:not(fn:empty($parent))) then <wf:parent>{$parent}</wf:parent> else ()}
+    {if (fn:not(fn:empty($forkid))) then <wf:forkid>{$forkid}</wf:forkid> else ()}
+    {if (fn:not(fn:empty($branchid))) then <wf:branchid>{$branchid}</wf:branchid> else ()}
   </wf:process>,
   xdmp:default-permissions(),
   (xdmp:default-collections(),"http://marklogic.com/workflow/processes")
   )
   return $id
+};
+
+(:
+ : Convenience function to take a few parameters and set up the above call to m:create (removes this logic from multiple functions)
+ :)
+declare function m:createSubProcess($parentProcessUri as xs:string,$forkid as xs:string,$subProcessStatus as element(wf:branch-status)) as xs:string {
+  let $parent := fn:doc($parentProcessUri)/wf:process
+  let $pipelineName := xs:string($parent/wf:process-definition-name) || "/" || xs:string($subProcessStatus/wf:branch)
+  return m:create($pipelineName,<data>{$parent/wf:data}</data>/*,<data>{$parent/wf:attachments}</data>/*,$parentProcessUri,$forkid,xs:string($subProcessStatus/wf:branch))
 };
 
 (:
@@ -167,7 +180,7 @@ declare function m:inbox($username as xs:string?) as element(wf:inbox) {
         {$process/wf:process}
         </wf:process-data>
         <wf:process-properties>
-        {xdmp:properties-document(fn:base-uri($process))}
+        {xdmp:document-properties(fn:base-uri($process))}
         </wf:process-properties>
       </wf:task>
   }
@@ -196,7 +209,7 @@ declare function m:queue($queue as xs:string) as element(wf:queue) {
         {$process/wf:process}
         </wf:process-data>
         <wf:process-properties>
-        {xdmp:properties-document(fn:base-uri($process))}
+        {xdmp:document-properties(fn:base-uri($process))}
         </wf:process-properties>
       </wf:task>
   }
@@ -225,7 +238,7 @@ declare function m:roleinbox($role as xs:string) as element(wf:queue) {
         {$process/wf:process}
         </wf:process-data>
         <wf:process-properties>
-        {xdmp:properties-document(fn:base-uri($process))}
+        {xdmp:document-properties(fn:base-uri($process))}
         </wf:process-properties>
       </wf:task>
   }
@@ -252,7 +265,7 @@ declare function m:list($processName as xs:string?) as element(wf:list) {
         {$process/wf:process}
         </wf:process-data>
         <wf:process-properties>
-        {xdmp:properties-document(fn:base-uri($process))}
+        {xdmp:document-properties(fn:base-uri($process))}
         </wf:process-properties>
       </wf:listitem>
   }
@@ -277,8 +290,12 @@ declare function m:complete($processUri as xs:string,$transition as node(),$stat
   let $_ := xdmp:log($transition)
 
 
-  (: check if we're in a subprocess, and check RV status on parent :)
-  let $audit-detail := m:rendezvous($processUri)
+  (: check if we're in a subprocess, AND we are completing the last step (_end), and update just our RV status on parent :)
+  (: Performance improvement - only update parent if status has changed :)
+  let $audit-detail :=
+    if (fn:substring($transition/name,fn:string-length($transition/name) - 3) = "_end") then
+      m:updateStatusInParent($processUri)
+    else ()
 
   (: clean up BPMN2 activity step properties :)
   let $cs := xdmp:document-properties($processUri)/prop:properties/wf:currentStep
@@ -394,30 +411,61 @@ declare function m:metric($processUri as xs:string,$state as xs:string,$start as
 
 
 
+
+
+
+(: STEP SPECIFIC INFO :)
+
+
+
+
 (: BRANCHING, LOOPING, FORKING, AND RENDEZVOUS FUNCTIONS :)
-declare function m:branch($branchid as xs:string, $pipeline as xs:string,$status as xs:string?) as element(wf:branch) {
-  <wf:branch>
+(:
+ : Note that the branchid holds a unique ID for this branch INSTANCE not the branch name. Branch name is derived
+ : from the pipeline element. Status generally initialised to INPROGRESS. Could become COMPLETE or FAILED or ABANDONED
+ :)
+declare function m:branch-status($branchid as xs:string, $pipeline as xs:string,$status as xs:string?) as element(wf:branch) {
+  <wf:branch-status>
     <wf:branch>{$branchid}</wf:branch>
     <wf:pipeline>{$pipeline}</wf:pipeline>
     <wf:status>{($status,"INPROGRESS")[1]}</wf:status>
-  </wf:branch>
+  </wf:branch-status>
 };
 
-declare function m:branches($branches as element(wf:branch)*,$rvmethod as xs:string) as element(wf:branches) {
+(:
+ : Possible for multiple rendezvous methods to be needed. What this is set as will depend upon the cpf:options
+ : configuration passed via m:fork and the fork action.
+ : Example: All (Wait for all to be complete),
+ :          AllTolerant (wait for all to complete, but consider abandoned and failed as complete)
+ :          One (The first one causes us to continue - although status updates will continue to be accepted),
+ :          None (fire and forget)
+ :
+ : Contention in status updates avoided for processes that repeatedly fork by using the forkid which is unique per fork.
+ :)
+declare function m:branches($forkid as xs:string,$branches as element(wf:branch)*,$rvmethod as xs:string) as element(wf:branches) {
   <wf:branches>
+    <wf:fork>{$forkid}</wf:fork>
     <wf:rendezvous-method>{$rvmethod}</wf:rendezvous-method>
     {$branches}
   </wf:branches>
 };
 
-declare function m:fork($processUri as xs:string,$branches as element(wf:branches)) as empty-sequence() {
-  (: TODO complete method :)
+declare function m:fork($processUri as xs:string,$branch-defs as element(wf:branch-definitions)) as empty-sequence() {
   (: Create document instance for each branch (under its current process name's version folder) :)
   (: map over parent URI and (optional) loop count :)
-
+  let $forkid := xs:string(fn:current-dateTime()) || sem:uuid-string()
+  let $branches :=
+    m:branches($forkid,(
+        for $bd in $branch-defs/wf:branch-definition
+        return
+          let $bs := m:branch-status(xs:string($bd/wf:branch), xs:string($bd/wf:pipeline), () )
+          let $doc := m:createSubProcess($processUri,$forkid,$bs) (: THIS IS WHAT CREATES THE FORKED SUB PROCESSES :) (: WFU MODULE :)
+          return $bs
+      ),xs:string($branch-defs/wf:rendezvous-method)
+    )
 
   (: Update parent process' properties to include passed in $branches settings, and parent status to INPROGRESS :)
-  let $parent-update-status := xdmp:document-set-property($processUri,
+  let $parent-update-status := xdmp:node-insert-child(xdmp:document-properties($processUri)/prop:properties,
     <wf:currentStep>
       <wf:startTime>{fn:current-dateTime()}</wf:startTime>
       <wf:step-type>fork</wf:step-type>
@@ -429,21 +477,35 @@ declare function m:fork($processUri as xs:string,$branches as element(wf:branche
   return ()
 };
 
-declare function m:rendezvous($childProcessUri as xs:string) as element()* {
-  (: TODO complete method :)
+declare function m:updateStatusInParent($childProcessUri as xs:string) as element()* {
   (: Check if parent URI property exists :)
+  let $parentProcessUri := xs:string(fn:doc($childProcessUri)/wf:process/wf:parent)
+  let $childStatus := xs:string(xdmp:document-properties($childProcessUri)/prop:properties/wf:status)
+  let $forkid := xs:string(fn:doc($childProcessUri)/wf:process/wf:forkid)
+  let $branchid := xs:string(fn:doc($childProcessUri)/wf:process/wf:branchid)
+  return
+    if (fn:not(fn:empty($parentProcessUri))) then
+      let $update := xdmp:node-replace(
+        xdmp:document-properties($parentProcessUri)/prop:properties/wf:branches[./wf:fork = $forkid]/wf:branch-status[./wf:branch = $branchid]/wf:status
+        ,
+        <wf:status>{$childStatus}</wf:status>
+      )
+      return
+        <wf:synchronisation-details>
+          <wf:message>Parent has been updated to reflect child branch instance's completion status</wf:message>
+          <wf:parentProcessUri>{$parentProcessUri}</wf:parentProcessUri>
+          <wf:childStatus>{$childStatus}</wf:childStatus>
+          <wf:forkid>{$forkid}</wf:forkid>
+          <wf:branchid>{$branchid}</wf:branchid>
+          <wf:sent-status>{$childStatus}</wf:sent-status>
+        </wf:synchronisation-details>
+    else ()
   (: Update parent branch for this child instance :)
-  (: Check if parent complete (don't forget there will be 1 incomplete child - this process instance! ACID!) :)
-  (: Get parent wf:branches element (with me complete) and return for audit purposes :)
-  ()
+  (: DO NOT Check if parent complete - done in hasRendezvoused condition -
+       (don't forget there will be 1 incomplete child - this process instance! ACID!) :)
+  (: DO NOT Get parent wf:branches element (with me complete) and return for audit purposes - will break in ONE mode :)
+
 };
-
-
-
-
-
-
-
 
 
 

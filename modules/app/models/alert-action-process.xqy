@@ -24,6 +24,7 @@ declare variable $alert:action as element(alert:action) external;
 let $procname := xs:string($alert:action/alert:options/wf:process-name)
 let $pid :=   wfu:create($procname,$alert:doc/element(),
       (<wf:attachment name="InitiatingAttachment" uri="{fn:base-uri($alert:doc)}" cardinality="1"/>)
+      ,(),(),()
   )
 return ()
 

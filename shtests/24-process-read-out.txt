@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ext:readResponse xmlns:ext="http://marklogic.com/rest-api/resource/process"><ext:outcome>SUCCESS</ext:outcome><ext:document><wf:process id="d068df0b-e7c4-4aa4-bfcb-2ba401a1af75-2015-05-26T08:07:11.608878-07:00" xmlns:wf="http://marklogic.com/workflow"><wf:data/><wf:attachments><wf:attachment name="Document" uri="/initial/sampledoc.xml"/></wf:attachments><wf:audit-trail/><wf:metrics/></wf:process></ext:document></ext:readResponse>

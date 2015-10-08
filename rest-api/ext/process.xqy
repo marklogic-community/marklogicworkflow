@@ -55,7 +55,7 @@ function ext:put(
   let $_ := xdmp:log($input)
 
   let $res := wfu:create($input/ext:createRequest/ext:processName/text(),
-    $input/ext:createRequest/ext:data/element(),$input/ext:createRequest/ext:attachments/wf:attachment)
+    $input/ext:createRequest/ext:data/element(),$input/ext:createRequest/ext:attachments/wf:attachment,(),(),())
 
   let $out := <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:processId>{$res}</ext:processId></ext:createResponse>
 

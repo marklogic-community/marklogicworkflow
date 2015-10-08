@@ -59,7 +59,7 @@ declare function update-generic($processId as xs:string,$data as node()*,$attach
  :)
 declare function complete-generic($processId as xs:string) as empty-sequence() {
   let $_ := xdmp:log("In wfa:complete-generic: processId: "||$processId)
-  let $props := wfu:getProperties($processId)
+  let $props := wfu:getProperties($processId) (: WFU MODULE :)
   let $_ := xdmp:log($props)
   (:
   let $next := $props/prop:properties/wf:currentStep/wf:state/text()  (: WHERE SHOULD THIS BE FROM INSTEAD ? :)
