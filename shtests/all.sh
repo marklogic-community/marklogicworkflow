@@ -39,7 +39,17 @@ sleep 5
 # Search needs to be immediately after - it executes too quick otherwise!!! (A blank result may mean processes already finished, not just haven't started)
 . ./28-processsearch-read.sh
 
+sleep 5
 
+. ./29-processasset-create.sh
+. ./30-processasset-read.sh
+. ./31-processasset-delete.sh
+
+sleep 5
+
+. ./32-processmodel-create-fork-simple.sh
+. ./33-processmodel-create-fork-conditional.sh
+. ./34-processmodel-create-fork-within-fork.sh
 
 
 

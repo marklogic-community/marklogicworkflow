@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel"><ext:outcome>SUCCESS</ext:outcome><ext:modelId>022-email-test__1__0</ext:modelId></ext:createResponse>

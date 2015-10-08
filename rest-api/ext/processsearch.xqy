@@ -1,10 +1,10 @@
+xquery version "1.0-ml";
 
 
 (: process.xqy - Start a new, or modify an existing, MarkLogic Workflow process
  :
  :)
-xquery version "1.0-ml";
-
+ 
 module namespace ext = "http://marklogic.com/rest-api/resource/processsearch";
 
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)

@@ -2,7 +2,7 @@
 
 # CREATED BY YEOMAN generator-mljsworkplace!
 
-RESTHOST=192.168.123.225
+RESTHOST=192.168.123.4
 RESTPORT=6001
 DATABASE=workplacetest-content
 MLADMINUSER=admin

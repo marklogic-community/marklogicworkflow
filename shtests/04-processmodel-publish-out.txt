@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ext:updateResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel"><ext:outcome>SUCCESS</ext:outcome><ext:domainId>9150734188337755708</ext:domainId></ext:updateResponse>

@@ -4,6 +4,7 @@ module namespace ext = "http://marklogic.com/rest-api/resource/workplace";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 
+declare namespace rapi = "http://marklogic.com/rest-api";
 
 (:
  : Exports all workplace pages as a single XML file in the current content database
@@ -38,6 +39,7 @@ function ext:get(
  :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:post(
     $context as map:map,
     $params  as map:map,

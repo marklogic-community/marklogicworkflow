@@ -12,15 +12,14 @@ declare variable $cpf:options as element() external;
 
 try {
   let $st := fn:current-dateTime()
-  let $_ := xdmp:log("MarkLogic Workflow generic complete CPF action called for: "||$cpf:document-uri)
-  let $props := xdmp:document-properties($cpf:document-uri)/prop:properties
-  let $_ := xdmp:log($props)
+  let $_ := xdmp:log("MarkLogic Workflow initial selection action called for: "||$cpf:document-uri)
 
-  (: wf:state in cpf:options MAY contain an override of the next state :)
-  let $stateOverride :=
-    if (fn:not(fn:empty($cpf:options/wf:state))) then
-      xs:anyURI(xs:string($cpf:options/wf:state))
-    else ()
+  (: determine next state by URI of the process document :)
+  let $middleName := fn:substring-before(fn:substring-after($cpf:document-uri,"/workflow/processes/"),"/")
+  let $_ := xdmp:log("Document is for process: " || $middleName)
+  let $stateOverride := xs:anyURI("http://marklogic.com/states/" || $middleName || "__start")
+  let $_ := xdmp:log("Next state is:-")
+  let $_ := xdmp:log($stateOverride)
 
   (: Allow state transition to happen :)
   return wfu:complete( $cpf:document-uri, $cpf:transition, $stateOverride, $st )

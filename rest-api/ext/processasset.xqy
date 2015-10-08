@@ -9,6 +9,8 @@ declare namespace wf="http://marklogic.com/workflow";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 
+declare namespace rapi = "http://marklogic.com/rest-api";
+
 
 (:
  : Get the process asset by exact name and version. Will return top level default if no versioned asset exists.
@@ -89,7 +91,7 @@ function ext:put(
  :)
 declare
 %roxy:params("")
-function ext:put(
+function ext:delete(
     $context as map:map,
     $params  as map:map
 ) as document-node()?
