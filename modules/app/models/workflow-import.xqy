@@ -397,7 +397,7 @@ declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$
       )
     else
       ()
-    } catch ($e) { ( xdmp:log("Error trying to remove domain: " || $pname || " ignoring and carrying on (it probably doeesn't exist yet!)"),xdmp:log($e) ) } (: catching domain throwing error if it doesn't exist. We can safely ignore this :)
+    } catch ($e) { ( xdmp:log("Error trying to remove domain: " || $pname || " ignoring and carrying on (it probably doeesn't exist yet!)") ) } (: catching domain throwing error if it doesn't exist. We can safely ignore this :)
 
   (: Configure domain :)
   return
@@ -612,7 +612,7 @@ declare function m:b2pipeline($rootName as xs:string, $parentStep as xs:string?,
 
         let $_ := m:b2walkFrom($rootName,$parentStep,$doc,$process,xs:string($initial/@id),$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
         return
-          map:get($pipelineSteps,$pname)
+          m:b2deduplicate(map:get($pipelineSteps,$pname))
         ,
         p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"__end"),
           "Standard placeholder for final state",xs:anyURI("http://marklogic.com/states/done"),
@@ -625,6 +625,23 @@ declare function m:b2pipeline($rootName as xs:string, $parentStep as xs:string?,
   let $mapin := map:put($pipelineMap,$pname,$pipeline)
   return $pipeline (: maintains compatibility with previous version of importer - could be removed :)
 
+};
+
+(: Another horrible, horrible hack because forks within forks seem to confuse the importer :)
+declare function m:b2deduplicate($transitions as element()*) as element()* {
+  (: Loop through states and don't include ones already processed :)
+  let $values := map:map()
+  let $doit :=
+    for $state in $transitions
+    let $id := xs:string($state/p:state)
+    return
+      if (fn:not(map:contains($values,$id))) then
+        map:put($values,$id,$state)
+      else ()
+  let $retVals :=
+    for $key in map:keys($values)
+    return map:get($values,$key)
+  return $retVals
 };
 
 declare function m:b2subPipeline($rootName as xs:string,$parentName as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
@@ -654,9 +671,10 @@ declare function m:b2subPipeline($rootName as xs:string,$parentName as xs:string
           <stateId>{xs:string($parentState/@id)}</stateId>
           <processId>{xs:string($process/@id)}</processId>
         </frame>
-      let $_ := stack:push($callStack,$thisLevel)
+      let $newStack := map:new($callStack)
+      let $_ := stack:push($newStack,$thisLevel)
       return m:b2pipeline($rootName,(:fn:string-join(($parentName,xs:string($nextState/@id)),"/"):) xs:string($nextState/@id) ,
-        $doc,$process,$nextState,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
+        $doc,$process,$nextState,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$newStack)
     else ()
 
   return ()
@@ -692,7 +710,7 @@ declare function m:b2walkFrom($rootName as xs:string,$parentStep as xs:string?, 
   (: Could return state-transitions, conditions, status-transitions, or nothing :)
   let $me := $process/element()[./@id = $nextStep]
   let $pname :=
-    if ($rootName = $parentStep) then
+    if ($rootName = $parentStep or "" = $parentStep) then
       $rootName
     else
       fn:string-join(($rootName,$parentStep),"/")
@@ -703,9 +721,22 @@ declare function m:b2walkFrom($rootName as xs:string,$parentStep as xs:string?, 
   let $_ := xdmp:log($pname)
   return
   (: need to keep a map of all processed steps by ID in the doc, and not walk them if already processed :)
-  if (fn:not(map:contains($stepMap,xs:string($me/@id))) or ($me/local-name(.) = "parallelGateway" and $me/@gatewayDirection = "Converging") ) then
+  if (fn:not(map:contains($stepMap,xs:string($me/@id))) or
+      ($me/local-name(.) = ("parallelGateway","inclusiveGateway") and $me/@gatewayDirection = "Converging") (: Once per fork :)
+     ) then
     let $stepDef :=
-
+      try {
+        xdmp:apply(xdmp:function(xs:QName("m:b2" || xs:string($me/local-name(.)))),
+          $rootName,$parentStep,$pname,$doc,$process,$me,$failureAction,$failureState,$pipelineMap,$stepMap,
+          $pipelineSteps,$parents,$callStack)
+      } catch ($e) {
+        (
+          xdmp:log("wfi:b2walkFrom: STEP NOT RECOGNISED!!!") (: returns empty sequence :)
+          ,
+          xdmp:log($e)
+        )
+      }
+    (:
     if ($me/local-name(.) = "startEvent") then
       m:b2startEvent($rootName,$parentStep,$pname,$doc,$process,$me,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
     else
@@ -727,7 +758,11 @@ declare function m:b2walkFrom($rootName as xs:string,$parentStep as xs:string?, 
     if ($me/local-name(.) = "parallelGateway") then
       m:b2parallelGateway($rootName,$parentStep,$pname,$doc,$process,$me,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
     else
+    if ($me/local-name(.) = "inclusiveGateway") then
+      m:b2inclusiveGateway($rootName,$parentStep,$pname,$doc,$process,$me,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
+    else
       xdmp:log("wfi:b2walkFrom: STEP NOT RECOGNISED!!!") (: TODO not supported warning, go to end of process placeholder from m:pipeline :)
+    :)
     let $_ := m:map-append($pipelineSteps,$pname,$stepDef)
     let $_ := xdmp:log("b2WalkFrom received for '" || xs:string($me/local-name(.)) || "':-")
     let $_ := xdmp:log($stepDef)
@@ -1011,140 +1046,234 @@ declare function m:b2sendTask($rootName as xs:string,$parentStep as xs:string?,$
         )
 };
 
+(: Create the DIVERGING state transition :)
+declare function m:b2gatewayDiverging($gatewayType as xs:string,$myname as xs:string,$pname as xs:string,$state as element(),$failureState,$process as element(b2:process)) as item() {
+  p:state-transition(xs:anyURI($myname),
+  "",xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)||"__rv"),
+  $failureState,(),
+  p:action("/workflowengine/actions/fork.xqy","BPMN2 " || $gatewayType || " Gateway Fork: "||xs:string($state/@name),
+    <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+      <wf:branch-definitions>
+        {
+          (: We can go straight to the next steps, as there are ZERO conditions on our routes, unlike other gateways :)
+
+            for $route in $state/b2:outgoing
+            let $txt := xs:string($route)
+            let $rc :=
+              if (fn:contains($txt,":")) then
+                fn:substring-after($txt,":")
+              else
+                $txt
+            let $sf := $process/b2:sequenceFlow[./@id = $rc]
+            let $nextState := $process/element()[./@id = xs:string($sf/@targetRef)]
+            (: NB MUST do the above not call the func, because the conditions are on the outgoing routes :)
+          (: for $nextState in m:b2getNextSteps($process,$state) :)
+          return
+            <wf:branch-definition>
+              <wf:pipeline>{$pname}</wf:pipeline>
+              <wf:branch>{$pname || "/" || xs:string($nextState/@id)}</wf:branch>
+              {
+                if ($gatewayType = "INCLUSIVE") then
+                  (: Add in branch condition :)
+                  if ($sf/@id = $state/@default) then
+                    <wf:default>true</wf:default>
+                  else
+                    <wf:condition language="{xs:string($sf/b2:conditionExpression[1]/@language)}">{$sf/b2:conditionExpression/text()}</wf:condition>
+                else ()
+              }
+            </wf:branch-definition>
+        }
+        {
+
+          (: No need - tagged branch as default above :)
+          (:
+          if ($gatewayType = "INCLUSIVE") then
+            (: Add in branch definition for DEFAULT route :)
+          else ()
+          :)
+        }
+        <wf:fork-method>{
+          if ($gatewayType = "PARALLEL") then
+            "ALL"
+          else if ($gatewayType = "INCLUSIVE") then
+            "CONDITIONAL"
+          else
+            "UNKNOWN"
+        }</wf:fork-method>
+        <wf:rendezvous-method>ALL</wf:rendezvous-method>
+      </wf:branch-definitions>
+    </p:options>
+  ),()
+)
+};
+
+declare function m:b2gatewayConvergingParent($gatewayType as xs:string,$stepMap as map:map,$state as element(),
+  $callStack as map:map,$pipelineSteps as map:map,$failureState,$process as element(b2:process)) as empty-sequence() {
+
+    if (fn:empty(map:get($stepMap,xs:string($state/@id)))) then
+    (:
+      Get previous stack parent WHERE frame end state id is blank
+      ALSO if you encounter this state's ID, then it has been processed before, so do not continue processing children
+    :)
+      let $parentFrame := stack:peek($callStack)
+      let $_ := xdmp:log("PARENT FRAME:-")
+      let $_ := xdmp:log($parentFrame)
+      let $_ := xdmp:log("PARENT FRAME stateid:-")
+      let $_ := xdmp:log($parentFrame/stateId)
+      return
+
+
+        (: GENERATE RENDEZVOUS STATE NOW :)
+        m:map-append($pipelineSteps,xs:string($parentFrame/pname),
+          (
+          (: peek gives PREVIOUS level on call stack, not currently level :)
+          p:state-transition(xs:anyURI("http://marklogic.com/states/"||xs:string($parentFrame/pname)||"/"||xs:string($parentFrame/stateId)||"__rv"), (: NOTE this name reflects the owning PARENT process :)
+            "",(), (: TODO send to next state in flow once completed :)
+            $failureState,(),
+            () (: empty default action :)
+            ,
+            (: execute set :)
+            p:execute(
+              p:condition("/workflowengine/conditions/hasRendezvoused.xqy","Check if child processes are finished",())
+              ,
+              p:action("/workflowengine/actions/genericComplete.xqy","BPMN2 Parallel Gateway Rendezvous: "||xs:string($state/@name),
+                <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+                  <wf:state>{xs:string(m:b2getNextSteps($process,$state)[1]/@id)}</wf:state>
+                </p:options>
+              ) (: p action :)
+              ,"Check if child processes are complete on entry"
+            )
+          )
+          (: TODO generate a state that moves from our state id (RV converging) to the next step in sequence flow :)
+          ,()
+          )
+        )
+
+    else ()
+};
+
+declare function m:b2gatewayConvergingEnd($gatewayType as xs:string,$pname as xs:string,$state as element(),
+  $failureState) as item() {
+  (
+    xdmp:log("wfi:b2gatewayConvergingEnd(): entered method")
+    ,
+        (: return a placeholder with this state's name in the current process flow too, transitioning to the __end state for sub process :)
+        p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
+          "",xs:anyURI("http://marklogic.com/states/"||$pname||"__end" ),
+          $failureState,(),
+
+          p:action("/workflowengine/actions/task.xqy","BPMN2 " || $gatewayType || " Gateway Placeholder: "||xs:string($state/@id),
+            <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+            </p:options>
+          )
+          ,
+          ()
+        )
+  )
+};
+
+declare function m:b2gatewayForkRV($gatewayType as xs:string,$rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+  $state as element(),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
+
+  let $_ := xdmp:log("m:b2gatewayForkRV(): entered function")
+        (:
+         : TODO ensure the diverging state has it's next step name in the cpf:options configuration for after rendezvous
+         :)
+        let $myname := "http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)
+        let $_ := xdmp:log("This " || $gatewayType || " gateway: " || $myname || " has a direction of: " || xs:string($state/@gatewayDirection))
+        return
+          if (xs:string($state/@gatewayDirection) = "Diverging") then
+          (
+            m:b2gatewayDiverging($gatewayType,$myname,$pname,$state,$failureState,$process)
+            ,
+
+
+            (: NOW LOOP THROUGH OUTGOING AND GENERATE A PIPELINE PER ROUTE :)
+            for $nextState in m:b2getNextSteps($process,$state)
+            let $_ := xdmp:log("wfi:b2getNextSteps: Generating sub pipeline for " || xs:string($state/@id) || " going to next state: " || xs:string($nextState/@id))
+            let $subProcId := m:b2subPipeline($rootName,xs:string($state/@id),$doc,$process,$myname,$state,$pname,$nextState,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
+            return ()
+          )
+
+
+
+        else if (xs:string($state/@gatewayDirection) = "Converging") then
+        (
+          (:
+           : Remove ourselves from the step map to ensure the rendezvous is processed for each fork
+           :)
+          let $_ := xdmp:log("MAP CHECK FOR CURRENT STATE RV CONVERGING CREATION:-")
+          let $_ := xdmp:log(map:get($stepMap,xs:string($state/@id)))
+          let $continueProcessing :=
+            m:b2gatewayConvergingParent($gatewayType,$stepMap,$state,$callStack,$pipelineSteps,$failureState,$process)
+
+
+          return
+          (:
+            Don't think we need the below - done by walkNext
+
+          (: return a placeholder with this state's name in the current process flow too, transitioning to the __end state for sub process :)
+          p:state-transition(xs:anyURI($myname), (: NOTE this name reflects the owning PARENT process :)
+            "",xs:anyURI("http://marklogic.com/states/"||$pname||"__end" ),
+            $failureState,(),
+            (:
+            p:action("/workflowengine/actions/task.xqy","BPMN2 Parallel Gateway Placeholder: "||xs:string($state/@name),
+              <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
+              </p:options>
+            )
+            :)
+            (),()
+          ),
+
+          :)
+          (
+            xdmp:log("About to call wfi:b2gatewayConvergingEnd()")
+            ,
+            m:b2gatewayConvergingEnd($gatewayType,$pname,$state,$failureState)
+            ,
+            if (fn:true() (: $continueProcessing:) ) then
+
+            let $parentFrame := stack:peek($callStack)
+            let $parentPname := $parentFrame/pname
+
+            let $_ := stack:pop($callStack)
+
+            (: NOW continue along flow as normal in PARENTS context:)
+            let $_ := xdmp:log("m:b2gatewayForkRV(): About to walk next after end of CHILD rv. callstack top now:-")
+            let $_ := xdmp:log(stack:peek($callStack))
+            return
+              m:b2walkNext($rootName,(:fn:substring-after(map:get($parents,$pname),"/"):)
+              (: Horrible, horrible hack due to recursion and some unidentifiable function nesting rootName within parentName :)
+
+                if (() = fn:substring-after(fn:substring-after(xs:string($parentPname),"/"),"/") ) then
+                  xs:string($parentPname)
+                else
+                  fn:substring-after(xs:string($parentPname),"/")
+
+
+
+                (: )$parentPname :)
+                ,$doc,$process,$state,$failureAction,$failureState,$pipelineMap,$stepMap,
+                $pipelineSteps,$parents,$callStack)
+            else () (:continue processing if :)
+          )
+        ) (: end if :)
+
+
+
+        else xdmp:log("UNKNOWN DIRECTION: " || xs:string($state/@gatewayDirection))
+};
+
 declare function m:b2parallelGateway($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:parallelGateway),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2parallelGateway()")
+  return m:b2gatewayForkRV("PARALLEL",$rootName,$parentStep,$pname,$doc,$process,$state,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
+};
 
-
-    (:
-     : TODO ensure the diverging state has it's next step name in the cpf:options configuration for after rendezvous
-     :)
-    let $myname := "http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)
-    let $_ := xdmp:log("This parallel gateway: " || $myname || " has a direction of: " || xs:string($state/@gatewayDirection))
-    return
-    if (xs:string($state/@gatewayDirection) = "Diverging") then
-    (
-      p:state-transition(xs:anyURI($myname),
-      "",xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)||"__rv"),
-      $failureState,(),
-      p:action("/workflowengine/actions/fork.xqy","BPMN2 Parallel Gateway Fork: "||xs:string($state/@name),
-        <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
-          <wf:branch-definitions>
-            {
-              (: We can go straight to the next steps, as there are ZERO conditions on our routes, unlike other gateways :)
-              for $nextState in m:b2getNextSteps($process,$state)
-              return
-                <wf:branch-definition>
-                  <wf:pipeline>{$pname}</wf:pipeline>
-                  <wf:branch>{$pname || "/" || xs:string($nextState/@id)}</wf:branch>
-                </wf:branch-definition>
-            }
-            <wf:rendezvous-method>ALL</wf:rendezvous-method>
-          </wf:branch-definitions>
-        </p:options>
-      ),()
-    )
-    ,
-
-
-    (: NOW LOOP THROUGH OUTGOING AND GENERATE A PIPELINE PER ROUTE :)
-    for $nextState in m:b2getNextSteps($process,$state)
-    let $_ := xdmp:log("wfi:b2getNextSteps: Generating sub pipeline for " || xs:string($state/@id) || " going to next state: " || xs:string($nextState/@id))
-    let $subProcId := m:b2subPipeline($rootName,xs:string($state/@id),$doc,$process,$myname,$state,$pname,$nextState,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
-    return ()
-    )
-
-
-
-    else if (xs:string($state/@gatewayDirection) = "Converging") then
-    (
-      (:
-       : Remove ourselves from the step map to ensure the rendezvous is processed for each fork
-       :)
-      let $_ := xdmp:log("MAP CHECK FOR CURRENT STATE RV CONVERGING CREATION:-")
-      let $_ := xdmp:log(map:get($stepMap,xs:string($state/@id)))
-      let $rv :=
-
-        if (fn:empty(map:get($stepMap,xs:string($state/@id)))) then
-          let $parentFrame := stack:peek($callStack)
-          let $_ := xdmp:log("PARENT FRAME:-")
-          let $_ := xdmp:log($parentFrame)
-          let $_ := xdmp:log("PARENT FRAME stateid:-")
-          let $_ := xdmp:log($parentFrame/stateId)
-          return
-
-
-            (: GENERATE RENDEZVOUS STATE NOW :)
-            m:map-append($pipelineSteps,xs:string($parentFrame/pname),
-              (
-              (: peek gives PREVIOUS level on call stack, not currently level :)
-              p:state-transition(xs:anyURI("http://marklogic.com/states/"||xs:string($parentFrame/pname)||"/"||xs:string($parentFrame/stateId)||"__rv"), (: NOTE this name reflects the owning PARENT process :)
-                "",(), (: TODO send to next state in flow once completed :)
-                $failureState,(),
-                () (: empty default action :)
-                ,
-                (: execute set :)
-                p:execute(
-                  p:condition("/workflowengine/conditions/hasRendezvoused.xqy","Check if child processes are finished",())
-                  ,
-                  p:action("/workflowengine/actions/genericComplete.xqy","BPMN2 Parallel Gateway Rendezvous: "||xs:string($state/@name),
-                    <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
-                      <wf:state>{xs:string(m:b2getNextSteps($process,$state)[1]/@id)}</wf:state>
-                    </p:options>
-                  ) (: p action :)
-                  ,"Check if child processes are complete on entry"
-                )
-              )
-              (: TODO generate a state that moves from our state id (RV converging) to the next step in sequence flow :)
-              ,()
-              )
-            )
-
-        else ()
-
-
-      return
-      (:
-        Don't think we need the below - done by walkNext
-
-      (: return a placeholder with this state's name in the current process flow too, transitioning to the __end state for sub process :)
-      p:state-transition(xs:anyURI($myname), (: NOTE this name reflects the owning PARENT process :)
-        "",xs:anyURI("http://marklogic.com/states/"||$pname||"__end" ),
-        $failureState,(),
-        (:
-        p:action("/workflowengine/actions/task.xqy","BPMN2 Parallel Gateway Placeholder: "||xs:string($state/@name),
-          <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
-          </p:options>
-        )
-        :)
-        (),()
-      ),
-
-      :)
-
-      (: return a placeholder with this state's name in the current process flow too, transitioning to the __end state for sub process :)
-      p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
-        "",xs:anyURI("http://marklogic.com/states/"||$pname||"__end" ),
-        $failureState,(),
-
-        p:action("/workflowengine/actions/task.xqy","BPMN2 Parallel Gateway Placeholder: "||xs:string($state/@id),
-          <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
-          </p:options>
-        )
-        ,
-        ()
-      )
-      ,
-      (: NOW continue along flow as normal :)
-      let $parentFrame := stack:peek($callStack)
-      return
-      m:b2walkNext($rootName,(:fn:substring-after(map:get($parents,$pname),"/"):) xs:string($parentFrame/pname)  ,$doc,$process,$state,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
-    )
-
-
-
-    else xdmp:log("UNKNOWN DIRECTION: " || xs:string($state/@gatewayDirection))
-
+declare function m:b2inclusiveGateway($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+    $state as element(b2:inclusiveGateway),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
+  let $_ := xdmp:log("In wfi:b2inclusiveGateway()")
+  return m:b2gatewayForkRV("INCLUSIVE",$rootName,$parentStep,$pname,$doc,$process,$state,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
 };
 
 (: END BPMN2 CUSTOM TASK FUNCTIONS :)
