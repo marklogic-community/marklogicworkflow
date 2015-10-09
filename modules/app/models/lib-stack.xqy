@@ -6,15 +6,15 @@ declare function stack:push($map as map:map,$obj as item()) as empty-sequence() 
   map:put($map,xs:string(map:count($map) + 1),$obj)
 };
 
-declare function stack:peek($map as map:map) as item() {
+declare function stack:peek($map as map:map) {
   map:get($map,xs:string(map:count($map)))
 };
 
-declare function stack:previous($map as map:map) as item() {
+declare function stack:previous($map as map:map) {
   map:get($map,xs:string(map:count($map) - 1))
 };
 
-declare function stack:pop($map as map:map) as item() {
+declare function stack:pop($map as map:map) {
   let $count := xs:string(map:count($map))
   let $item := map:get($map,$count)
   let $remove := map:delete($map,$count)

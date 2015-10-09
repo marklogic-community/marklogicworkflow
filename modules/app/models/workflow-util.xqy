@@ -442,10 +442,11 @@ declare function m:branch-status($branchid as xs:string, $pipeline as xs:string,
  :
  : Contention in status updates avoided for processes that repeatedly fork by using the forkid which is unique per fork.
  :)
-declare function m:branches($forkid as xs:string,$branches as element(wf:branch)*,$rvmethod as xs:string) as element(wf:branches) {
+declare function m:branches($forkid as xs:string,$branches as element(wf:branch-status)*,$rvmethod as xs:string) as element(wf:branches) {
   <wf:branches>
     <wf:fork>{$forkid}</wf:fork>
     <wf:rendezvous-method>{$rvmethod}</wf:rendezvous-method>
+    <wf:status>INPROGRESS</wf:status>
     {$branches}
   </wf:branches>
 };
@@ -456,11 +457,44 @@ declare function m:fork($processUri as xs:string,$branch-defs as element(wf:bran
   let $forkid := xs:string(fn:current-dateTime()) || sem:uuid-string()
   let $branches :=
     m:branches($forkid,(
+      let $resultMap := map:map()
+      let $_ := map:put($resultMap,"atLeastOneBranch",fn:false())
+      let $mainBranches :=
         for $bd in $branch-defs/wf:branch-definition
         return
-          let $bs := m:branch-status(xs:string($bd/wf:branch), xs:string($bd/wf:pipeline), () )
-          let $doc := m:createSubProcess($processUri,$forkid,$bs) (: THIS IS WHAT CREATES THE FORKED SUB PROCESSES :) (: WFU MODULE :)
-          return $bs
+          (: if inclusiveGateway then check fork condition on EACH branch, and only create sub process for true branches :)
+          let $doBranch :=
+            if ($branch-defs/wf:forkMethod = "CONDITIONAL") then
+              if ($bd/wf:default = "true") then
+                fn:false()
+              else
+                let $ns := (<wf:namespace short="wf" long="http://marklogic.com/workflow" />)
+                return
+                  if (fn:true() = m:evaluate($processUri,$ns,$bd/wf:condition/text())) then
+                    (fn:true(),map:put($resultMap,"atLeastOneBranch",fn:true()) )
+                  else
+                    fn:false()
+            else
+              fn:true() (: always true if not conditional :)
+          return
+            if ($doBranch) then
+              let $bs := m:branch-status(xs:string($bd/wf:branch), xs:string($bd/wf:pipeline), () )
+              let $doc := m:createSubProcess($processUri,$forkid,$bs) (: THIS IS WHAT CREATES THE FORKED SUB PROCESSES :) (: WFU MODULE :)
+              return $bs
+            else
+              ()
+      let $defaultBranch :=
+        if ($branch-defs/wf:forkMethod = "CONDITIONAL" and fn:false() = map:get($resultMap,"atLeastOneBranch")) then
+          (: process default branch now - treat as parallel for simplicity, even though its only ever one route :)
+          (: This is for inclusive gateways only :)
+          for $bd in $branch-defs/wf:branch-definition[./wf:default = "true"][1]
+          return
+            let $bs := m:branch-status(xs:string($bd/wf:branch), xs:string($bd/wf:pipeline), () )
+            let $doc := m:createSubProcess($processUri,$forkid,$bs) (: THIS IS WHAT CREATES THE FORKED SUB PROCESSES :) (: WFU MODULE :)
+            return $bs
+
+        else ()
+      return ($mainBranches,$defaultBranch) (: TODO if both of these are empty, throw workflow exception, as per formal spec :)
       ),xs:string($branch-defs/wf:rendezvous-method)
     )
 
