@@ -6,7 +6,7 @@
 
 echo "starting 92-processengine-delete.sh"
 
-curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X DELETE \
+curl -v --anyauth --user $WFADMU:$WFADMP -X DELETE \
     -H "Accept: application/xml" \
     "http://$RESTHOST:$RESTPORT/v1/resources/processengine" > 92-processengine-delete-out.txt
 

@@ -6,7 +6,7 @@
 
 echo "starting 26-processsubscription-read.sh"
 
-curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X GET \
+curl -v --anyauth --user $WFMANU:$WFMANP -X GET \
     -H "Accept: application/xml" \
     "http://$RESTHOST:$RESTPORT/v1/resources/processsubscription?rs:name=email-sub-test" > 26-processsubscription-read-out.txt
 

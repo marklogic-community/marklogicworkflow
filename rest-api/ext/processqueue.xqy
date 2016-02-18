@@ -5,7 +5,6 @@ module namespace ext = "http://marklogic.com/rest-api/resource/processqueue";
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
-import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
 
 declare namespace roxy = "http://marklogic.com/roxy";
@@ -13,11 +12,11 @@ declare namespace wf="http://marklogic.com/workflow";
 
 
 (:
- : Fetch a process inbox for the current user
+ : Fetch a process queue with work available to the current user
  : Returns the full process document
  :)
 declare
-%roxy:params("inbox=xs:string")
+%roxy:params("queue=xs:string")
 function ext:get(
   $context as map:map,
   $params  as map:map

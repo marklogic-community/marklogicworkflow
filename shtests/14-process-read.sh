@@ -10,7 +10,7 @@ echo "starting 14-process-read.sh"
 
 PID=`cat 06-process-create-out.txt`
 
-curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X GET \
+curl -v --anyauth --user $WFUU:$WFUP -X GET \
     -H "Accept: application/xml" \
     "http://$RESTHOST:$RESTPORT/v1/resources/process?rs:processid=$PID" > 14-process-read-out.txt
 

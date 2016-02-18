@@ -24,3 +24,12 @@ You need to ensure your content database has a Triggers database configured, and
 Some tasks require global configuration. An example of this is the email task which requires SMTP settings.
 
 TODO: Provide a standard way to support this.
+
+## Production server advice
+
+### Task server limits
+
+By default the number of threads on a task server is 16. This should not be a problem as most MarkLogic Workflow
+CPF tasks execute within a second, and don't stay on the task server if waiting for user action. You may find
+instances, however, where you wish to increase this number. An example might be a web service call that you are
+blocking for a response for, where the response could take seconds or minutes rather than milliseconds.

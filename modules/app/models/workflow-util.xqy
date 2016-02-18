@@ -13,10 +13,19 @@ declare namespace wf="http://marklogic.com/workflow";
 declare namespace p="http://marklogic.com/cpf/pipelines";
 declare namespace error="http://marklogic.com/xdmp/error";
 
+declare private variable $privDesigner as xs:string := "http://marklogic.com/workflow/privileges/designer"; (: Process MODEL designers :)
+declare private variable $privManager as xs:string := "http://marklogic.com/workflow/privileges/manager"; (: People who can install and remove process models from the live system :)
+declare private variable $privAdmin as xs:string := "http://marklogic.com/workflow/privileges/administrator"; (: People who can see and remove live process INSTANCES :)
+declare private variable $privMonitor as xs:string := "http://marklogic.com/workflow/privileges/monitor"; (: People who can watch (read only) process status :)
+declare private variable $privUser as xs:string := "http://marklogic.com/workflow/privileges/user"; (: A workflow user :)
+declare private variable $privInstantiator as xs:string := "http://marklogic.com/workflow/privileges/instantiator"; (: Someone who can initiate a workflow instance :)
+
 (:
  : Create a new process and activate it.
  :)
 declare function m:create($pipelineName as xs:string,$data as element()*,$attachments as element()*,$parent as xs:string?,$forkid as xs:string?,$branchid as xs:string?) as xs:string {
+  let $_secure := xdmp:security-assert($privInstantiator, "execute")
+
   let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
   let $uri := "/workflow/processes/"||$pipelineName||"/"||$id || ".xml"
   let $_ :=
@@ -40,7 +49,7 @@ declare function m:create($pipelineName as xs:string,$data as element()*,$attach
 (:
  : Convenience function to take a few parameters and set up the above call to m:create (removes this logic from multiple functions)
  :)
-declare function m:createSubProcess($parentProcessUri as xs:string,$forkid as xs:string,$subProcessStatus as element(wf:branch-status)) as xs:string {
+declare private function m:createSubProcess($parentProcessUri as xs:string,$forkid as xs:string,$subProcessStatus as element(wf:branch-status)) as xs:string {
   let $parent := fn:doc($parentProcessUri)/wf:process
   let $pipelineName := xs:string($parent/wf:process-definition-name) || "/" || xs:string($subProcessStatus/wf:branch)
   return m:create($pipelineName,<data>{$parent/wf:data}</data>/*,<data>{$parent/wf:attachments}</data>/*,$parentProcessUri,$forkid,xs:string($subProcessStatus/wf:branch))
@@ -50,13 +59,17 @@ declare function m:createSubProcess($parentProcessUri as xs:string,$forkid as xs
  : You must create one or more CPF domains for folders or collections that alerts can be evaluated within.
  :)
 declare function m:createAlertingDomain($name as xs:string,$type as xs:string,$path as xs:string,$depth as xs:string) as xs:unsignedLong {
-  ss:create-domain($name,$type,$path,$depth,("Status Change Handling","Alerting"),xdmp:database-name(xdmp:modules-database()))
+  let $_secure := xdmp:security-assert($privManager, "execute")
+
+  return ss:create-domain($name,$type,$path,$depth,("Status Change Handling","Alerting"),xdmp:database-name(xdmp:modules-database()))
 };
 
 (:
  : Create a new process subscription
  :)
 declare function m:createSubscription($pipelineName as xs:string,$name as xs:string,$domainname as xs:string,$query as cts:query) as xs:string {
+  let $_secure := xdmp:security-assert($privManager, "execute")
+
   let $alert-uri := ss:add-alert($name,$query,(),"/app/models/alert-action-process.xqy",xdmp:database-name(xdmp:modules-database()),
     (<wf:process-name>{$pipelineName}</wf:process-name>))
   let $alert-enabled := ss:cpf-enable($alert-uri,$domainname)
@@ -67,7 +80,9 @@ declare function m:createSubscription($pipelineName as xs:string,$name as xs:str
  : Fetches a process subscription
  :)
 declare function m:getSubscription($name as xs:string) as element()? {
-  ss:get-alert("/config/alerts/" || $name)
+  let $_secure := xdmp:security-assert($privManager, "execute")
+
+  return ss:get-alert("/config/alerts/" || $name)
 };
 
 (:
@@ -355,7 +370,7 @@ declare function m:inProgress($processId as xs:string,$transition as xs:string) 
     xdmp:node-replace(xdmp:document-properties($processUri)/prop:properties/wf:currentStep/wf:step-status,<wf:step-status>IN PROGRESS</wf:step-status>)
 };
 
-declare function m:transitionByPath($path as xs:string) as element(p:state-transition)? {
+declare private function m:transitionByPath($path as xs:string) as element(p:state-transition)? {
   xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:path as xs:string external;xdmp:unpath($m:path)',
     (xs:QName("wf:path"),$path),
     <options xmlns="xdmp:eval">
@@ -372,18 +387,18 @@ declare function m:failure($processUri as xs:string,$transition as node(),$failu
   cpf:failure($processUri,$transition,$failureReason,())
 };
 
-declare function m:audit($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as empty-sequence() {
+declare private function m:audit($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as empty-sequence() {
   (: Perform append operation on process document's audit element :)
   xdmp:node-insert-child(fn:doc($processUri)/wf:process/wf:audit-trail,
     m:audit-create($processUri,$state,$eventCategory,$description,$detail)
   )
 };
 
-declare function m:audit-create($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as element(wf:audit) {
+declare private function m:audit-create($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as element(wf:audit) {
   <wf:audit><wf:when>{fn:current-dateTime()}</wf:when><wf:category>{$eventCategory}</wf:category><wf:state>{$state}</wf:state><wf:description>{$description}</wf:description><wf:detail>{$detail}</wf:detail></wf:audit>
 };
 
-declare function m:metric($processUri as xs:string,$state as xs:string,$start as xs:dateTime,$completion as xs:dateTime,$success as xs:boolean) as empty-sequence() {
+declare private function m:metric($processUri as xs:string,$state as xs:string,$start as xs:dateTime,$completion as xs:dateTime,$success as xs:boolean) as empty-sequence() {
   (: Append metric event to internal metrics element :)
   xdmp:node-insert-child(fn:doc($processUri)/wf:process/wf:metrics,
     <wf:metric><wf:state>{$state}</wf:state><wf:start>{$start}</wf:start><wf:finish>{$completion}</wf:finish>
@@ -424,7 +439,7 @@ declare function m:metric($processUri as xs:string,$state as xs:string,$start as
  : Note that the branchid holds a unique ID for this branch INSTANCE not the branch name. Branch name is derived
  : from the pipeline element. Status generally initialised to INPROGRESS. Could become COMPLETE or FAILED or ABANDONED
  :)
-declare function m:branch-status($branchid as xs:string, $pipeline as xs:string,$status as xs:string?) as element(wf:branch) {
+declare private function m:branch-status($branchid as xs:string, $pipeline as xs:string,$status as xs:string?) as element(wf:branch) {
   <wf:branch-status>
     <wf:branch>{$branchid}</wf:branch>
     <wf:pipeline>{$pipeline}</wf:pipeline>
@@ -442,7 +457,7 @@ declare function m:branch-status($branchid as xs:string, $pipeline as xs:string,
  :
  : Contention in status updates avoided for processes that repeatedly fork by using the forkid which is unique per fork.
  :)
-declare function m:branches($forkid as xs:string,$branches as element(wf:branch-status)*,$rvmethod as xs:string) as element(wf:branches) {
+declare private function m:branches($forkid as xs:string,$branches as element(wf:branch-status)*,$rvmethod as xs:string) as element(wf:branches) {
   <wf:branches>
     <wf:fork>{$forkid}</wf:fork>
     <wf:rendezvous-method>{$rvmethod}</wf:rendezvous-method>
@@ -511,7 +526,10 @@ declare function m:fork($processUri as xs:string,$branch-defs as element(wf:bran
   return ()
 };
 
-declare function m:updateStatusInParent($childProcessUri as xs:string) as element()* {
+(:
+ : Called by child process' complete function
+ :)
+declare private function m:updateStatusInParent($childProcessUri as xs:string) as element()* {
   (: Check if parent URI property exists :)
   let $parentProcessUri := xs:string(fn:doc($childProcessUri)/wf:process/wf:parent)
   let $childStatus := xs:string(xdmp:document-properties($childProcessUri)/prop:properties/wf:status)
@@ -591,6 +609,10 @@ declare function m:evaluateOLD($processUri as xs:string,$namespaces as element(w
 };
 :)
 
+(:
+ : TODO WARNING - This function is vulnerable to XQuery injection attacks. It should be invoked with just enough
+ : privileges such that it can read the single document (wf:process element) it is passed, and be read only.
+ :)
 declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:namespace)*,$xpath as xs:string) {
   let $ns :=
     for $namespace in $namespaces
@@ -608,10 +630,16 @@ declare function m:evaluate($processUri as xs:string,$namespaces as element(wf:n
       (xs:QName("wf:process"),fn:doc($processUri)/wf:process),
       <options xmlns="xdmp:eval">
         <isolation>different-transaction</isolation>
+        <prevent-deadlocks>true</prevent-deadlocks>
       </options>
-    )
+    ) (: NB prevent deadlocks ALSO prevents UPDATES. :)
 };
 
+
+(:
+ : TODO WARNING - This function is vulnerable to XQuery injection attacks. It should be invoked with just enough
+ : privileges such that it can read the single document (wf:process element) it is passed, and be read only.
+ :)
 declare function m:evaluateXml($processUri as xs:string,$namespaces as element(wf:namespace)*,$xmlText as xs:string,$params as node()*) as node()* {
   let $xquery := 'xquery version "1.0-ml";declare namespace wf="http://marklogic.com/workflow";' ||
       'declare variable $wf:process as element(wf:process) external;' || $xmlText
@@ -621,8 +649,9 @@ declare function m:evaluateXml($processUri as xs:string,$namespaces as element(w
       (xs:QName("wf:process"),fn:doc($processUri)/wf:process), (: TODO accept external params without having blank params of () in the eval call :)
       <options xmlns="xdmp:eval">
         <isolation>different-transaction</isolation>
+        <prevent-deadlocks>true</prevent-deadlocks>
       </options>
-    )
+    ) (: NB prevent deadlocks ALSO prevents UPDATES. :)
   let $_ := xdmp:log("wfu:evaluateXml: result:-")
   let $_ := xdmp:log($result)
   let $_ := xdmp:log("wfu:evaluateXml: Complete. Returning...")

@@ -6,7 +6,7 @@
 
 echo "starting 25-processsubscription-create.sh"
 
-curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X PUT \
+curl -v --anyauth --user $WFMANU:$WFMANP -X PUT \
     -d@"./25-payload.xml" \
     -H "Content-type: application/xml" -H "Accept: application/xml" \
     "http://$RESTHOST:$RESTPORT/v1/resources/processsubscription" > 25-processsubscription-create-out.txt

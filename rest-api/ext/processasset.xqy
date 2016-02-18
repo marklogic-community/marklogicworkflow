@@ -2,7 +2,6 @@ xquery version "1.0-ml";
 
 module namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 
-import module namespace wfi="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";

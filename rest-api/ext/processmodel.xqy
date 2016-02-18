@@ -5,7 +5,6 @@ module namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
 import module namespace wfi="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 
@@ -14,7 +13,8 @@ declare namespace roxy = "http://marklogic.com/roxy";
 
 (:
  : Get the process model by exact name
- :  ?publishedId=name
+ :  ?rs:publishedId=name
+ : TODO list all published processes that can be invoked if no name specified
  :)
 declare
 %roxy:params("")

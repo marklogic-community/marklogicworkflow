@@ -4,7 +4,7 @@
 
 echo "starting 22-processmodel-publish.sh"
 
-curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X POST \
+curl -v --anyauth --user $WFMANU:$WFMANP -X POST \
     -d "<somexml/>" \
     -H "Content-type: application/xml" -H "Accept: application/xml" \
     "http://$RESTHOST:$RESTPORT/v1/resources/processmodel?rs:publishedId=022-email-test__1__0" > 22-processmodel-publish-out.txt

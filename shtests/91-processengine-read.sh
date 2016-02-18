@@ -6,7 +6,7 @@
 
 echo "starting 91-processengine-read.sh"
 
-curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X GET \
+curl -v --anyauth --user $WFMONU:$WFMONP -X GET \
     -H "Accept: application/xml" \
     "http://$RESTHOST:$RESTPORT/v1/resources/processengine" > 91-processengine-read-out.txt
 

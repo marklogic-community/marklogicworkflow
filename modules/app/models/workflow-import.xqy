@@ -16,15 +16,25 @@ import module namespace stack="http://marklogic.com/stack" at "/app/models/lib-s
 
 import module namespace ss = "http://marklogic.com/alerts/alerts" at "/app/models/lib-alerts.xqy";
 
+declare private variable $privDesigner as xs:string := "http://marklogic.com/workflow/privileges/designer"; (: Process MODEL designers :)
+declare private variable $privManager as xs:string := "http://marklogic.com/workflow/privileges/manager"; (: People who can install and remove process models from the live system :)
+declare private variable $privAdmin as xs:string := "http://marklogic.com/workflow/privileges/administrator"; (: People who can see and remove live process INSTANCES :)
+declare private variable $privMonitor as xs:string := "http://marklogic.com/workflow/privileges/monitor"; (: People who can watch (read only) process status :)
+declare private variable $privUser as xs:string := "http://marklogic.com/workflow/privileges/user"; (: A workflow user :)
+
 (: TODO replace following outgoing routes with call to m:b2getNextSteps() :)
 
 (: REST API OR XQUERY PUBLIC API FUNCTIONS :)
 
-declare function m:install-and-convert($doc as node(),$filename as xs:string,$major as xs:string,$minor as xs:string,$enable as xs:boolean?) as xs:string {
+declare function m:install-and-convert($doc as node(),$filename as xs:string,$major as xs:string,$minor as xs:string,$enable as xs:boolean?) as xs:string* {
+  let $_secure := xdmp:security-assert($privDesigner, "execute")
+  let $_secure2 := if (fn:true() = $enable) then xdmp:security-assert($privManager, "execute") else ()
+
   let $_ := xdmp:log("In wfi:install-and-convert")
   (: 1. Save document in to DB :)
   let $uri := "/workflow/models/" || $filename
   let $_ :=
+  (:)
     xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:uri as xs:string external;declare variable $m:doc as node() external;'
       || 'xdmp:document-insert($m:uri,$m:doc,xdmp:default-permissions(),(xdmp:default-collections(),"http://marklogic.com/workflow/model"))'
       ,
@@ -33,11 +43,15 @@ declare function m:install-and-convert($doc as node(),$filename as xs:string,$ma
         <isolation>different-transaction</isolation>
       </options>
     )
+    :)
+    m:eval-install-model-document($uri,$doc)
+
   (: 2. Convert to CPF :)
-  let $pnames := m:convert-to-cpf($uri,$major,$minor)
+  let $pnames := m:convert-to-cpf($uri,$major,$minor,$enable)
   let $_ := xdmp:log("In wfi:install-and-convert: pnames:- ")
   let $_ := xdmp:log($pnames)
   let $pcreate :=
+    (:)
     (
       for $resp in $pnames
       let $_ := xdmp:log("Installing domain for " || $resp || "?")
@@ -52,37 +66,56 @@ declare function m:install-and-convert($doc as node(),$filename as xs:string,$ma
           ()
       return $resp
     )
-  return $pnames[1] (: first is root process :)
+    :)
+    if ($enable) then
+      m:domains($pnames)
+    else ()
+  return $pnames (: first is NOT necessarily root process :)
 };
 
-declare function m:enable($localPipelineId as xs:string) as xs:unsignedLong {
-  m:domain($localPipelineId,m:get-pipeline-id($localPipelineId)) (: Keep uri, major, minor here in case :)
-  (: TODO Need to fetch child domains too, like enabling with PUT does :)
+declare function m:enable($pname as xs:string) as map:map {
+  xdmp:security-assert($privManager, "execute")
+  ,
+  xdmp:log("wfi:enable called for pname: " || $pname)
+  ,
+  let $pmap := m:do-create-pipelines-base($pname) (: pname -> pid map in LIVE cpf trigger DB :)
+  let $doms :=
+    for $key in map:keys($pmap)
+    return m:domain($key,map:get($pmap,$key))
+  return $pmap
 };
 
-declare function m:get-model-by-name($name as xs:string) as node() {
+(:
+ : Used by GET processmodel
+ :)
+declare function m:get-model-by-name($name as xs:string) as node()? {
+  let $_secure := xdmp:security-assert($privDesigner, "execute")
+
   let $uri := "/workflow/models/" || $name
   return fn:doc($uri)
 };
 
-declare function m:ensureWorkflowPipelinesInstalled() as empty-sequence() {
+declare private function m:ensureWorkflowPipelinesInstalled() as empty-sequence() {
   (: first check if pipeline does not exist :)
   let $name := "MarkLogic Workflow Initial Selection"
   return
   try {
-    let $pexists := xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:name as xs:string external;p:get($m:name)',
+    let $pexists :=
+    (:xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:name as xs:string external;p:get($m:name)',
       (xs:QName("wf:name"),$name),
       <options xmlns="xdmp:eval">
         <database>{xdmp:triggers-database()}</database>
         <isolation>different-transaction</isolation>
       </options>
-    )
+    ):)
+    m:eval-pipeline-get-by-name($name)
     return ()
   } catch ($e) {
     (: Install pipeline as it must be missing :)
 
     let $failureAction := p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),())
     let $wfInitialPid :=
+    (:)
           xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:name as xs:string external;'
             ||
             'p:create($m:name,$m:name,p:action("/MarkLogic/cpf/actions/success-action.xqy",(),()),p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),()),() (: status transitions :) ,('
@@ -96,9 +129,12 @@ declare function m:ensureWorkflowPipelinesInstalled() as empty-sequence() {
               <isolation>different-transaction</isolation>
             </options>
           )
+          :)
+          m:eval-pipeline-create-initial($name)
     let $_ := xdmp:log("Installing workflow initial pipeline " || $name)
     let $_ := xdmp:log($wfInitialPid)
     let $wfInitial :=
+    (:)
       xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:name as xs:string external;p:get($m:name)',
         (xs:QName("wf:name"),$name),
         <options xmlns="xdmp:eval">
@@ -106,35 +142,41 @@ declare function m:ensureWorkflowPipelinesInstalled() as empty-sequence() {
           <isolation>different-transaction</isolation>
         </options>
       )
+      :)
+      m:eval-pipeline-get-by-name($name)
     let $_ := xdmp:log("Workflow initial pipeline XML:-")
     let $_ := xdmp:log($wfInitial)
     let $installedPipelinePid :=
-
+      (:)
       xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:xml as element(p:pipeline) external;p:insert($m:xml)',
         (xs:QName("wf:xml"),$wfInitial),
         <options xmlns="xdmp:eval">
           <database>{xdmp:triggers-database()}</database>
           <isolation>different-transaction</isolation>
         </options>
-      )
+      ):)
+      m:eval-pipeline-create($wfInitial)
     return ()
   } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
 };
 
 
-declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as xs:string* {
+declare private function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string,$enable as xs:boolean) as xs:string* {
   (: Find document :)
   let $_ := xdmp:log("In wfi:convert-to-cpf")
 
   (: 1. Create Pipeline from raw process model :)
   (: Determine type from root element :)
   let $pmap :=
+  m:eval-call-create($processmodeluri,$major,$minor)
+  (:)
     xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:major as xs:string external;declare variable $m:minor as xs:string external;m:create($m:processmodeluri,$m:major,$m:minor)',
       (xs:QName("m:processmodeluri"),$processmodeluri,xs:QName("m:major"),$major,xs:QName("m:minor"),$minor),
       <options xmlns="xdmp:eval">
         <isolation>different-transaction</isolation>
       </options>
     )
+    :)
   let $_ := xdmp:log("In wfi:convert-to-cpf: pipeline map:-")
   let $_ := xdmp:log($pmap)
 
@@ -145,50 +187,87 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
    : PROCESSNAME__MAJOR__MINOR[/SUBPROCESS] => 1234567890 (aka the PID)
    :
    : IMPLIES
-   : Domain: directory @ /workflow/processes/PROCESSNAME__MAJOR__MINOR/SUBPROCESSABC with depth: 0
+   : Domain: directory @ /workflow/processes/PROCESSNAME__MAJOR__MINOR/SUBPROCESSABC with depth: 1
    :)
 
   (: 1.5 loop through pmaps :)
-  let $pnames := (
-    for $pname in map:keys($pmap)
-    (:let $docpid := map:get($pmap,$pname):)
 
-    (: 2. Get this pipeline's URI :)
-    (: let $puri := "http://marklogic.com/cpf/pipelines/"||xs:string($localPipelineId)||".xml" :)
-    let $puri :=
-      xdmp:eval('xquery version "1.0-ml";import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:id as xs:string external;p:get($m:id)/fn:base-uri(.)',
-        (xs:QName("m:id"),$pname),
-        <options xmlns="xdmp:eval">
-          <isolation>different-transaction</isolation>
-        </options>
-      )
-    let $_ := xdmp:log("In wfi:convert-to-cpf: puri: " || $puri)
+  let $pids :=
 
-    (: 3. Install pipeline in modules DB (so that CPF runs it) and get the MODULES DB PID (not content db pid as above) :)
-    let $pid :=
-      xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:puri as xs:string external;m:install($m:puri)',
-        (xs:QName("m:puri"),$puri),
-        <options xmlns="xdmp:eval">
-          <isolation>different-transaction</isolation>
-        </options>
-      )
+    if ($enable) then
+    (
+      m:do-create-pipelines($pmap) (: returns a map of FINAL pids :)
+    )
+    else ()
 
-    let $_ := xdmp:log("In wfi:convert-to-cpf: installed pid: " || $pid || " for pname: " || $pname)
+  let $_ := xdmp:log("In wfi:convert-to-cpf: pids:-")
+  let $_ := xdmp:log($pids)
 
-
-    return $pname
-  )
-
-  let $_ := xdmp:log("In wfi:convert-to-cpf: pnames:-")
-  let $_ := xdmp:log($pnames)
-
-  return $pnames
+  return map:keys($pids)
 
 };
 
+declare private function m:do-create-pipelines-base($pname as xs:string) as map:map {
+  let $_secure := xdmp:security-assert($privManager, "execute")
 
-declare function m:subscribe-process($subscriptionName as xs:string, $processuri as xs:string,$query as element(cts:query)) as xs:unsignedLong {
-  (: TODO remove existing config with same subscription name, if it exists :)
+  let $map := map:map()
+  let $doit :=
+    for $pipe in m:eval-pipeline-get-by-name($pname)
+    return
+      map:put($map,xs:string($pipe/p:pipeline-name),xs:unsignedLong($pipe/p:pipeline-id) )
+  return m:do-create-pipelines($map)
+};
+
+declare private function m:do-create-pipelines($pmap as map:map) as map:map {
+  let $_secure := xdmp:security-assert($privManager, "execute")
+
+  let $outmap := map:map()
+
+  let $pids :=
+    for $pname in map:keys($pmap)
+   (:let $docpid := map:get($pmap,$pname):)
+
+   (: 2. Get this pipeline's URI :)
+   (: let $puri := "http://marklogic.com/cpf/pipelines/"||xs:string($localPipelineId)||".xml" :)
+   (:
+   let $puri :=
+   m:eval-pipeline-get-uri-by-name($pname)
+    - NOT USED!
+   :)
+   (:)
+     xdmp:eval('xquery version "1.0-ml";import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:id as xs:string external;p:get($m:id)/fn:base-uri(.)',
+       (xs:QName("m:id"),$pname),
+       <options xmlns="xdmp:eval">
+         <isolation>different-transaction</isolation>
+       </options>
+     )
+     :)
+
+   (: 3. Install pipeline in modules DB (so that CPF runs it) and get the MODULES DB PID (not content db pid as above) :)
+
+    let $pxml := m:eval-pipeline-get-by-name($pname)
+    let $pid := m:eval-pipeline-create($pxml) (: returns LIVE pid :)
+    let $_ := xdmp:log("In wfi:do-create-pipelines: installed pid: " || $pid || " for pname: " || $pname)
+    let $_ := map:put($outmap,$pname,$pid)
+    return $pid
+   (:
+     xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:puri as xs:string external;m:install($m:puri)',
+       (xs:QName("m:puri"),$puri),
+       <options xmlns="xdmp:eval">
+         <isolation>different-transaction</isolation>
+       </options>
+     )
+     :)
+
+
+
+  return $outmap
+};
+
+
+declare private function m:subscribe-process($subscriptionName as xs:string, $processuri as xs:string,$query as element(cts:query)) as xs:unsignedLong {
+  let $_secure := xdmp:security-assert($privManager, "execute")
+  return (: TODO remove existing config with same subscription name, if it exists :)
   ss:add-alert($subscriptionName,$query,(),"/app/models/action-process.xqy",xdmp:modules-database(),
     <process-name>{$processuri}</process-name>)
 };
@@ -196,7 +275,7 @@ declare function m:subscribe-process($subscriptionName as xs:string, $processuri
 
 
 
-declare function m:index-of-string
+declare private function m:index-of-string
   ( $arg as xs:string? ,
     $substring as xs:string )  as xs:integer* {
 
@@ -220,7 +299,256 @@ declare function m:index-of-string
 
 (: INTERNAL PRIVATE FUNCTIONS :)
 
-declare function m:create($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as map:map {
+(: Evil eval functions :)
+(: This function should be invoked by the wfi:eval-* functions themselves, not in other functions :)
+declare private function m:eval-update-cpf($function as function() as item()*) {
+  xdmp:invoke-function($function,
+    <options xmlns="xdmp:eval">
+      <database>{xdmp:triggers-database()}</database>
+      <transaction-mode>update-auto-commit</transaction-mode>
+      <isolation>different-transaction</isolation>
+    </options>
+  )
+};
+
+declare private function m:eval-update-content($function as function() as item()*) {
+  xdmp:invoke-function($function,
+    <options xmlns="xdmp:eval">
+      <database>{xdmp:database()}</database>
+      <transaction-mode>update-auto-commit</transaction-mode>
+      <isolation>different-transaction</isolation>
+    </options>
+  )
+};
+
+declare private function m:eval-query-content($function as function() as item()*) {
+  xdmp:invoke-function($function,
+    <options xmlns="xdmp:eval">
+      <database>{xdmp:database()}</database>
+      <transaction-mode>query</transaction-mode>
+      <isolation>different-transaction</isolation>
+    </options>
+  )
+};
+
+declare private function m:eval-query-cpf($function as function() as item()*) {
+  xdmp:invoke-function($function,
+    <options xmlns="xdmp:eval">
+      <database>{xdmp:triggers-database()}</database>
+      <transaction-mode>query</transaction-mode>
+      <isolation>different-transaction</isolation>
+    </options>
+  )
+};
+
+(:
+ : As above, but creates output in the CONTENT database, not the TRIGGERS (CPF live) database
+ :)
+declare private function m:eval-update-cpf-content($function as function() as item()*) {
+  m:eval-update-content($function)
+};
+
+(:
+ : As above, but queries the CONTENT database, not the TRIGGERS (CPF live) database
+ :)
+declare private function m:eval-query-cpf-content($function as function() as item()*) {
+  m:eval-query-content($function)
+};
+
+
+
+
+(: Eval do-er functions :)
+
+declare private function m:eval-install-model-document($uri as xs:string,$doc) {
+  m:eval-update-content(
+    function() {
+      xdmp:document-insert($uri,$doc,
+        (xdmp:default-permissions(),
+         xdmp:permission("workflow-manager","read"),
+         xdmp:permission("workflow-designer","update"),
+         xdmp:permission("workflow-designer","read")
+        ),
+        (xdmp:default-collections(),"http://marklogic.com/workflow/model")
+      )
+    }
+  )
+};
+
+declare private function m:eval-domain-delete($pname as xs:string) {
+  m:eval-update-cpf(
+    function() {
+      if (fn:not(fn:empty(dom:get($pname)))) then
+        dom:remove($pname)
+      else ()
+    }
+  )
+};
+
+declare private function m:eval-domain-create($pid as xs:unsignedLong,$pname as xs:string) {
+  let $mdb := xdmp:modules-database()
+  return
+  m:eval-update-cpf(
+    function() {
+      (
+        xdmp:log("calling dom:create for " || $pname)
+        ,
+        dom:create($pname,"Execute process given a process data document for "||$pname,
+          dom:domain-scope("directory","/workflow/processes/"||$pname||"/","1")
+          ,
+          dom:evaluation-context($mdb,"/"),
+          (
+            (
+              for $pipe in p:pipelines()[p:pipeline-name =
+                ("Status Change Handling","MarkLogic Workflow Initial Selection")]/p:pipeline-id
+              return xs:unsignedLong($pipe)
+            )
+            ,
+            $pid
+          )
+          ,()
+        )
+      )
+    }
+  )
+};
+
+declare private function m:eval-pipeline-delete($puri as xs:string) as empty-sequence() {
+  m:eval-update-cpf(
+    function() {
+      ( (: p:remove($m:puri), :)
+        for $pn in p:pipelines()/p:pipeline-name
+        return
+          if (fn:substring(xs:string($pn),1,fn:string-length($puri)) = $puri) then
+            (xdmp:log("Deleting pipeline: "||xs:string($pn)), p:remove(xs:string($pn)) )
+          else ()
+      )
+    }
+  )
+};
+
+declare private function m:eval-pipeline-create($pxml as element(p:pipeline)) as xs:unsignedLong {
+  m:eval-update-cpf(
+    function() {
+      p:insert($pxml)
+    }
+  )
+};
+
+(:
+declare private function m:eval-pipeline-create-content($puri as xs:string) as xs:unsignedLong {
+  m:eval-update-cpf-content(
+    function() {
+      m:install($m:puri)
+    }
+  )
+};
+:)
+
+declare private function m:eval-pipeline-create-initial($name as xs:string) as xs:unsignedLong {
+  m:eval-update-cpf(
+    function() {
+      try {
+      p:create($name,$name,
+        p:action("/MarkLogic/cpf/actions/success-action.xqy",(),()),
+        p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),()),
+        () (: status transitions :) ,
+        (
+          p:state-transition(xs:anyURI("http://marklogic.com/states/initial"),"",(),
+            xs:anyURI("http://marklogic.com/states/error"),(),
+            p:action("/workflowengine/actions/workflowInitialSelection.xqy","BPMN2 Workflow initial process step selection",()),
+            ()
+          )
+        ) (: state transitions :)
+      )
+      } catch ($e) {
+      (
+        xdmp:log("Exception thrown while creating MarkLogic Workflow initial pipelines: Already exist? Ignoring."),
+        xs:unsignedLong(p:get($name)/p:pipeline-id)
+      )
+      }
+    }
+  )
+};
+
+declare private function m:eval-pipeline-delete-content($puri as xs:string) {
+  m:eval-update-cpf-content(
+    function() {
+      ( (: p:remove($m:puri), :)
+        for $pn in p:pipelines()/p:pipeline-name
+        return
+          if (fn:substring(xs:string($pn),1,fn:string-length($puri)) = $puri) then
+            (xdmp:log("Deleting pipeline: "||xs:string($pn)), p:remove(xs:string($pn)) )
+          else ()
+      )
+
+    }
+  )
+};
+
+declare private function m:eval-call-create($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) {
+  m:eval-update-cpf-content(
+    function() {
+      m:create($processmodeluri,$major,$minor)
+    }
+  )
+};
+
+declare private function m:eval-do-create($pname as xs:string,$root) {
+  m:eval-update-cpf-content(
+    function() {
+      m:do-create($pname,$root) (: $root could be any format - SCXML or BPMN2 for example - hence no type here :)
+    }
+  )
+};
+
+declare private function m:eval-pipeline-get-id-by-name($name as xs:string) as xs:unsignedLong? {
+  m:eval-query-cpf-content(
+    function() {
+      xs:unsignedLong(p:get($name)/p:pipeline-id)
+    }
+  )
+};
+
+declare private function m:eval-pipeline-get-uri-by-name($name as xs:string) as xs:string? {
+  m:eval-query-cpf-content(
+    function() {
+      p:get($name)/fn:base-uri(.)
+    }
+  )
+};
+
+declare private function m:eval-pipeline-get-by-name($name as xs:string) as element(p:pipeline)? {
+  m:eval-query-cpf-content(
+    function() {
+      p:get($name)
+    }
+  )
+};
+
+declare private function m:eval-pipelines-get-by-base($map as map:map,$base as xs:string) as empty-sequence() {
+  m:eval-query-cpf(
+    function() {
+      ( (: p:remove($m:puri), :)
+        for $pn in p:pipelines()/p:pipeline-name
+        return
+          if (fn:substring(xs:string($pn),1,fn:string-length($base)) = $base) then
+            map:put($map,$pn,xs:unsignedLong($pn/p:pipeline-id))
+          else ()
+      )
+    }
+  )
+};
+
+(: END EVIL EVAL FUNCTIONS :)
+
+
+
+
+
+
+(: Normal functions :)
+declare private function m:create($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as map:map {
   let $_ := xdmp:log("In wfi:create")
 
   let $root := fn:doc($processmodeluri)/element()
@@ -250,6 +578,7 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
 
   let $removeDoc :=
     try {
+      (:
     (:if (fn:not(fn:empty(p:get($name)))) then:)
       xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;( (: p:remove($m:puri), :) for $pn in p:pipelines()/p:pipeline-name return if (fn:substring(xs:string($pn),1,fn:string-length($m:puri)) = $m:puri) then (xdmp:log("Deleting pipeline: "||xs:string($pn)), p:remove(xs:string($pn)) ) else ()  )',
         (xs:QName("wf:puri"),$name),
@@ -260,12 +589,15 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
       )
     (: else
       () :)
+    :)
+      m:eval-pipeline-delete-content($name)
     } catch ($e) { () } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
 
   (: NOTE above also removes all child pipelines too - those starting with PROCESS__MAJOR__MINOR :)
   let $_ := xdmp:log("wfi:create : Now recreating pipeline(s)")
 
   let $pmap :=
+  (:
         xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";'
           || 'declare variable $m:pname as xs:string external;'
           || 'declare variable $m:root as element() external;'
@@ -277,14 +609,16 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
             <isolation>different-transaction</isolation>
           </options>
         ) (: TODO handle failure gracefully :)
-
+  :)
+    m:eval-do-create($name,$root)
   return
     $pmap
 
 
 };
 
-declare function m:do-create($pipelineName as xs:string,$root as element()) as map:map {
+declare private function m:do-create($pipelineName as xs:string,$root as element()) as map:map {
+  let $_secure := xdmp:security-assert($privDesigner, "execute")
   let $_ := xdmp:log("In wfi:do-create: pipelineName: " || $pipelineName)
   return
 
@@ -308,7 +642,8 @@ declare function m:do-create($pipelineName as xs:string,$root as element()) as m
 
 (: ASync CPF utility routines :)
 
-declare function m:get-pipeline-id($pname as xs:string) as xs:unsignedLong {
+declare private function m:get-pipeline-id($pname as xs:string) as xs:unsignedLong? {
+  (:)
     xdmp:eval(
      'xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; ' ||
      'import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; ' ||
@@ -320,9 +655,13 @@ declare function m:get-pipeline-id($pname as xs:string) as xs:unsignedLong {
         <isolation>different-transaction</isolation>
       </options>
     )
+  :)
+  m:eval-pipeline-get-id-by-name($pname)
 };
 
-declare function m:install($puri as xs:string) as xs:unsignedLong {
+declare private function m:install($puri as xs:string) as xs:unsignedLong {
+  let $_secure := xdmp:security-assert($privManager, "execute")
+
   let $_ := xdmp:log("In wfi:install: puri: " || $puri)
   let $pxml := fn:doc($puri)/p:pipeline
 
@@ -332,6 +671,7 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
     if (fn:not(fn:empty(p:get($puri)))) then
       let $_ := xdmp:log("wfi:install: Removing pipeline config: " || $puri)
       return
+      (:
       xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;( (: p:remove($m:puri), :) for $pn in p:pipelines()/p:pipeline-name return if (fn:substring(xs:string($pn),1,fn:string-length($m:puri)) = $m:puri) then (xdmp:log("Deleting pipeline: "||xs:string($pn)), p:remove(xs:string($pn)) ) else ()  )',
         (xs:QName("wf:puri"),$puri),
         <options xmlns="xdmp:eval">
@@ -339,6 +679,8 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
           <isolation>different-transaction</isolation>
         </options>
       )
+      :)
+      m:eval-pipeline-delete($puri)
     else
       ()
     } catch ($e) { () } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
@@ -347,6 +689,7 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
 
   (: Recreate pipeline :)
   return
+  (:)
     xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:pxml as element(p:pipeline) external;p:insert($m:pxml)',
       (xs:QName("wf:pxml"),$pxml),
       <options xmlns="xdmp:eval">
@@ -354,18 +697,30 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
         <isolation>different-transaction</isolation>
       </options>
     )
+  :)
+    m:eval-pipeline-create($pxml)
 };
 
+declare private function m:domains($pnames as xs:string*) as xs:unsignedLong* {
+  let $pmap := map:map()
+  let $getem :=
+    for $pname in $pnames
+    return m:eval-pipelines-get-by-base($pmap,$pname)
+  return
+    for $key in map:keys($pmap)
+    return m:domain($key,map:get($pmap,$key)) (: Alters the pipelines in the Triggers DB :)
+};
 
-declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$minor as xs:string, :) $pname as xs:string,$pid as xs:unsignedLong) as xs:unsignedLong {
+declare private function m:domain((: $processmodeluri as xs:string,$major as xs:string,$minor as xs:string, :) $pname as xs:string,$pid as xs:unsignedLong) as xs:unsignedLong {
 
   let $_ := xdmp:log("In wfi:domain")
 
   (: let $pname := $processmodeluri||"__"||$major||"__"||$minor :)
   (: TODO Add all OOTB CPF pipelines to this domain too :)
 
-  let $mdb := xdmp:modules-database()
-  let $_ := xdmp:log("pname: " || $pname || ", pid: " || xs:string($pid))
+  let $_ := xdmp:log("pname: " || $pname)
+
+  (:
 
   (: check if domain already exists and recreate :)
   let $remove :=
@@ -418,6 +773,21 @@ declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$
         <isolation>different-transaction</isolation>
       </options>
     )
+  :)
+  return
+    (
+        try {
+          m:eval-domain-delete($pname)
+        } catch ($e) {
+          xdmp:log("Domain doesn't exist already - not deleting: " || $pname)
+        }
+        ,
+        m:eval-domain-create( (: ONE DOMAIN PER PID REMEMBER! :)
+          $pid
+          ,
+          $pname
+        )
+    )
 };
 
 
@@ -435,7 +805,7 @@ declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$
 (:
  : See http://www.w3.org/TR/scxml/
  :)
-declare function m:scxml-to-cpf($pipelineName as xs:string, $doc as element(sc:scxml)) as map:map  {
+declare private function m:scxml-to-cpf($pipelineName as xs:string, $doc as element(sc:scxml)) as map:map  {
   (: Convert the SCXML process model to a CPF pipeline and insert (create or replace) :)
   let $_ := xdmp:log("in m:scxml-to-cpf()")
   let $initial :=
@@ -529,7 +899,7 @@ Example:-
 :)
 
 
-declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definitions)) as map:map  {
+declare private function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definitions)) as map:map  {
 
   (: Convert the process model to a CPF pipeline and insert (create or replace) :)
   let $_ := xdmp:log("in m:bpmn2-to-cpf()")
@@ -566,7 +936,7 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
 
 };
 
-declare function m:b2pipeline($rootName as xs:string, $parentStep as xs:string?, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2pipeline($rootName as xs:string, $parentStep as xs:string?, $doc as element(b2:definitions),$process as element(b2:process),
     $initial as element(), $failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as xs:unsignedLong {
   let $_ := xdmp:log("In m:b2pipeline()")
   let $pname := fn:string-join(($rootName,$parentStep),"/")
@@ -628,7 +998,7 @@ declare function m:b2pipeline($rootName as xs:string, $parentStep as xs:string?,
 };
 
 (: Another horrible, horrible hack because forks within forks seem to confuse the importer :)
-declare function m:b2deduplicate($transitions as element()*) as element()* {
+declare private function m:b2deduplicate($transitions as element()*) as element()* {
   (: Loop through states and don't include ones already processed :)
   let $values := map:map()
   let $doit :=
@@ -644,7 +1014,7 @@ declare function m:b2deduplicate($transitions as element()*) as element()* {
   return $retVals
 };
 
-declare function m:b2subPipeline($rootName as xs:string,$parentName as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2subPipeline($rootName as xs:string,$parentName as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $parentStateId as xs:string,$parentState as element(),$parentPname as xs:string,
     $nextState as element(),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as empty-sequence() {
   let $pname := fn:string-join(($rootName,$parentName,xs:string($nextState/@id)),"/")
@@ -680,7 +1050,7 @@ declare function m:b2subPipeline($rootName as xs:string,$parentName as xs:string
   return ()
 };
 
-declare function m:map-append($map as map:map,$key as xs:string,$el as item()*) as empty-sequence() {
+declare private function m:map-append($map as map:map,$key as xs:string,$el as item()*) as empty-sequence() {
   (
     xdmp:log("wfi:map-append: $key: " || $key || ", $el:-")
     ,
@@ -700,7 +1070,7 @@ declare function m:map-append($map as map:map,$key as xs:string,$el as item()*) 
   )
 };
 
-declare function m:b2walkFrom($rootName as xs:string,$parentStep as xs:string?, $doc as element(b2:definitions),$process as element(b2:process),$nextStep as xs:string,
+declare private function m:b2walkFrom($rootName as xs:string,$parentStep as xs:string?, $doc as element(b2:definitions),$process as element(b2:process),$nextStep as xs:string,
     $failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
 
   let $_ := xdmp:log("In m:b2walkFrom()")
@@ -771,7 +1141,7 @@ declare function m:b2walkFrom($rootName as xs:string,$parentStep as xs:string?, 
   else ()
 };
 
-declare function m:b2walkNext($rootName as xs:string,$parentStep as xs:string?,$doc as element(b2:definitions),
+declare private function m:b2walkNext($rootName as xs:string,$parentStep as xs:string?,$doc as element(b2:definitions),
   $process as element(b2:process), $currentStep as element(),$failureAction,$failureState,$pipelineMap as map:map,
   $stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   for $next in m:b2getNextSteps($process,$currentStep)
@@ -783,7 +1153,7 @@ declare function m:b2walkNext($rootName as xs:string,$parentStep as xs:string?,$
 
 (: STEP SPECIFIC FUNCTION CALLS FOR BPMN2 :)
 
-declare function m:b2startEvent($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2startEvent($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:startEvent),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2startEvent()")
 
@@ -810,7 +1180,7 @@ declare function m:b2startEvent($rootName as xs:string,$parentStep as xs:string?
       )
 };
 
-declare function m:b2endEvent($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2endEvent($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:endEvent),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2endEvent()")
   return
@@ -831,7 +1201,7 @@ declare function m:b2endEvent($rootName as xs:string,$parentStep as xs:string?,$
     )
 };
 
-declare function m:b2task($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2task($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:task),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2task()")
       let $route := xs:string($state/b2:outgoing[1]) (: TODO support split here? :)
@@ -857,7 +1227,7 @@ declare function m:b2task($rootName as xs:string,$parentStep as xs:string?,$pnam
       )
 };
 
-declare function m:b2exclusiveGateway($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2exclusiveGateway($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:exclusiveGateway),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2exclusiveGateway()")
   return
@@ -897,7 +1267,7 @@ declare function m:b2exclusiveGateway($rootName as xs:string,$parentStep as xs:s
         )
 };
 
-declare function m:b2userTask($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2userTask($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:userTask),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2userTask()")
       let $type :=
@@ -1012,7 +1382,7 @@ declare function m:b2userTask($rootName as xs:string,$parentStep as xs:string?,$
 };
 
 
-declare function m:b2sendTask($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2sendTask($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:sendTask),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2sendTask()")
       let $messageText := xs:string($doc/b2:message[@id = $state/@messageRef]/@name)
@@ -1047,7 +1417,7 @@ declare function m:b2sendTask($rootName as xs:string,$parentStep as xs:string?,$
 };
 
 (: Create the DIVERGING state transition :)
-declare function m:b2gatewayDiverging($gatewayType as xs:string,$myname as xs:string,$pname as xs:string,$state as element(),$failureState,$process as element(b2:process)) as item() {
+declare private function m:b2gatewayDiverging($gatewayType as xs:string,$myname as xs:string,$pname as xs:string,$state as element(),$failureState,$process as element(b2:process)) as item() {
   p:state-transition(xs:anyURI($myname),
   "",xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)||"__rv"),
   $failureState,(),
@@ -1107,7 +1477,7 @@ declare function m:b2gatewayDiverging($gatewayType as xs:string,$myname as xs:st
 )
 };
 
-declare function m:b2gatewayConvergingParent($gatewayType as xs:string,$stepMap as map:map,$state as element(),
+declare private function m:b2gatewayConvergingParent($gatewayType as xs:string,$stepMap as map:map,$state as element(),
   $callStack as map:map,$pipelineSteps as map:map,$failureState,$process as element(b2:process)) as empty-sequence() {
 
     if (fn:empty(map:get($stepMap,xs:string($state/@id)))) then
@@ -1152,7 +1522,7 @@ declare function m:b2gatewayConvergingParent($gatewayType as xs:string,$stepMap 
     else ()
 };
 
-declare function m:b2gatewayConvergingEnd($gatewayType as xs:string,$pname as xs:string,$state as element(),
+declare private function m:b2gatewayConvergingEnd($gatewayType as xs:string,$pname as xs:string,$state as element(),
   $failureState) as item() {
   (
     xdmp:log("wfi:b2gatewayConvergingEnd(): entered method")
@@ -1172,7 +1542,7 @@ declare function m:b2gatewayConvergingEnd($gatewayType as xs:string,$pname as xs
   )
 };
 
-declare function m:b2gatewayForkRV($gatewayType as xs:string,$rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2gatewayForkRV($gatewayType as xs:string,$rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
   $state as element(),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
 
   let $_ := xdmp:log("m:b2gatewayForkRV(): entered function")
@@ -1264,13 +1634,13 @@ declare function m:b2gatewayForkRV($gatewayType as xs:string,$rootName as xs:str
         else xdmp:log("UNKNOWN DIRECTION: " || xs:string($state/@gatewayDirection))
 };
 
-declare function m:b2parallelGateway($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2parallelGateway($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:parallelGateway),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2parallelGateway()")
   return m:b2gatewayForkRV("PARALLEL",$rootName,$parentStep,$pname,$doc,$process,$state,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
 };
 
-declare function m:b2inclusiveGateway($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
+declare private function m:b2inclusiveGateway($rootName as xs:string,$parentStep as xs:string?,$pname as xs:string, $doc as element(b2:definitions),$process as element(b2:process),
     $state as element(b2:inclusiveGateway),$failureAction,$failureState,$pipelineMap as map:map,$stepMap as map:map,$pipelineSteps as map:map,$parents as map:map,$callStack as map:map) as element()* {
   let $_ := xdmp:log("In wfi:b2inclusiveGateway()")
   return m:b2gatewayForkRV("INCLUSIVE",$rootName,$parentStep,$pname,$doc,$process,$state,$failureAction,$failureState,$pipelineMap,$stepMap,$pipelineSteps,$parents,$callStack)
@@ -1278,7 +1648,7 @@ declare function m:b2inclusiveGateway($rootName as xs:string,$parentStep as xs:s
 
 (: END BPMN2 CUSTOM TASK FUNCTIONS :)
 
-declare function m:b2getNextSteps($process as element(b2:process),$state as element()) as element()* {
+declare private function m:b2getNextSteps($process as element(b2:process),$state as element()) as element()* {
   for $route in $state/b2:outgoing
   let $txt := xs:string($route)
   let $rc :=

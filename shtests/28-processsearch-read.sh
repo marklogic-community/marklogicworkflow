@@ -6,7 +6,7 @@
 
 echo "starting 28-processsearch-read.sh"
 
-curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X GET \
+curl -v --anyauth --user $WFMONU:$WFMONP -X GET \
     -H "Accept: application/xml" \
     "http://$RESTHOST:$RESTPORT/v1/resources/processsearch?rs:processname=022-email-test__1__0" > 28-processsearch-read-out.txt
 
