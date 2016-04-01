@@ -10,6 +10,7 @@ declare namespace wf="http://marklogic.com/workflow";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 
+declare namespace rapi = "http://marklogic.com/rest-api";
 
 (:
  : Get the process model by exact name
@@ -52,7 +53,7 @@ function ext:get(
  :  ?[major=numeric[&minor=numeric]]&name=name[&enable=true]
  :)
 declare
-%roxy:params("")
+%roxy:params("") (:major=integer","minor=integer","name=string","enable=boolean:)
 function ext:put(
     $context as map:map,
     $params  as map:map,
@@ -103,7 +104,8 @@ function ext:put(
  : ?publishedId=myprocess__1__0
  :)
 declare
-%roxy:params("")
+%roxy:params("") (: publishedId=string:)
+%rapi:transaction-mode("update")
 function ext:post(
     $context as map:map,
     $params  as map:map,
@@ -116,9 +118,15 @@ function ext:post(
   let $_ := xdmp:log($context)
   let $_ := xdmp:log($input)
 
-  let $published := xs:string(wfi:enable(map:get($params,"publishedId")))
+  let $published := wfi:enable(map:get($params,"publishedId"))
 
-  let $out := <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome><ext:domainId>{$published}</ext:domainId></ext:updateResponse>
+  let $out := <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome>
+  {
+    for $pname in map:keys($published)
+    return
+      <ext:domainId>{$pname}</ext:domainId>
+  }
+  </ext:updateResponse>
 
   return
   (
@@ -140,7 +148,7 @@ function ext:post(
 };
 
 
-(:)
+(:
 (:
  : Remove the specified process model from execution
  :  ?[major=numeric[&minor=numeric]]&modelid=modelid

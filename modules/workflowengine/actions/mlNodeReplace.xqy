@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfr="http://marklogic.com/workflow-runtime" at "/app/models/workflow-runtime.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 
@@ -37,12 +37,12 @@ try {
     let $ns := ($cpf:options/wf:namespaces/wf:namespace,<wf:namespace short="wf" long="http://marklogic.com/workflow" />)
     return
       xdmp:node-replace(
-        wfu:evaluate($cpf:document-uri,$ns,xs:string($cpf:options/wf:xpath)),
-        wfu:evaluate($cpf:document-uri,$ns,xs:string($cpf:options/wf:content))
+        wfr:evaluate($cpf:document-uri,$ns,xs:string($cpf:options/wf:xpath)),
+        wfr:evaluate($cpf:document-uri,$ns,xs:string($cpf:options/wf:content))
       )
     ,cpf:success($cpf:document-uri,$cpf:transition,())
   )
   (: Note the state transition is a full path as a string, so in the WF namespace, not the pipeline namespace :)
 } catch ($e) {
-  wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
+  wfr:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

@@ -1,0 +1,13 @@
+{
+  "security": {
+    "RejectedEmail.txt": [
+      {"role": "workflow-internal", "permissions": ["read"]},
+      {"role": "workflow-manager", "permissions": ["read","update"]}
+    ],
+
+      "ApprovedEmail.txt": [
+        {"role": "workflow-internal", "permissions": ["read"]},
+        {"role": "workflow-manager", "permissions": ["read","update"]}
+      ]
+  }
+}

@@ -1,7 +1,6 @@
 xquery version "1.0-ml";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace prop = "http://marklogic.com/xdmp/property";

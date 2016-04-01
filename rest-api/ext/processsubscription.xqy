@@ -6,7 +6,7 @@ module namespace ext = "http://marklogic.com/rest-api/resource/processsubscripti
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfman="http://marklogic.com/workflow-management" at "/app/models/workflow-management.xqy";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
@@ -39,13 +39,13 @@ function ext:put(
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
   let $_ := xdmp:log($input)
-  let $domainid := wfu:createAlertingDomain(
+  let $domainid := wfman:createAlertingDomain(
     xs:string($input/ext:createRequest/ext:domain/ext:name),
     xs:string($input/ext:createRequest/ext:domain/ext:type),
     xs:string($input/ext:createRequest/ext:domain/ext:path),
     xs:string($input/ext:createRequest/ext:domain/ext:depth)
   )
-  let $subname := wfu:createSubscription(
+  let $subname := wfman:createSubscription(
     xs:string($input/ext:createRequest/ext:processName),
     xs:string($input/ext:createRequest/ext:name),
     xs:string($input/ext:createRequest/ext:domain/ext:name),
@@ -93,7 +93,7 @@ function ext:get(
     else
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
         <ext:subscription>
-          {wfu:getSubscription(map:get($params,"name"))}
+          {wfman:getSubscription(map:get($params,"name"))}
         </ext:subscription>
       </ext:readResponse>
 

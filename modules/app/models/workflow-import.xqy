@@ -6,6 +6,7 @@ declare namespace wf="http://marklogic.com/workflow";
 declare namespace sc="http://www.w3.org/2005/07/scxml";
 declare namespace b2="http://www.omg.org/spec/BPMN/20100524/MODEL";
 
+import module namespace wfdefs = "http://marklogic.com/workflow-definitions" at "/app/models/workflow-definitions.xqy";
 
 import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
@@ -13,22 +14,22 @@ import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/
 
 import module namespace stack="http://marklogic.com/stack" at "/app/models/lib-stack.xqy";
 
-
 import module namespace ss = "http://marklogic.com/alerts/alerts" at "/app/models/lib-alerts.xqy";
 
-declare private variable $privDesigner as xs:string := "http://marklogic.com/workflow/privileges/designer"; (: Process MODEL designers :)
-declare private variable $privManager as xs:string := "http://marklogic.com/workflow/privileges/manager"; (: People who can install and remove process models from the live system :)
-declare private variable $privAdmin as xs:string := "http://marklogic.com/workflow/privileges/administrator"; (: People who can see and remove live process INSTANCES :)
-declare private variable $privMonitor as xs:string := "http://marklogic.com/workflow/privileges/monitor"; (: People who can watch (read only) process status :)
-declare private variable $privUser as xs:string := "http://marklogic.com/workflow/privileges/user"; (: A workflow user :)
+(:
+ : SECURITY NOTICE
+ :
+ : Functions in this library should only be executable by those with the workflow-designer or workflow-manager privilege.
+ :)
 
 (: TODO replace following outgoing routes with call to m:b2getNextSteps() :)
+
 
 (: REST API OR XQUERY PUBLIC API FUNCTIONS :)
 
 declare function m:install-and-convert($doc as node(),$filename as xs:string,$major as xs:string,$minor as xs:string,$enable as xs:boolean?) as xs:string* {
-  let $_secure := xdmp:security-assert($privDesigner, "execute")
-  let $_secure2 := if (fn:true() = $enable) then xdmp:security-assert($privManager, "execute") else ()
+  let $_secure := xdmp:security-assert($wfdefs:privDesigner, "execute")
+  let $_secure2 := if (fn:true() = $enable) then xdmp:security-assert($wfdefs:privManager, "execute") else ()
 
   let $_ := xdmp:log("In wfi:install-and-convert")
   (: 1. Save document in to DB :)
@@ -73,8 +74,11 @@ declare function m:install-and-convert($doc as node(),$filename as xs:string,$ma
   return $pnames (: first is NOT necessarily root process :)
 };
 
+(:
+ : TODO Qn: Does an amp carry on to called functions, or is it only valid for the named function only???
+ :)
 declare function m:enable($pname as xs:string) as map:map {
-  xdmp:security-assert($privManager, "execute")
+  xdmp:security-assert($wfdefs:privManager, "execute")
   ,
   xdmp:log("wfi:enable called for pname: " || $pname)
   ,
@@ -89,7 +93,7 @@ declare function m:enable($pname as xs:string) as map:map {
  : Used by GET processmodel
  :)
 declare function m:get-model-by-name($name as xs:string) as node()? {
-  let $_secure := xdmp:security-assert($privDesigner, "execute")
+  let $_secure := xdmp:security-assert($wfdefs:privDesigner, "execute")
 
   let $uri := "/workflow/models/" || $name
   return fn:doc($uri)
@@ -98,9 +102,9 @@ declare function m:get-model-by-name($name as xs:string) as node()? {
 declare private function m:ensureWorkflowPipelinesInstalled() as empty-sequence() {
   (: first check if pipeline does not exist :)
   let $name := "MarkLogic Workflow Initial Selection"
-  return
+  let $result :=
   try {
-    let $pexists :=
+
     (:xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:name as xs:string external;p:get($m:name)',
       (xs:QName("wf:name"),$name),
       <options xmlns="xdmp:eval">
@@ -108,9 +112,13 @@ declare private function m:ensureWorkflowPipelinesInstalled() as empty-sequence(
         <isolation>different-transaction</isolation>
       </options>
     ):)
-    m:eval-pipeline-get-by-name($name)
-    return ()
+    m:eval-pipeline-exists-live($name)
+
   } catch ($e) {
+    fn:false()
+  }
+  return
+   if ($result) then () else
     (: Install pipeline as it must be missing :)
 
     let $failureAction := p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),())
@@ -143,7 +151,7 @@ declare private function m:ensureWorkflowPipelinesInstalled() as empty-sequence(
         </options>
       )
       :)
-      m:eval-pipeline-get-by-name($name)
+      m:eval-pipeline-get-by-name-live($name)
     let $_ := xdmp:log("Workflow initial pipeline XML:-")
     let $_ := xdmp:log($wfInitial)
     let $installedPipelinePid :=
@@ -157,7 +165,7 @@ declare private function m:ensureWorkflowPipelinesInstalled() as empty-sequence(
       ):)
       m:eval-pipeline-create($wfInitial)
     return ()
-  } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
+   (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
 };
 
 
@@ -198,7 +206,7 @@ declare private function m:convert-to-cpf($processmodeluri as xs:string,$major a
     (
       m:do-create-pipelines($pmap) (: returns a map of FINAL pids :)
     )
-    else ()
+    else $pmap (: return designer time pids :)
 
   let $_ := xdmp:log("In wfi:convert-to-cpf: pids:-")
   let $_ := xdmp:log($pids)
@@ -208,7 +216,7 @@ declare private function m:convert-to-cpf($processmodeluri as xs:string,$major a
 };
 
 declare private function m:do-create-pipelines-base($pname as xs:string) as map:map {
-  let $_secure := xdmp:security-assert($privManager, "execute")
+  let $_secure := xdmp:security-assert($wfdefs:privManager, "execute")
 
   let $map := map:map()
   let $doit :=
@@ -219,7 +227,7 @@ declare private function m:do-create-pipelines-base($pname as xs:string) as map:
 };
 
 declare private function m:do-create-pipelines($pmap as map:map) as map:map {
-  let $_secure := xdmp:security-assert($privManager, "execute")
+  let $_secure := xdmp:security-assert($wfdefs:privManager, "execute")
 
   let $outmap := map:map()
 
@@ -266,7 +274,7 @@ declare private function m:do-create-pipelines($pmap as map:map) as map:map {
 
 
 declare private function m:subscribe-process($subscriptionName as xs:string, $processuri as xs:string,$query as element(cts:query)) as xs:unsignedLong {
-  let $_secure := xdmp:security-assert($privManager, "execute")
+  let $_secure := xdmp:security-assert($wfdefs:privManager, "execute")
   return (: TODO remove existing config with same subscription name, if it exists :)
   ss:add-alert($subscriptionName,$query,(),"/app/models/action-process.xqy",xdmp:modules-database(),
     <process-name>{$processuri}</process-name>)
@@ -378,9 +386,14 @@ declare private function m:eval-install-model-document($uri as xs:string,$doc) {
 declare private function m:eval-domain-delete($pname as xs:string) {
   m:eval-update-cpf(
     function() {
-      if (fn:not(fn:empty(dom:get($pname)))) then
-        dom:remove($pname)
-      else ()
+      (:if (fn:not(fn:empty(dom:get($pname)))) then
+        let $_ := xdmp:log("domain " || $pname || " exists, deleting")
+        return
+        :)
+          dom:remove($pname)
+      (: else
+        xdmp:log("domain " || $pname || " does not exist already exist. Not deleting.") (: will never execute - exception thrown instead :)
+    :)
     }
   )
 };
@@ -526,6 +539,40 @@ declare private function m:eval-pipeline-get-by-name($name as xs:string) as elem
   )
 };
 
+declare private function m:eval-pipeline-get-by-name-live($name as xs:string) as element(p:pipeline)? {
+  m:eval-query-cpf(
+    function() {
+      p:get($name)
+    }
+  )
+};
+
+declare private function m:eval-pipeline-exists($name as xs:string) as xs:boolean {
+  m:eval-query-cpf-content(
+    function() {
+      try {
+        let $detail := p:get($name)
+        return fn:true()
+      } catch ($err) {
+        fn:false()
+      }
+    }
+  )
+};
+
+declare private function m:eval-pipeline-exists-live($name as xs:string) as xs:boolean {
+  m:eval-query-cpf(
+    function() {
+      try {
+        let $detail := p:get($name)
+        return fn:true()
+      } catch ($err) {
+        fn:false()
+      }
+    }
+  )
+};
+
 declare private function m:eval-pipelines-get-by-base($map as map:map,$base as xs:string) as empty-sequence() {
   m:eval-query-cpf(
     function() {
@@ -618,7 +665,7 @@ declare private function m:create($processmodeluri as xs:string,$major as xs:str
 };
 
 declare private function m:do-create($pipelineName as xs:string,$root as element()) as map:map {
-  let $_secure := xdmp:security-assert($privDesigner, "execute")
+  let $_secure := xdmp:security-assert($wfdefs:privDesigner, "execute")
   let $_ := xdmp:log("In wfi:do-create: pipelineName: " || $pipelineName)
   return
 
@@ -660,7 +707,7 @@ declare private function m:get-pipeline-id($pname as xs:string) as xs:unsignedLo
 };
 
 declare private function m:install($puri as xs:string) as xs:unsignedLong {
-  let $_secure := xdmp:security-assert($privManager, "execute")
+  let $_secure := xdmp:security-assert($wfdefs:privManager, "execute")
 
   let $_ := xdmp:log("In wfi:install: puri: " || $puri)
   let $pxml := fn:doc($puri)/p:pipeline
@@ -777,9 +824,15 @@ declare private function m:domain((: $processmodeluri as xs:string,$major as xs:
   return
     (
         try {
-          m:eval-domain-delete($pname)
+          m:eval-domain-delete($pname) (: TODO replace this with a boolean return value :)
         } catch ($e) {
-          xdmp:log("Domain doesn't exist already - not deleting: " || $pname)
+          (: Thrown when dom:get() doesn't find anything... NOW when dom:delete() find it doesn't exist :)
+          (
+            xdmp:log("Domain doesn't exist already - not deleting: " || $pname),
+            xdmp:log("START RECOVERABLE ERROR"),
+            xdmp:log($e),
+            xdmp:log("END RECOVERABLE ERROR")
+          )
         }
         ,
         m:eval-domain-create( (: ONE DOMAIN PER PID REMEMBER! :)

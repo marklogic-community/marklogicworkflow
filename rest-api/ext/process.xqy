@@ -1,20 +1,20 @@
+xquery version "1.0-ml";
 
 
 (: process.xqy - Start a new, or modify an existing, MarkLogic Workflow process
  :
  :)
-xquery version "1.0-ml";
 
 module namespace ext = "http://marklogic.com/rest-api/resource/process";
 
-(: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfin="http://marklogic.com/workflow-instantiation" at "/app/models/workflow-instantiation.xqy";
+import module namespace wfp="http://marklogic.com/workflow-process" at "/app/models/workflow-process.xqy";
 import module namespace wfa="http://marklogic.com/workflow-actions" at "/app/models/workflow-actions.xqy";
 
 declare namespace roxy = "http://marklogic.com/roxy";
-declare namespace wf="http://marklogic.com/workflow";
+declare namespace wf = "http://marklogic.com/workflow";
 
 declare namespace rapi = "http://marklogic.com/rest-api";
 
@@ -55,7 +55,7 @@ function ext:put(
 
   let $_ := xdmp:log($input)
 
-  let $res := wfu:create($input/ext:createRequest/ext:processName/text(),
+  let $res := wfin:create($input/ext:createRequest/ext:processName/text(),
     $input/ext:createRequest/ext:data/element(),$input/ext:createRequest/ext:attachments/wf:attachment,(),(),())
 
   let $out := <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:processId>{$res}</ext:processId></ext:createResponse>
@@ -104,12 +104,12 @@ function ext:get(
     else
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
         {if ($part = "document") then
-          <ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>
+          <ext:document>{wfp:get(map:get($params,"processid"))}</ext:document>
          else if ($part = "properties") then
-           <ext:properties>{wfu:getProperties(map:get($params,"processid"))}</ext:properties>
+           <ext:properties>{wfp:getProperties(map:get($params,"processid"))}</ext:properties>
          else
-           (<ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>,
-           <ext:properties>{wfu:getProperties(map:get($params,"processid"))}</ext:properties>)
+           (<ext:document>{wfp:get(map:get($params,"processid"))}</ext:document>,
+           <ext:properties>{wfp:getProperties(map:get($params,"processid"))}</ext:properties>)
         }
       </ext:readResponse>
 
@@ -149,7 +149,7 @@ function ext:post(
  let $pid := map:get($params,"processid")
  (:let $proc := wfu:get($pid):)
  let $_ := xdmp:log("REST EXT ProcessId: " || $pid)
- let $props := wfu:getProperties($pid)
+ let $props := wfp:getProperties($pid)
  (:
  let $_ := xdmp:log("CURRENT STEP INFO")
  let $_ := xdmp:log($props/wf:currentStep)

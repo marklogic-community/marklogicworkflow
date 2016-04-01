@@ -1,0 +1,88 @@
+{
+  "security": {
+    "alert-action-process.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]}
+    ],
+    "lib-alerts.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]}
+    ],
+    "lib-search-subscribe.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]}
+    ],
+    "lib-sectest.xqy": [
+      {"role": "workflow-designer", "permissions": ["read","execute"]}
+    ],
+    "lib-stack.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]}
+    ],
+    "workflow-actions.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]},
+      {"role": "workflow-instantiator", "permissions": ["read","execute"]},
+      {"role": "workflow-user", "permissions": ["read","execute"]}
+    ],
+    "workflow-admin.xqy": [
+      {"role": "workflow-administrator", "permissions": ["read","execute"]},
+      {"role": "workflow-monitor", "permissions": ["read","execute"]}
+    ],
+    "workflow-assets.xqy": [
+      {"role": "workflow-manager", "permissions": ["read","execute"]}
+    ],
+    "workflow-definitions.xqy": [
+      {"role": "workflow-manager", "permissions": ["read","execute"]},
+      {"role": "workflow-user", "permissions": ["read","execute"]},
+      {"role": "workflow-administrator", "permissions": ["read","execute"]},
+      {"role": "workflow-monitor", "permissions": ["read","execute"]},
+      {"role": "workflow-internal", "permissions": ["read","execute"]},
+      {"role": "workflow-designer", "permissions": ["read","execute"]},
+      {"role": "workflow-instantiator", "permissions": ["read","execute"]}
+    ],
+    "workflow-import.xqy": [
+      {"role": "workflow-designer", "permissions": ["read","execute"]},
+      {"role": "workflow-manager", "permissions": ["read","execute"]}
+    ],
+    "workflow-instantiation.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]},
+      {"role": "workflow-instantiator", "permissions": ["read","execute"]},
+      {"role": "workflow-user", "permissions": ["read","execute"]}
+    ],
+    "workflow-management.xqy": [
+      {"role": "workflow-manager", "permissions": ["read","execute"]}
+    ],
+    "workflow-monitoring.xqy": [
+      {"role": "workflow-monitor", "permissions": ["read","execute"]},
+      {"role": "workflow-manager", "permissions": ["read","execute"]}
+    ],
+    "workflow-process.xqy": [
+      {"role": "workflow-manager", "permissions": ["read","execute"]},
+      {"role": "workflow-user", "permissions": ["read","execute"]},
+      {"role": "workflow-administrator", "permissions": ["read","execute"]},
+      {"role": "workflow-monitor", "permissions": ["read","execute"]},
+      {"role": "workflow-internal", "permissions": ["read","execute"]},
+      {"role": "workflow-designer", "permissions": ["read","execute"]},
+      {"role": "workflow-instantiator", "permissions": ["read","execute"]}
+    ],
+    "workflow-runtime.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]},
+      {"role": "workflow-instantiator", "permissions": ["read","execute"]},
+      {"role": "workflow-user", "permissions": ["read","execute"]}
+    ],
+    "workflow-status.xqy": [
+      {"role": "workflow-monitor", "permissions": ["read","execute"]},
+      {"role": "workflow-manager", "permissions": ["read","execute"]},
+      {"role": "workflow-instantiator", "permissions": ["read","execute"]},
+      {"role": "workflow-user", "permissions": ["read","execute"]}
+    ],
+    "lib-alerts.xqy": [
+      {"role": "workflow-manager", "permissions": ["read","execute"]},
+      {"role": "workflow-designer", "permissions": ["read","execute"]}
+    ],
+    "lib-search-subscribe.xqy": [
+      {"role": "workflow-manager", "permissions": ["read","execute"]},
+      {"role": "workflow-designer", "permissions": ["read","execute"]}
+    ],
+    "lib-stack.xqy": [
+      {"role": "workflow-manager", "permissions": ["read","execute"]},
+      {"role": "workflow-designer", "permissions": ["read","execute"]}
+    ]
+  }
+}

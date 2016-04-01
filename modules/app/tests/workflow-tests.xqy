@@ -4,6 +4,11 @@ declare module namespace m="http://marklogic.com/workflow-tests" at "/app/tests/
 
 import module namespace wfi="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
 
+(:
+ : This file contains tests that had to be executed within the server rather than via the command line. See the
+ : QConsole workspace (to be named) for example executions.
+ :)
+
 (: XDMP AS USER CALLS :)
 
 declare function m:asDesigner($function as function() as item()*) {

@@ -1,0 +1,8 @@
+{
+  "security": {
+    "TestEmail.txt": [
+      {"role": "workflow-internal", "permissions": ["read"]},
+      {"role": "workflow-manager", "permissions": ["read","update"]}
+    ]
+  }
+}

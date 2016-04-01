@@ -11,7 +11,7 @@ import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic
 declare namespace wf = "http://marklogic.com/workflow";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfin="http://marklogic.com/workflow-instantiation" at "/app/models/workflow-instantiation.xqy";
 
 declare variable $alert:config-uri as xs:string external;
 declare variable $alert:doc as node() external;
@@ -22,7 +22,7 @@ declare variable $alert:action as element(alert:action) external;
 
 (: Find appropriate process from alert action option :)
 let $procname := xs:string($alert:action/alert:options/wf:process-name)
-let $pid :=   wfu:create($procname,$alert:doc/element(),
+let $pid :=   wfin:create($procname,$alert:doc/element(),
       (<wf:attachment name="InitiatingAttachment" uri="{fn:base-uri($alert:doc)}" cardinality="1"/>)
       ,(),(),()
   )

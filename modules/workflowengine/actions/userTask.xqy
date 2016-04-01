@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfr="http://marklogic.com/workflow-runtime" at "/app/models/workflow-runtime.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 
@@ -37,7 +37,7 @@ try {
           return
           (: decide who the user is now :)
           (
-            <wf:user>{wfu:evaluate($cpf:document-uri,$ns,xs:string($cpf:options/wf:dynamicUser))}</wf:user>,
+            <wf:user>{wfr:evaluate($cpf:document-uri,$ns,xs:string($cpf:options/wf:dynamicUser))}</wf:user>,
             $cpf:options/wf:type,
             $cpf:options/wf:state
           )
@@ -53,5 +53,5 @@ try {
   (: WARNING the above currentStep properties are the MINIMUM required of all late-completing process steps :)
   (: Note the state transition is a full path as a string, so in the WF namespace, not the pipeline namespace :)
 } catch ($e) {
-  wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
+  wfr:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

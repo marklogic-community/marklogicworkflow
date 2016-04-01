@@ -3,11 +3,14 @@
     {"name": "version", "methods": ["GET"]},
     {"name": "workplace", "methods": ["GET","POST"]},
     {"name": "process", "methods": ["GET","POST","PUT"]},
+    {"name": "processasset", "methods": ["GET","DELETE","PUT"]},
+    {"name": "processengine", "methods": ["GET","DELETE"]},
     {"name": "processinbox", "methods": ["GET"]},
     {"name": "processqueue", "methods": ["GET"]},
     {"name": "processmodel", "methods": ["GET","POST","PUT"]},
     {"name": "processsubscription", "methods": ["PUT"]},
-    {"name": "processsearch", "methods": ["PUT"]}
+    {"name": "processsearch", "methods": ["PUT"]},
+    {"name": "sectest", "methods": ["GET"]}
   ],
   "transforms": [],
   "triggers": [

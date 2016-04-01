@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfr="http://marklogic.com/workflow-runtime" at "/app/models/workflow-runtime.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace prop = "http://marklogic.com/xdmp/property";
@@ -33,7 +33,7 @@ try {
       let $next := xs:string($props/wf:currentStep/wf:state)
       let $_ := xdmp:log("Next state: "||$next)
       let $startTime := xs:dateTime($props/wf:currentStep/wf:startTime)
-      return wfu:complete( $cpf:document-uri, $cpf:transition, xs:anyURI($next), $startTime )
+      return wfr:complete( $cpf:document-uri, $cpf:transition, xs:anyURI($next), $startTime )
     else (
       (: From set-updated-action.xqy in CPF:)
 
@@ -47,5 +47,5 @@ try {
 
     ) (: do what CPF normally does... :)
 } catch ($e) {
-  wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
+  wfr:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

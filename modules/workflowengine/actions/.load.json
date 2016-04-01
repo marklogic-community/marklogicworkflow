@@ -1,0 +1,41 @@
+{
+  "security": {
+    "endEvent.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]}
+    ],
+      "exclusiveGateway.xqy": [
+        {"role": "workflow-internal", "permissions": ["read","execute"]}
+      ],
+        "fork.xqy": [
+          {"role": "workflow-internal", "permissions": ["read","execute"]}
+        ],
+          "genericComplete.xqy": [
+            {"role": "workflow-internal", "permissions": ["read","execute"]}
+          ],
+            "mlNodeReplace.xqy": [
+              {"role": "workflow-internal", "permissions": ["read","execute"]}
+            ],
+              "restart.xqy": [
+                {"role": "workflow-internal", "permissions": ["read","execute"]}
+              ],
+                "scriptTask.xqy": [
+                  {"role": "workflow-internal", "permissions": ["read","execute"]}
+                ],
+                  "sendTask.xqy": [
+                    {"role": "workflow-internal", "permissions": ["read","execute"]}
+                  ],
+                    "startEvent.xqy": [
+                      {"role": "workflow-internal", "permissions": ["read","execute"]}
+                    ],
+                      "task.xqy": [
+                        {"role": "workflow-internal", "permissions": ["read","execute"]}
+                      ],
+                        "userTask.xqy": [
+                          {"role": "workflow-internal", "permissions": ["read","execute"]}
+                        ],
+                          "workflowInitialSelection.xqy": [
+                            {"role": "workflow-internal", "permissions": ["read","execute"]},
+                              {"role": "workflow-instantiator", "permissions": ["read","execute"]}
+                          ]
+  }
+}

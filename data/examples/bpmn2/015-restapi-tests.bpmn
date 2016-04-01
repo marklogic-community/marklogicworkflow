@@ -4,7 +4,7 @@
   <bpmn2:import importType="http://www.w3.org/2001/XMLSchema" location="platform:/resource/MarkLogic%20Workflow/documentation/marklogicworkflow.xsd" namespace="http://marklogic.com/workflow"/>
   <bpmn2:itemDefinition id="ItemDefinition_5" isCollection="false" structureRef="process"/>
   <bpmn2:itemDefinition id="ItemDefinition_1" isCollection="false" structureRef="ns2.xsd:process"/>
-  <bpmn2:resource id="Resource_1" name="admin"/>
+  <bpmn2:resource id="Resource_1" name="workflow-user"/>
   <bpmn2:resource id="Resource_2" name="Editors"/>
   <bpmn2:resource id="Resource_3" name="DynamicUser"/>
   <bpmn2:process id="restapitests" name="REST API Test 015" isExecutable="false" processType="Public">

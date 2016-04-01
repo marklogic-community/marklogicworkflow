@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfr="http://marklogic.com/workflow-runtime" at "/app/models/workflow-runtime.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 
@@ -27,7 +27,7 @@ declare variable $cpf:options as element() external;
 :)
 
 try {
-  wfu:complete( $cpf:document-uri, $cpf:transition, (), fn:current-dateTime() )
+  wfr:complete( $cpf:document-uri, $cpf:transition, (), fn:current-dateTime() )
 } catch ($e) {
-  wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
+  wfr:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }

@@ -1,0 +1,13 @@
+{
+  "security": {
+    "hasEntered.xqy": [
+      {"role": "workflow-internal", "permissions": ["read","execute"]}
+    ],
+      "hasRendezvoused.xqy": [
+        {"role": "workflow-internal", "permissions": ["read","execute"]}
+      ],
+        "isComplete.xqy": [
+          {"role": "workflow-internal", "permissions": ["read","execute"]}
+        ]
+  }
+}

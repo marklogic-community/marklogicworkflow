@@ -5,7 +5,7 @@ module namespace ext = "http://marklogic.com/rest-api/resource/processqueue";
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfst="http://marklogic.com/workflow-status" at "/app/models/workflow-status.xqy";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
@@ -32,7 +32,7 @@ function ext:get(
       <ext:readResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Parameter 'queue' is required.</ext:message></ext:readResponse>
     else
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
-        {wfu:queue( map:get($params,"queue") )}
+        {wfst:queue( map:get($params,"queue") )}
       </ext:readResponse>
 
   return

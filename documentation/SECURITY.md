@@ -189,8 +189,22 @@ eval-query-cpf | workflow-internal, pipeline-management | Allows call to invoke-
 convert-to-cpf | workflow-manager | Allows install of process in modules DB before deploying to triggers db
 eval-domain-create | domain-management, pipeline-management | Allows domain creation and retrieval of pipeline information for creating the domain
 install-and-convert | workflow-internal | Allows conversion to CPF in modules DB
+eval-pipeline-create | pipeline-management | Allows pipelines to be created in live CPF
+eval-domain-delete | domain-management,pipeline-management | Allows domains to be seen and deleted in live CPF
 
-workflow internal role has the below privileges:-
+Amps for workflow-actions.xqy:-
+
+local-name | roles assigned | explanation
+---- | ---- | ----
+complete-generic (private function) | workflow-internal | Allows call to workflow-runtime:finallyComplete
+
+Amps for workflow-instantiator.xqy:-
+
+local-name | roles assigned | explanation
+---- | ---- | ----
+create | workflow-internal | allows initial actions and libraries to run as workflow internal role - workflow-internal has xdmp:login privilege (and thus NO USER SHOULD EVER BE ASSIGNED THIS ROLE)
+
+workflow internal (aka runtime) role has the below privileges:-
 - xdmp:invoke
 - xdmp:invoke-in
 - create-pipeline
@@ -200,3 +214,10 @@ workflow internal role has the below privileges:-
 
 - Determine why REST extension cannot be executed
 - Check permissions on REST API code by default, then check our execute permissions on the REST extension, and import module
+
+## Diagnosing issues
+
+If you get a SEC-PRIV response in a rest extension this means you do not have your amps set properly.
+
+If the extension does not exist you EITHER do not have execute privileges on the resource extension OR have
+execute permissions on all required libraries - it is NOT an amp issue.

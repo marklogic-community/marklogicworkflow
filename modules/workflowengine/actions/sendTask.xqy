@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfr="http://marklogic.com/workflow-runtime" at "/app/models/workflow-runtime.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 
@@ -41,11 +41,11 @@ try {
   let $_ := xdmp:log($message)
 
 
-  let $messageText := wfu:getProcessInstanceAsset($cpf:document-uri,$message || ".txt")/text() (: This is a text file!!! Not XML :)
+  let $messageText := wfr:getProcessInstanceAsset($cpf:document-uri,$message || ".txt")/text() (: This is a text file!!! Not XML :)
   let $_ := xdmp:log($messageText)
 
   (: Perform replacements across returned content :)
-  let $messageXml := wfu:evaluateXml($cpf:document-uri,$ns,$messageText, ()) (: TODO pass in real parameters, like to and from email etc.? Or just do inside template? :)
+  let $messageXml := wfr:evaluateXml($cpf:document-uri,$ns,$messageText, ()) (: TODO pass in real parameters, like to and from email etc.? Or just do inside template? :)
 
 
   let $_ := xdmp:log("sendTask: Email message result XML:-")
@@ -57,8 +57,8 @@ try {
     (
       xdmp:email($messageXml)
       ,
-      wfu:complete( $cpf:document-uri, $cpf:transition, (), $st )
+      wfr:complete( $cpf:document-uri, $cpf:transition, (), $st )
     )
 } catch ($e) {
-  wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
+  wfr:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }
