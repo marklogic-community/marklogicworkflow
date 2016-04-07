@@ -61,6 +61,8 @@ declare private function m:update-generic($processId as xs:string,$data as node(
 	let $previous-attach := fn:doc(wfp:getProcessUri($processId))/wf:process/wf:attachments
 
   return (
+    (: This method needs an amp to workflow-internal in order to modify the process doc :)
+    (: TODO SECURITY add sanity checks to ensure THIS user is allowed to do this to THIS instance :)
       xdmp:node-replace(fn:doc(wfp:getProcessUri($processId))/wf:process/wf:data,
         (: Keep previous data if not newly sent and add new elements :)
         element wf:data {

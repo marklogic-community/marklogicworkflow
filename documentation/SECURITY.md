@@ -197,6 +197,7 @@ Amps for workflow-actions.xqy:-
 local-name | roles assigned | explanation
 ---- | ---- | ----
 complete-generic (private function) | workflow-internal | Allows call to workflow-runtime:finallyComplete
+update-generic | workflow-internal | Allows a normal workflow-user to update data and attachments in a live process
 
 Amps for workflow-instantiator.xqy:-
 
@@ -204,11 +205,23 @@ local-name | roles assigned | explanation
 ---- | ---- | ----
 create | workflow-internal | allows initial actions and libraries to run as workflow internal role - workflow-internal has xdmp:login privilege (and thus NO USER SHOULD EVER BE ASSIGNED THIS ROLE)
 
+Amps for workflow-runtime.xqy:-
+
+local-name | roles assigned | explanation
+---- | ---- | ----
+finallyComplete | workflow-internal | Allows CPF processing to continue as if the workflow-internal user started it.
+
 workflow internal (aka runtime) role has the below privileges:-
 - xdmp:invoke
 - xdmp:invoke-in
 - create-pipeline
 - create-domain
+- workflow-internal (obviously)
+- xdmp:login (to perform a later processing action as a specific workflow-user) - locked down to a PRIVATE function.
+- workflow-instantiator-uri (URI privilege)
+
+workflow-internal role also inherits from the below roles:-
+- pipeline-execution
 
 ## Security TODOs
 

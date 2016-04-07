@@ -43,6 +43,7 @@ declare function m:finallyComplete($processId as xs:string,$transition as xs:str
   return
     (
     xdmp:node-replace($props/wf:currentStep/wf:step-status,<wf:step-status>COMPLETE</wf:step-status>)
+    (: NOTE SECURITY The above requires an amp so that CPF runs as workflow-internal when cpf-property-update occurs :)
     (:,
     xdmp:node-replace($props/cpf:status,<cpf:processing-status>active</cpf:processing-status>)
     :)
