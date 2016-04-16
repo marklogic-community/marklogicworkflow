@@ -4,8 +4,6 @@ declare namespace my="http://marklogic.com/alerts";
 
 import module namespace la = "http://marklogic.com/alerts/alerting" at "/app/models/lib-alerting.xqy";
 
-declare variable $my:alert-name as xs:string external;
-declare variable $my:query as cts:query external;
-declare variable $my:options as cts:query external;
+declare variable $my:vars as map:map external;
 
-la:create-rule($my:alert-name,$my:query,$my:options)
+la:create-rule(map:get($my:vars,"alert-name"),map:get($my:vars,"query"),map:get($my:vars,"options"))
