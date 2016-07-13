@@ -134,6 +134,7 @@ function ext:get(
  :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:post(
    $context as map:map,
    $params  as map:map,
@@ -143,7 +144,7 @@ function ext:post(
  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
  let $part := (map:get($params,"part"),"document")[1]
- 
+
  let $_ := xdmp:log($input)
  let $pid := map:get($params,"processid")
  (:let $proc := wfu:get($pid):)
