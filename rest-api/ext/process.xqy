@@ -142,6 +142,8 @@ function ext:post(
 
  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
+ let $part := (map:get($params,"part"),"document")[1]
+ 
  let $_ := xdmp:log($input)
  let $pid := map:get($params,"processid")
  (:let $proc := wfu:get($pid):)
@@ -175,7 +177,7 @@ function ext:post(
 
      if ("true" = map:get($params,"lock")) then
        (: Lock the work item, and return its details as if get had been called. If already locked, instead return an error :)
-       let $feedback = wfu:lock($pid)
+       let $feedback := wfu:lock($pid)
        let $update :=
          if (fn:empty($feedback)) then
            <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>

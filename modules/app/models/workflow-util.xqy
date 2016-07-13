@@ -204,7 +204,7 @@ declare function m:lock($processId as xs:string) as node()? {
         if (fn:empty($props/wf:currentStep/wf:lock)) then
           (: lock and return success :) (: TODO check what happens if this call fails... :)
           (
-            xdmp:node-insert-child($props/wf:currentStep,<wf:lock><wf:by>{xdmp:get-current-user()}</wf:by><wf:when>{xdmp:current-dateTime()}</wf:when></wf:lock>)
+            xdmp:node-insert-child($props/wf:currentStep,<wf:lock><wf:by>{xdmp:get-current-user()}</wf:by><wf:when>{fn:current-dateTime()}</wf:when></wf:lock>)
             ,
             m:audit(m:getProcessUri($processId),(),"ProcessEngine","Work item locked by '" || xdmp:get-current-user() || "'",())
           )
