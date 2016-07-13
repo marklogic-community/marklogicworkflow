@@ -1,6 +1,0 @@
-<error-response xmlns="http://marklogic.com/xdmp/error">
-  <status-code>500</status-code>
-  <status>Internal Server Error</status>
-  <message-code>INTERNAL ERROR</message-code>
-  <message>XDMP-UPDATEFUNCTIONFROMQUERY: xdmp:function(fn:QName("http://marklogic.com/rest-api/resource/process","post"), "/marklogic.rest.resource/process/assets/resource.xqy")($context, $service-params, $input) -- Cannot apply an update function from a query . See the MarkLogic server error log for further detail.</message>
-</error-response>
