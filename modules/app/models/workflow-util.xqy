@@ -192,6 +192,66 @@ declare function m:list($processName as xs:string?) as element(wf:list) {
 
 
 
+(:
+ : Called by the REST API only.
+ :)
+declare function m:lock($processId as xs:string) as node()? {
+  (: Check that this is a human queue task or user task :)
+  let $props := m:getProperties($processId)
+  return
+    if ($props/wf:currentStep/wf:step-type = "userTask" and $props/wf:currentStep/wf:step-status = "ENTERED") then
+      if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
+        if (fn:empty($props/wf:currentStep/wf:lock)) then
+          (: lock and return success :) (: TODO check what happens if this call fails... :)
+          (
+            xdmp:node-insert-child($props/wf:currentStep,<wf:lock><wf:by>{xdmp:get-current-user()}</wf:by><wf:when>{fn:current-dateTime()}</wf:when></wf:lock>)
+            ,
+            m:audit(m:getProcessUri($processId),(),"ProcessEngine","Work item locked by '" || xdmp:get-current-user() || "'",())
+          )
+        else
+          if ($props/wf:currentStep/wf:lock/wf:by = xdmp:get-current-user()) then
+            (: Do nothing - ok :)
+            ()
+          else
+            (: Fail :)
+            "Could not lock work item. Work item is already locked by '" || xs:string($props/wf:currentStep/wf:lock/wf:by) || "'"
+      else
+        "Could not lock work item. userTask type '" || xs:string($props/wf:currentStep/wf:type) || "' not supported for locking."
+    else
+      "Could not lock work item. Step is not a userTask, or status is not 'ENTERED'. Try again."
+  (: If assigned to user task, and this user, always return true even if already locked :)
+  (: Check that this item is not already locked if a queue task :)
+  (: Lock the work item :)
+  (: Return blank if ok :)
+};
+
+(:
+ : Allow unlocking of a work item. (Not the same as completion). Does not return data.
+ :)
+declare function m:unlock($processId as xs:string) as node()? {
+let $props := m:getProperties($processId)
+return
+  if ($props/wf:currentStep/wf:step-type = "userTask" and $props/wf:currentStep/wf:step-status = "ENTERED") then
+    if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
+      if (fn:empty($props/wf:currentStep/wf:lock)) then
+        () (: Just succeed, rather than error - means we are alreay unlocked! :)
+      else
+        if ($props/wf:currentStep/wf:lock/wf:by = xdmp:get-current-user()) then
+          (: Unlock :)
+          (
+            xdmp:node-delete($props/wf:currentStep/wf:lock)
+            ,
+            m:audit(m:getProcessUri($processId),(),"ProcessEngine","Work item unlocked by '" || xdmp:get-current-user() || "'",())
+          )
+        else
+          (: Fail :)
+          "Could not unlock work item. Work item is locked by a different user: '" || xs:string($props/wf:currentStep/wf:lock/wf:by) || "'"
+    else
+      "Could not unlock work item. userTask type '" || xs:string($props/wf:currentStep/wf:type) || "' not supported for locking."
+  else
+    "Could not unlock work item. Step is not a userTask, or status is not 'ENTERED'. Try again."
+};
+
 
 (:
  : This module performs process data document update functions via a high level abstraction.
