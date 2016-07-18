@@ -2,7 +2,7 @@
   "extensions": [
     {"name": "version", "methods": ["GET"]},
     {"name": "workplace", "methods": ["GET","POST"]},
-    {"name": "process", "methods": ["GET","POST","PUT"]},
+    {"name": "process", "methods": ["GET","POST","PUT","DELETE"]},
     {"name": "processinbox", "methods": ["GET"]},
     {"name": "processqueue", "methods": ["GET"]},
     {"name": "processmodel", "methods": ["GET","POST","PUT"]},

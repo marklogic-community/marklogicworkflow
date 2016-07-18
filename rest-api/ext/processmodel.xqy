@@ -61,13 +61,13 @@ function ext:put(
 {
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
-  let $_ := xdmp:log("processmodel: PUT: name: " || map:get($params,"name") || ", major: " || map:get($params,"major") || ", minor: " || map:get($params,"minor"))
-  let $_ := xdmp:log($params)
-  let $_ := xdmp:log($context)
-  let $_ := xdmp:log($input)
+  let $_ := xdmp:trace("marklogicworkflow.rest","processmodel: PUT: name: " || map:get($params,"name") || ", major: " || map:get($params,"major") || ", minor: " || map:get($params,"minor"))
+  let $_ := xdmp:trace("marklogicworkflow.rest",$params)
+  let $_ := xdmp:trace("marklogicworkflow.rest",$context)
+  let $_ := xdmp:trace("marklogicworkflow.rest",$input)
 
   let $enable := if (map:get($params,"enable") = "true") then fn:true() else fn:false()
-  let $_ := xdmp:log("Enabled? : " || xs:string($enable))
+  let $_ := xdmp:trace("marklogicworkflow.rest","Enabled? : " || xs:string($enable))
 
   let $modelid := wfi:install-and-convert($input,map:get($params,"name"),(map:get($params,"major"),"1")[1],(map:get($params,"minor"),"0")[1], $enable )
 
@@ -112,9 +112,9 @@ function ext:post(
 {
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
-  let $_ := xdmp:log($params)
-  let $_ := xdmp:log($context)
-  let $_ := xdmp:log($input)
+  let $_ := xdmp:trace("marklogicworkflow.rest",$params)
+  let $_ := xdmp:trace("marklogicworkflow.rest",$context)
+  let $_ := xdmp:trace("marklogicworkflow.rest",$input)
 
   let $published := xs:string(wfi:enable(map:get($params,"publishedId")))
 
@@ -139,8 +139,6 @@ function ext:post(
   )
 };
 
-
-(:)
 (:
  : Remove the specified process model from execution
  :  ?[major=numeric[&minor=numeric]]&modelid=modelid
@@ -151,12 +149,15 @@ declare function ext:delete(
 ) as document-node()?
 {
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  
+  let $l := xdmp:trace("marklogicworkflow.rest","DELETE /v1/resources/processmodel CALLED")
 
-  let $name := map:get($params,"something")
-  let $l := xdmp:log("DELETE /v1/resources/processmodel CALLED")
-  let $out := ()
-  let $l := xdmp:log($params)
-  let $l := xdmp:log($context)
+let $_ := xdmp:log("HERE X: " || map:get($params,"modelid") || " " || (map:get($params,"major"),"1")[1] || " " || (map:get($params,"minor"),"0")[1])
+  
+  let $out := wfi:delete(map:get($params,"modelid"),(map:get($params,"major"),"1")[1],(map:get($params,"minor"),"0")[1])
+  
+  let $l := xdmp:trace("marklogicworkflow.rest",$params)
+  let $l := xdmp:trace("marklogicworkflow.rest",$context)
   return (xdmp:set-response-code(200,"OK"),document {
 
             if ("application/xml" = $preftype) then
@@ -171,4 +172,3 @@ declare function ext:delete(
 
    })
 };
-:)

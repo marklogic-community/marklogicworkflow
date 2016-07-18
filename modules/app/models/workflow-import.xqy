@@ -55,6 +55,11 @@ declare function m:install-and-convert($doc as node(),$filename as xs:string,$ma
   return $pnames[1] (: first is root process :)
 };
 
+declare function m:delete($shortname as xs:string,$major as xs:string,$minor as xs:string) {
+  let $name := $shortname || "__" || $major || "__" || $minor
+  return m:remove($name)
+};
+
 declare function m:enable($localPipelineId as xs:string) as xs:unsignedLong {
   m:domain($localPipelineId,m:get-pipeline-id($localPipelineId)) (: Keep uri, major, minor here in case :)
   (: TODO Need to fetch child domains too, like enabling with PUT does :)
@@ -220,6 +225,25 @@ declare function m:index-of-string
 
 (: INTERNAL PRIVATE FUNCTIONS :)
 
+declare function m:remove($name as xs:string) {
+  let $_ := xdmp:log("wfi: Now DELETING pipeline(s) given name: " || $name)
+
+  return
+    try {
+    (:if (fn:not(fn:empty(p:get($name)))) then:)
+      xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;( (: p:remove($m:puri), :) xdmp:log("trying to delete " || $m:puri), for $pn in p:pipelines()/p:pipeline-name return if (fn:substring(xs:string($pn),1,fn:string-length($m:puri)) = $m:puri) then (xdmp:log("Deleting pipeline: "||xs:string($pn)), p:remove(xs:string($pn)) ) else ()  )',
+        (xs:QName("wf:puri"),$name),
+        <options xmlns="xdmp:eval">
+          <database>{xdmp:database()}</database>
+          <isolation>different-transaction</isolation>
+        </options>
+      )
+    (: else
+      () :)
+    } catch ($e) { ( xdmp:log(xdmp:quote($e))) } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
+};
+
+
 declare function m:create($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as map:map {
   let $_ := xdmp:log("In wfi:create")
 
@@ -245,22 +269,7 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
 
   let $_ := xdmp:log("In wfi:create: name: " || $name)
 
-  let $_ := xdmp:log("wfi:create : Now DELETING pipeline(s)")
-
-
-  let $removeDoc :=
-    try {
-    (:if (fn:not(fn:empty(p:get($name)))) then:)
-      xdmp:eval('xquery version "1.0-ml";declare namespace m="http://marklogic.com/workflow"; import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";declare variable $m:puri as xs:string external;( (: p:remove($m:puri), :) for $pn in p:pipelines()/p:pipeline-name return if (fn:substring(xs:string($pn),1,fn:string-length($m:puri)) = $m:puri) then (xdmp:log("Deleting pipeline: "||xs:string($pn)), p:remove(xs:string($pn)) ) else ()  )',
-        (xs:QName("wf:puri"),$name),
-        <options xmlns="xdmp:eval">
-          <database>{xdmp:database()}</database>
-          <isolation>different-transaction</isolation>
-        </options>
-      )
-    (: else
-      () :)
-    } catch ($e) { () } (: catching pipeline throwing error if it doesn't exist. We can safely ignore this :)
+  let $removeDoc := m:remove($name)
 
   (: NOTE above also removes all child pipelines too - those starting with PROCESS__MAJOR__MINOR :)
   let $_ := xdmp:log("wfi:create : Now recreating pipeline(s)")
