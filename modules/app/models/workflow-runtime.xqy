@@ -17,6 +17,12 @@ import module namespace wfin = "http://marklogic.com/workflow-instantiation" at 
 import module namespace wfp = "http://marklogic.com/workflow-process" at "/app/models/workflow-process.xqy";
 
 (:
+ : TODO SECURITY NOTICE
+ :)
+
+
+
+(:
  : Convenience function to take a few parameters and set up the above call to m:create (removes this logic from multiple functions)
  :)
 declare private function m:createSubProcess($parentProcessUri as xs:string,$forkid as xs:string,$subProcessStatus as element(wf:branch-status)) as xs:string {
@@ -27,7 +33,6 @@ declare private function m:createSubProcess($parentProcessUri as xs:string,$fork
   (: TODO AMP TO CALL CREATE :)
   return wfin:create($pipelineName,<data>{$parent/wf:data}</data>/*,<data>{$parent/wf:attachments}</data>/*,$parentProcessUri,$forkid,xs:string($subProcessStatus/wf:branch))
 };
-
 
 
 
@@ -157,7 +162,7 @@ declare private function m:audit($processUri as xs:string,$state as xs:string,$e
 declare private function m:audit-create($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as element(wf:audit) {
   let $_secure := xdmp:security-assert($wfdefs:privRuntime, "execute")
 
-  return <wf:audit><wf:when>{fn:current-dateTime()}</wf:when><wf:category>{$eventCategory}</wf:category><wf:state>{$state}</wf:state><wf:description>{$description}</wf:description><wf:detail>{$detail}</wf:detail></wf:audit>
+  return <wf:audit><wf:by>{xdmp:get-current-user()}</wf:by><wf:when>{fn:current-dateTime()}</wf:when><wf:category>{$eventCategory}</wf:category><wf:state>{$state}</wf:state><wf:description>{$description}</wf:description><wf:detail>{$detail}</wf:detail></wf:audit>
 };
 
 declare private function m:metric($processUri as xs:string,$state as xs:string,$start as xs:dateTime,$completion as xs:dateTime,$success as xs:boolean) as empty-sequence() {

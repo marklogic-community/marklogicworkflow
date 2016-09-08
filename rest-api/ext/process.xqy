@@ -8,7 +8,6 @@ xquery version "1.0-ml";
 module namespace ext = "http://marklogic.com/rest-api/resource/process";
 
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
-
 import module namespace wfin="http://marklogic.com/workflow-instantiation" at "/app/models/workflow-instantiation.xqy";
 import module namespace wfp="http://marklogic.com/workflow-process" at "/app/models/workflow-process.xqy";
 import module namespace wfa="http://marklogic.com/workflow-actions" at "/app/models/workflow-actions.xqy";
@@ -132,8 +131,14 @@ function ext:get(
 
 
 
-
-(: POST - update a process instance, potentially completing it (e.g. human step) :)
+(:
+ : POST - update a process instance, potentially completing it (e.g. human step)
+ :
+ : POST process?processid=1234 -> Updates data only, does not lock or unlock item. DEPRECATED in current form - In future this will respect locks. Does not yet.
+ : POST process?processid=1234&complete=true -> Completes work item. Respects locks. (optionally) updates work item data.
+ : POST process?processid=1234&lock=true -> Locks the work item for the current user. (optionally) updates work item data. Respects locks.
+ : POST process?processid=1234&unlock=true -> Unlocks the work item if locked by current user. (optionally) update work item data. Respects locks.
+ :)
 declare
 %roxy:params("")
 %rapi:transaction-mode("update")
@@ -174,8 +179,63 @@ function ext:post(
        (: error - cannot call complete on non completable task :)
        <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Cannot call complete on non completable task: {$props/wf:step-type/text()}</ext:message></ext:updateResponse>
    else
-     (: TODO perform a data update but leave incomplete :)
-     <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome><ext:message>No complete parameter, or complete parameter false. Leaving incomplete.</ext:message></ext:updateResponse>
+
+   if ("true" = map:get($params,"lock")) then
+     (: Lock the work item, and return its details as if get had been called. If already locked, instead return an error :)
+     let $feedback = wfa:lock($pid)
+     let $update :=
+       if (fn:empty($feedback)) then
+         <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
+           {if ($part = "document") then
+             <ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>
+            else if ($part = "properties") then
+              <ext:properties>{wfp:getProperties(map:get($params,"processid"))}</ext:properties>
+            else
+              (<ext:document>{wfp:get(map:get($params,"processid"))}</ext:document>,
+              <ext:properties>{wfp:getProperties(map:get($params,"processid"))}</ext:properties>)
+           }
+         </ext:readResponse>
+       else
+         <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Work item could not be locked by user.</ext:message><ext:feedback>{$feedback}</ext:feedback></ext:updateResponse>
+      return
+        if (fn:empty($feedback)) then
+          let $fb := wfa:update-userTask($pid,$input/ext:updateRequest/wf:data/node(),$input/ext:updateRequest/wf:attachments/node())
+          return
+            if (fn:not(fn:empty($fb))) then
+              <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Could not update userTask</ext:message><ext:feedback>{$fb}</ext:feedback></ext:updateResponse>
+            else
+              $update
+        else
+          $update
+    else
+      if ("true" = map:get($params,"unlock")) then
+        let $feedback := wfa:unlock($pid)
+        let $update :=
+         if (fn:empty($feedback)) then
+          <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
+            {if ($part = "document") then
+              <ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>
+             else if ($part = "properties") then
+               <ext:properties>{wfp:getProperties(map:get($params,"processid"))}</ext:properties>
+             else
+               (<ext:document>{wfp:get(map:get($params,"processid"))}</ext:document>,
+               <ext:properties>{wfp:getProperties(map:get($params,"processid"))}</ext:properties>)
+            }
+          </ext:readResponse>
+         else
+          <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Work item could not be unlocked by user.</ext:message><ext:feedback>{$feedback}</ext:feedback></ext:updateResponse>
+        return
+          if (fn:empty($feedback)) then
+            let $fb := wfa:update-userTask($pid,$input/ext:updateRequest/wf:data/node(),$input/ext:updateRequest/wf:attachments/node())
+            return
+              if (fn:not(fn:empty($fb))) then
+                <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Could not update userTask</ext:message><ext:feedback>{$fb}</ext:feedback></ext:updateResponse>
+              else
+                $update
+          else
+            $update
+      else
+        () (: Just default to updating the data, but doing nothing around locking :)
 
 
  let $out := ($res,<ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>)[1]

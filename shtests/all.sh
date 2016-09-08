@@ -19,13 +19,12 @@ sleep 15
 
 sleep 15
 
-. ./11-process-update.sh
-. ./12-process-read.sh
-
-sleep 15
-
-. ./13-process-update.sh
-. ./14-process-read.sh
+. ./11-process-update-lock.sh
+. ./12-process-update-lock-fail.sh
+. ./13-process-update-unlock.sh
+. ./14-process-update-lock.sh
+. ./15-process-update.sh
+. ./16-process-read.sh
 
 sleep 5
 
