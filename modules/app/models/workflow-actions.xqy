@@ -34,16 +34,16 @@ import module namespace wfp = "http://marklogic.com/workflow-process" at "/app/m
  :)
 declare function m:lock($processId as xs:string) as node()? {
   (: Check that this is a human queue task or user task :)
-  let $props := m:getProperties($processId)
+  let $props := wfp:getProperties($processId)
   return
     if ($props/wf:currentStep/wf:step-type = "userTask" and $props/wf:currentStep/wf:step-status = "ENTERED") then
       if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
         if (fn:empty($props/wf:currentStep/wf:lock)) then
           (: lock and return success :) (: TODO check what happens if this call fails... :)
           (
-            xdmp:node-insert-child($props/wf:currentStep,<wf:lock><wf:by>{xdmp:get-current-user()}</wf:by><wf:when>{xdmp:current-dateTime()}</wf:when></wf:lock>)
+            xdmp:node-insert-child($props/wf:currentStep,<wf:lock><wf:by>{xdmp:get-current-user()}</wf:by><wf:when>{fn:current-dateTime()}</wf:when></wf:lock>)
             ,
-            wfr:audit(m:getProcessUri($processId),(),"ProcessEngine","Work item locked by '" || xdmp:get-current-user() || "'",())
+            wfr:audit(wfp:getProcessUri($processId),(),"ProcessEngine","Work item locked by '" || xdmp:get-current-user() || "'",())
           )
         else
           if ($props/wf:currentStep/wf:lock/wf:by = xdmp:get-current-user()) then
@@ -66,7 +66,7 @@ declare function m:lock($processId as xs:string) as node()? {
  : Allow unlocking of a work item. (Not the same as completion). Does not return data.
  :)
 declare function m:unlock($processId as xs:string) as node()? {
-let $props := m:getProperties($processId)
+let $props := wfp:getProperties($processId)
 return
   if ($props/wf:currentStep/wf:step-type = "userTask" and $props/wf:currentStep/wf:step-status = "ENTERED") then
     if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
@@ -78,7 +78,7 @@ return
           (
             xdmp:node-delete($props/wf:currentStep/wf:lock)
             ,
-            wfr:audit(m:getProcessUri($processId),(),"ProcessEngine","Work item unlocked by '" || xdmp:get-current-user() || "'",())
+            wfr:audit(wfp:getProcessUri($processId),(),"ProcessEngine","Work item unlocked by '" || xdmp:get-current-user() || "'",())
           )
         else
           (: Fail :)
@@ -106,14 +106,14 @@ declare function m:complete-userTask($processId as xs:string,$data as node()*,$a
 
   let $_ := xdmp:log("In wfa:complete-userTask")
   let $unlock :=
-    if (fn:not(fn:empty(wfu:getProperties($processId)/wf:currentStep/wf:lock))) then
-      wfu:unlock($processId) (: We call this to ensure this user has the current lock, even though wf:currentStep will be deleted :)
+    if (fn:not(fn:empty(wfp:getProperties($processId)/wf:currentStep/wf:lock))) then
+      m:unlock($processId) (: We call this to ensure this user has the current lock, even though wf:currentStep will be deleted :)
     else
       ()
   (: Find process document :)
   (: Get next step ID :)
   (: TODO check required attachments and properties here (Should be done in the UI) :)
-  let $update := 
+  let $update :=
     if (fn:empty($unlock)) then
       update-userTask($processId,$data,$attachments)
     else

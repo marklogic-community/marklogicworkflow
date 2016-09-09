@@ -150,7 +150,8 @@ declare function m:failure($processUri as xs:string,$transition as node(),$failu
   )
 };
 
-declare private function m:audit($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as empty-sequence() {
+(: May be called by user actions on a process :)
+declare function m:audit($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as empty-sequence() {
   let $_secure := xdmp:security-assert($wfdefs:privRuntime, "execute")
 
   (: Perform append operation on process document's audit element :)

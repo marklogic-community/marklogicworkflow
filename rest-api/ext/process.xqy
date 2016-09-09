@@ -149,6 +149,7 @@ function ext:post(
 ) as document-node()* {
 
  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+ let $part := (map:get($params,"part"),"document")[1]
 
  let $_ := xdmp:log($input)
  let $pid := map:get($params,"processid")
@@ -182,12 +183,12 @@ function ext:post(
 
    if ("true" = map:get($params,"lock")) then
      (: Lock the work item, and return its details as if get had been called. If already locked, instead return an error :)
-     let $feedback = wfa:lock($pid)
+     let $feedback := wfa:lock($pid)
      let $update :=
        if (fn:empty($feedback)) then
          <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
            {if ($part = "document") then
-             <ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>
+             <ext:document>{wfp:get(map:get($params,"processid"))}</ext:document>
             else if ($part = "properties") then
               <ext:properties>{wfp:getProperties(map:get($params,"processid"))}</ext:properties>
             else
@@ -214,7 +215,7 @@ function ext:post(
          if (fn:empty($feedback)) then
           <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
             {if ($part = "document") then
-              <ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>
+              <ext:document>{wfp:get(map:get($params,"processid"))}</ext:document>
              else if ($part = "properties") then
                <ext:properties>{wfp:getProperties(map:get($params,"processid"))}</ext:properties>
              else
