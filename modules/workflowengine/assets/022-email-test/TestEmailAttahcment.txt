@@ -1,0 +1,37 @@
+﻿
+declare function local:format-email ($attachment-uri) {
+	
+let $newline := "&#13;&#10;"
+let $boundary := concat("blah", xdmp:random())
+let $content-type := fn:concat("multipart/mixed; boundary=",$boundary)
+let $attachment := fn:doc($attachment-uri)
+let $content := concat("This is a test email with one file attached.", $newline,
+  "--",$boundary,$newline,$attachment)
+  
+return $content
+}; 
+
+
+
+<em:Message
+ xmlns:em="URN:ietf:params:email-xml:"
+ xmlns:rf="URN:ietf:params:rfc822:">
+  <rf:subject>Test attachments</rf:subject>
+  <rf:from>
+    <em:Address>
+      <em:name>MarkLogic Admin</em:name>
+      <em:adrs>admin@example.com</em:adrs>
+    </em:Address>
+  </rf:from>
+  <rf:to>
+    <em:Address>
+      <em:name>Admin</em:name>
+      <em:adrs>admin@example.com</em:adrs>
+    </em:Address>
+  </rf:to>
+  <em:content> 
+  	{ 
+  		local:format-email(xs:string($wf:process/wf:attachments/wf:attachment[1]/@uri))
+    }
+  </em:content>
+</em:Message>
