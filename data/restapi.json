@@ -10,7 +10,8 @@
     {"name": "processmodel", "methods": ["GET","POST","PUT"]},
     {"name": "processsubscription", "methods": ["PUT"]},
     {"name": "processsearch", "methods": ["PUT"]},
-    {"name": "sectest", "methods": ["GET"]}
+    {"name": "sectest", "methods": ["GET"]},
+    {"name": "case", "methods": ["GET","PUT","POST"]}
   ],
   "transforms": [],
   "triggers": [
