@@ -71,11 +71,17 @@ declare private function m:audit-create($caseId as xs:string,$status as xs:strin
 declare function m:case-update($caseId as xs:string,$dataUpdates as element()*,$attachmentUpdates as element()*) as xs:boolean {
   let $_secure := xdmp:security-assert($cdefs:privCaseUser, "execute")
 
-  (: TODO don't just blanket replace all data and attachments :)
+  (: TODO don't just blanket replace all data and attachments, replace one by one :)
+  (: if data or attachment nodes are blank, leave them as they are - do not replace them with nothing :)
+  (: TODO fail if already closed :)
   let $case := m:case-get($caseId,fn:true())
   let $_ := (
-      xdmp:node-replace($case/c:data,<c:data>{$dataUpdates}</c:data>),
-      xdmp:node-replace($case/c:attachments,<c:attachments>{$attachmentUpdates}</c:attachments>),
+    if (fn:not(fn:empty($dataUpdates))) then
+      xdmp:node-replace($case/c:data,<c:data>{$dataUpdates}</c:data>)
+    else (),
+    if (fn:not(fn:empty($attachmentUpdates))) then
+      xdmp:node-replace($case/c:attachments,<c:attachments>{$attachmentUpdates}</c:attachments>)
+    else (),
       xdmp:node-insert-child($case/c:audit-trail,
         m:audit-create($caseId,"Open","Lifecycle","Case Updated",($dataUpdates,$attachmentUpdates)) )
   )
@@ -102,12 +108,17 @@ declare function m:case-close($caseId as xs:string,$dataUpdates as element()*,$a
 
   (: TODO If locked, check it is by current user, fail otherwise :)
   (: TODO Remove lockedBy, set locked to false :)
-  (: Change status to closed :)
-  (: TODO Add audit entry item :)
+  (: Changes status to closed :)
+  (: if data or attachment nodes are blank, leave them as they are - do not replace them with nothing :)
+  (: TODO fail if already closed :)
   let $case := m:case-get($caseId,fn:true())
   let $_ := (
-      xdmp:node-replace($case/c:data,<c:data>{$dataUpdates}</c:data>),
-      xdmp:node-replace($case/c:attachments,<c:attachments>{$attachmentUpdates}</c:attachments>),
+    if (fn:not(fn:empty($dataUpdates))) then
+      xdmp:node-replace($case/c:data,<c:data>{$dataUpdates}</c:data>)
+    else (),
+    if (fn:not(fn:empty($attachmentUpdates))) then
+      xdmp:node-replace($case/c:attachments,<c:attachments>{$attachmentUpdates}</c:attachments>)
+    else (),
       xdmp:node-replace(m:case-get($caseId,fn:true())/c:status,<c:status>Closed</c:status>),
       xdmp:node-insert-child($case/c:audit-trail,
         m:audit-create($caseId,"Closed","Lifecycle","Case Closed",($dataUpdates,$attachmentUpdates)) )

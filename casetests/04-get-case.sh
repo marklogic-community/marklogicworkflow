@@ -2,12 +2,12 @@
 
 . ../config/webserver-settings.sh
 
-echo "starting 02-get-case.sh"
+echo "starting 04-get-case.sh"
 
 CID=`cat 01-create-case-out.txt`
 
 curl -v --anyauth --user $MLADMINUSER:$MLADMINPASS -X GET \
     -H "Content-type: application/xml" -H "Accept: application/xml" \
-    "http://$RESTHOST:$RESTPORT/v1/resources/case?rs:caseid=$CID" > 02-get-case-out.txt
+    "http://$RESTHOST:$RESTPORT/v1/resources/case?rs:caseid=$CID" > 04-get-case-out.txt
 
-echo "02-get-case.sh complete"
+echo "04-get-case.sh complete"

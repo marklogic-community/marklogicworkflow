@@ -1,0 +1,12 @@
+<ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/case" xmlns:c="http://marklogic.com/workflow/case">
+  <ext:data>
+    <choiceA>B</choiceA>
+    <choiceB>C</choiceB>
+    <fieldC>valueC</fieldC>
+  </ext:data>
+  <ext:attachments>
+    <c:attachment name="Menace" uri="/some/squid.xml" />
+    <c:attachment name="Document" uri="/initial/sampledoc.xml" />
+    <c:attachment name="ANOther" uri="/initial/other.xml" />
+  </ext:attachments>
+</ext:updateRequest>

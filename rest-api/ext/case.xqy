@@ -37,7 +37,7 @@ declare namespace rapi = "http://marklogic.com/rest-api";
  :    <ns1:choiceA>B</ns1:choiceA><ns1:choiceB>C</ns1:choiceB>
  :  </ext:data>
  :  <ext:attachments>
- :    <c:attachment>format TBD</c:attachment>
+ :    <c:attachment uri="some ml uri" />
  :  </ext:attachments>
  : </ext:createRequest>
  :)
@@ -84,7 +84,7 @@ function ext:put(
 
 (:
  : Fetch a case by its UUID
- : ?caseid = the string id returned from PUT /resource/case or cc:case-create
+ : ?rs:caseid = the string id returned from PUT /resource/case or cc:case-create
  :)
 declare
 %roxy:params("caseid=xs:string","part=xs:string")
@@ -129,9 +129,9 @@ function ext:get(
 (:
  : POST - update a case instance, potentially changing data and status
  :
- : POST process?processid=1234&close=true -> Closed case. Respects locks. (optionally) updates case data.
- : POST process?processid=1234&lock=true -> Locks the case for the current user. (optionally) updates case data. Respects locks.
- : POST process?processid=1234&unlock=true -> Unlocks the case if locked by current user. (optionally) updates case data. Respects locks.
+ : POST process?rs:caseid=1234&rs:close=true -> Closed case. Respects locks. (optionally) updates case data.
+ : POST process?rs:caseid=1234&rs:lock=true -> Locks the case for the current user. (optionally) updates case data. Respects locks.
+ : POST process?rs:caseid=1234&rs:unlock=true -> Unlocks the case if locked by current user. (optionally) updates case data. Respects locks.
  :)
 declare
 %roxy:params("")
@@ -152,13 +152,13 @@ function ext:post(
  let $res :=
    if ("true" = map:get($params,"close")) then 
      if (fn:true() = cc:case-close($caseid,
-       $input/ext:createRequest/ext:data/element(),$input/ext:createRequest/ext:attachments/c:attachment) ) then 
+       $input/ext:updateRequest/ext:data/element(),$input/ext:updateRequest/ext:attachments/c:attachment) ) then 
        <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
      else 
        <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Case could not be closed.</ext:message><ext:feedback></ext:feedback></ext:updateResponse>
    else
      if (fn:true() = cc:case-update($caseid,
-       $input/ext:createRequest/ext:data/element(),$input/ext:createRequest/ext:attachments/c:attachment)) then 
+       $input/ext:updateRequest/ext:data/element(),$input/ext:updateRequest/ext:attachments/c:attachment)) then 
        <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
      else
        <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Case could not be updated.</ext:message><ext:feedback></ext:feedback></ext:updateResponse>
