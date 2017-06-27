@@ -1,6 +1,8 @@
 xquery version "1.0-ml";
 
-module namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
+module namespace ext = "http://marklogic.com/rest-api/resource/processasset";
+
+import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
 import module namespace wfi="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
@@ -29,16 +31,17 @@ function ext:get(
     let $assets := wfu:getProcessAssets(map:get($params,"asset"),map:get($params,"model"),
       map:get($params,"major"),map:get($params,"minor"))
 
-    return
+    return (
       (: TODO replace the below with multi part mime support, as required, in case of multiple results :)
 
       xdmp:set-response-code(200, "OK"),
       (: TODO get mime type of the assets from its URI, and return in the response :)
 
       document {
-        return $assets[1]
+        $assets[1]
 
       }
+    )
   )
 };
 
@@ -99,8 +102,6 @@ function ext:delete(
 
     let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else
       if ("text/plain" = map:get($context,"accept-types")) then "text/plain" else "application/json"
-
-    let $_ := xdmp:log($input)
 
     let $res := wfu:deleteProcessAsset(map:get($params,"asset"), map:get($params,"model"),
       map:get($params,"major"),map:get($params,"minor"))

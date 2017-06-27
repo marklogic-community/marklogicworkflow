@@ -30,7 +30,7 @@ function ext:get(
 
   let $out :=
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
-        {wfadmin:processes(  )}
+        {wfadmin:processes( () )}
       </ext:readResponse>
 
   return
@@ -82,4 +82,4 @@ function ext:delete(
           json:transform-to-json($out, $config)
     }
   )
-}
+};
