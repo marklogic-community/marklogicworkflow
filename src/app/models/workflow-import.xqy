@@ -264,7 +264,6 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
 
   (: NOTE above also removes all child pipelines too - those starting with PROCESS__MAJOR__MINOR :)
   let $_ := xdmp:log("wfi:create : Now recreating pipeline(s)")
-  let $_ := xdmp:log(concat('processmodeluri: ', $processmodeluri, 'name: ', $name, ', root: ', xdmp:quote($root)))
   let $pmap :=
         xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";'
           || 'declare variable $m:pname as xs:string external;'

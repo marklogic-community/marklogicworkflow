@@ -103,7 +103,7 @@ declare function m:setProcessAsset($assetname as xs:string,$asset as node(), $pr
     'declare variable $wf:assetname as xs:string external;' ||
     'declare variable $wf:asset as node() external;' ||
     'let $uri := "/workflowengine/assets/" || fn:string-join(($wf:processName,$wf:major,$wf:minor),"/") || "/" || $wf:assetname ' ||
-    'return (xdmp:document-insert($uri,$asset),$uri)'
+    'return (xdmp:document-insert($uri,$wf:asset),$uri)'
     , (: TODO security permissions and properties for easy finding :)
 
       (xs:QName("wf:processName"),$processName,xs:QName("wf:assetname"),$assetname,xs:QName("wf:major"),$major,
