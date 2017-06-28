@@ -21,7 +21,7 @@ declare namespace error="http://marklogic.com/xdmp/error";
 declare function update-userTask($processId as xs:string,$data as node()*,$attachments as node()*) as node()? {
   let $_ := xdmp:log("In wfa:update-userTask")
   return
-  update-generic($processId,$data,$attachments)
+    update-generic($processId,$data,$attachments)
 };
 
 (:
@@ -29,10 +29,19 @@ declare function update-userTask($processId as xs:string,$data as node()*,$attac
  :)
 declare function complete-userTask($processId as xs:string,$data as node()*,$attachments as node()*) as node()? {
   let $_ := xdmp:log("In wfa:complete-userTask")
+  let $unlock :=
+    if (fn:not(fn:empty(wfu:getProperties($processId)/wf:currentStep/wf:lock))) then
+      wfu:unlock($processId) (: We call this to ensure this user has the current lock, even though wf:currentStep will be deleted :)
+    else
+      ()
   (: Find process document :)
   (: Get next step ID :)
   (: TODO check required attachments and properties here (Should be done in the UI) :)
-  let $update := update-userTask($processId,$data,$attachments)
+  let $update :=
+    if (fn:empty($unlock)) then
+      update-userTask($processId,$data,$attachments)
+    else
+      $unlock (: report issue :)
   (: TODO lookup functionality from document patch in REST API to see if we can replicate that method here :)
   return
     if (fn:empty($update)) then complete-generic($processId) else $update
