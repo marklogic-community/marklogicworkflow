@@ -277,7 +277,8 @@ declare function m:list($processName as xs:string?) as element(wf:list) {
 (:
  : Called by the REST API only.
  :)
-declare function m:lock($processId as xs:string) as node()? {
+declare function m:lock($processId as xs:string) as xs:string? {
+  (: when it works, should return empty-sequence() :)
   (: Check that this is a human queue task or user task :)
   let $props := m:getProperties($processId)
   return
@@ -310,7 +311,8 @@ declare function m:lock($processId as xs:string) as node()? {
 (:
  : Allow unlocking of a work item. (Not the same as completion). Does not return data.
  :)
-declare function m:unlock($processId as xs:string) as node()? {
+declare function m:unlock($processId as xs:string) as xs:string? {
+(: when it works, should return empty-sequence() :)
 let $props := m:getProperties($processId)
 return
   if ($props/wf:currentStep/wf:step-type = "userTask" and $props/wf:currentStep/wf:step-status = "ENTERED") then
