@@ -28,13 +28,15 @@ project, you will need to execute the extension manually.
 
 ### Latest from source (any branch) for Plugin development
 
+*Newer versions of Eclipse may be better supported under the develop branch*
+
 Note: If following the Contributing guide, you should have logged an issue and created a new branch from develop using
 ```sh
 $ git checkout -b feature-ISSUEID develop
 ```
 
 To execute the latest extension from source:-
-- Checkout or download the zip of the latest (develop or feature branch) of MarkLogic Workflow at http://github.com/adamfowleruk/marklogicworkflow
+- Checkout or download the zip of the latest (develop or feature branch) of MarkLogic Workflow at http://github.com/marklogic-community/marklogicworkflow
 - Open Eclipse Luna (4.4) or above
 - Go to File -> Import project
 - Navigate to ./marklogicworkflow/eclipse/org.eclipse.bpmn2.modeler.runtime.marklogic (NOT just ./marklogicworkflow)

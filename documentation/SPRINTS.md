@@ -70,4 +70,4 @@ Completed Sat 18 Apr 2015 14:30 BST by Adam Fowler
 ## All future sprints in GitHub
 
 Sprints are now modelled as Milestones (Sprint-00x) in GitHub. Go to the
-[issues page](http://github.com/adamfowleruk/marklogicworkflow/issues) for details.
+[issues page](http://github.com/marklogic-community/marklogicworkflow/issues) for details.
