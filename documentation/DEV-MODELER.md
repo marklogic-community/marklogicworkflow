@@ -33,9 +33,9 @@ Note: If following the Contributing guide, you should have logged an issue and c
 $ git checkout -b feature-ISSUEID develop
 ```
 
-1. Checkout or download the zip of the latest (develop or feature branch) of MarkLogic Workflow at http://github.com/adamfowleruk/marklogicworkflow
+1. Checkout or download the zip of the latest (develop or feature branch) of MarkLogic Workflow at http://github.com/marklogic-community/marklogicworkflow
 2. Open Eclipse Luna (4.4) or above
-3. Install the BPMN plugin version according to your eclipse version. Refer to [BPMN's download page](http://www.eclipse.org/bpmn2-modeler/downloads.php "BPMN download page") for more info. 
+3. Install the BPMN plugin version according to your eclipse version. Refer to [BPMN's download page](http://www.eclipse.org/bpmn2-modeler/downloads.php "BPMN download page") for more info.
   * Only needed if you haven't installed BPMN yet.  
   * Users that are using BPMN plugin v 1.2.2 or earlier (typically Eclipse-Luna) of would need to recompile the project to refer to the old class that contain ```RootElementParser```, i.e. search ```AbstractBpmn2RuntimeExtension.RootElementParser``` and replace with ```DefaultBpmn2RuntimeExtension.RootElementParser```
   * You may refer to [this issue](https://www.eclipse.org/forums/index.php/t/1074631/) for more details regarding above need for change.

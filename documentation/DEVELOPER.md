@@ -4,4 +4,4 @@ Here is the developer documentation
 - [Creating a custom step processor](DEV-STEPPROC.md)
 - [Integrating your app to MarkLogic Workflow](RESTAPI.md)
 
-Any issues contact me at adam.fowler@marklogic.com
+Any issues contact Ed Outhwaite at ed.outhwaite@marklogic.com

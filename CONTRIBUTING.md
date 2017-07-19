@@ -11,7 +11,7 @@ through the process.
 ## <a name="question"></a> Got a Question or Problem?
 
 If you have questions about how to use MarkLogic Workflow, please direct these to the
-Adam Fowler - adam.fowler@marklogic.com.
+Ed Outhwaite - ed.outhwaite@marklogic.com.
 
 ## <a name="issue"></a> Found an Issue?
 If you find a bug in the source code or a mistake in the documentation, you can help us by
@@ -47,10 +47,10 @@ progress so multiple dev teams can work at the same time. Below is a description
 
 #### Fork MarkLogic Workflow
 
-First ask Adam Fowler for access to the project, passing him your GitHub account name. Then:-
+First ask Ed Outhwaite for access to the project, passing him your GitHub account name. Then:-
 
 ```sh
-$ git clone ssh://user@github.com/adamfowleruk/marklogicworkflow.git
+$ git clone ssh://user@github.com/marklogic-community/marklogicworkflow.git
 $ cd marklogicworkflow
 $ git checkout -b develop origin/develop
 ```
@@ -93,7 +93,7 @@ To share the branch so others can see it (although advised not to work on it) do
 $ git push --set-upstream origin feature-ISSUEID
 ```
 
-Now your feature branch [will be visible on GitHub](https://github.com/adamfowleruk/marklogicworkflow/branches) if you
+Now your feature branch [will be visible on GitHub](https://github.com/marklogic-community/marklogicworkflow/branches) if you
 are a contributor.
 
 #### Formatting code
@@ -143,5 +143,5 @@ to your code.
 
 ### Further information
 
-- [issue tracker](https://github.com/adamfowleruk/marklogicworkflow/issues)
+- [issue tracker](https://github.com/marklogic-community/marklogicworkflow/issues)
 - [.editorconfig](http://editorconfig.org/)
