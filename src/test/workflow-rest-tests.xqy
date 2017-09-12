@@ -3,6 +3,37 @@ module namespace wrt = "http://marklogic.com/workflow/rest-tests";
 
 import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 
+declare function wrt:test-09-11-12-xml-payload ($pid)
+{
+  <ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
+    <ext:processId>{$pid}</ext:processId>
+    <wf:data></wf:data>
+    <wf:attachments></wf:attachments>
+  </ext:updateRequest>
+};
+
+declare function wrt:test-13-xml-payload ($pid)
+{
+  <ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
+    <ext:processId>{$pid}</ext:processId>
+    <wf:data>
+      <unlock-new-data>Some data created on request to unlock</unlock-new-data>
+    </wf:data>
+    <wf:attachments></wf:attachments>
+  </ext:updateRequest>
+};
+
+declare function wrt:test-14-15-xml-payload ($pid)
+{
+  <ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
+    <ext:processId>{$pid}</ext:processId>
+    <wf:data>
+      <complete-data>Some data added by complete action</complete-data>
+    </wf:data>
+    <wf:attachments></wf:attachments>
+  </ext:updateRequest>
+};
+
 declare function wrt:test-01-processmodel-create ($options)
 {
   let $uri := fn:concat("http://", $c:RESTHOST, ':', $c:RESTPORT, "/v1/resources/processmodel?rs:name=015-restapi-tests.bpmn&amp;enable=true")
@@ -54,7 +85,7 @@ declare function wrt:test-08-processinbox-read ($options)
 declare function wrt:test-09-process-update ($options, $pid)
 {
   let $uri := fn:concat("http://", $c:RESTHOST, ':', $c:RESTPORT, "/v1/resources/process?rs:processid=", $pid, "&amp;rs:complete=true")
-  let $file := doc("/raw/data/09-payload.xml")
+  let $file := wrt:test-09-11-12-xml-payload($pid)
   return xdmp:http-post($uri, $options, $file)
 };
 
@@ -67,14 +98,45 @@ declare function wrt:test-10-processqueue-read ($options)
 declare function wrt:test-11-process-update-lock ($options, $pid)
 {
   let $uri := fn:concat("http://", $c:RESTHOST, ':', $c:RESTPORT, "/v1/resources/process?rs:processid=", $pid, "&amp;rs:lock=true")
-  let $file := doc("/raw/data/11-payload.xml")
+  let $file := wrt:test-09-11-12-xml-payload($pid)
   return xdmp:http-post($uri, $options, $file)
 };
 
 declare function wrt:test-12-process-update-lock-fail ($options, $pid)
 {
   let $uri := fn:concat("http://", $c:RESTHOST, ':', $c:RESTPORT, "/v1/resources/process?rs:processid=", $pid, "&amp;rs:lock=true")
-  let $file := doc("/raw/data/12-payload.xml")
+  let $file := wrt:test-09-11-12-xml-payload($pid)
   return xdmp:http-post($uri, $options, $file)
 };
+
+declare function wrt:test-13-process-update-unlock ($options, $pid)
+{
+  let $uri := fn:concat("http://", $c:RESTHOST, ':', $c:RESTPORT, "/v1/resources/process?rs:processid=", $pid, "&amp;rs:unlock=true")
+  let $file := wrt:test-13-xml-payload($pid)
+  return xdmp:http-post($uri, $options, $file)
+};
+
+declare function wrt:test-14-process-update-lock ($options, $pid)
+{
+  let $uri := fn:concat("http://", $c:RESTHOST, ':', $c:RESTPORT, "/v1/resources/process?rs:processid=", $pid, "&amp;rs:lock=true")
+  let $file := wrt:test-14-15-xml-payload($pid)
+  return xdmp:http-post($uri, $options, $file)
+};
+
+declare function wrt:test-15-process-update ($options, $pid)
+{
+  let $uri := fn:concat("http://", $c:RESTHOST, ':', $c:RESTPORT, "/v1/resources/process?rs:processid=", $pid, "&amp;rs:complete=true")
+  let $file := wrt:test-14-15-xml-payload($pid)
+  return xdmp:http-post($uri, $options, $file)
+};
+
+declare function wrt:test-16-process-read ($options, $pid)
+{
+  let $uri := fn:concat("http://", $c:RESTHOST, ':', $c:RESTPORT, "/v1/resources/process?rs:processid=", $pid)
+  return xdmp:http-get($uri, $options)
+};
+
+
+
+
 
