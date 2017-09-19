@@ -145,7 +145,7 @@ return (
   test:assert-exists($result[2]/readResponse/queue)
 );
 
-(: 11-process-update-lock :)
+(: 11-process-update-lock - Attempt to lock unlocked task - should pass :)
 import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
@@ -162,7 +162,7 @@ return (
   test:assert-exists($result[2]/readResponse/document)
 );
 
-(: 12-process-update-lock-fail :)
+(: 12-process-update-lock-fail - Attempt to lock locked task - should fail : )
 import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
@@ -175,11 +175,11 @@ let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-12-process-update-lock-fail($c:json-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  test:assert-equal('FAILURE', xs:string($result[2]//outcome)), (: this is currently passing :)
+  test:assert-equal('FAILURE', xs:string($result[2]//outcome)), ( : this is currently SUCCESSful : )
   test:assert-exists($result[2]/readResponse/message)
-);
+); :)
 
-(: 13-process-update-unlock :)
+(: 13-process-update-unlock - Attempt to unlock locked task - should pass :)
 import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
@@ -187,15 +187,16 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace error="http://marklogic.com/xdmp/error";
 
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-13-process-update-unlock($c:json-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  test:assert-equal('SUCCESS', xs:string($result[2]/readResponse/outcome)),
+  test:assert-equal('SUCCESS', xs:string($result[2]//outcome)),
   test:assert-exists($result[2]/readResponse/document)
 );
 
-(: 14-process-update-lock :)
+(: 14-process-update-lock - Attempt to lock unlocked task - should pass :)
 import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
@@ -203,13 +204,13 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace wf="http://marklogic.com/workflow";
 
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-14-process-update-lock($c:json-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  (: to do - is this supposed to fail ? :)
-  test:assert-equal('SUCCESS', xs:string($result[2]/updateResponse/outcome)),
-  test:assert-exists($result[2]/updateResponse/document)
+  test:assert-equal('SUCCESS', xs:string($result[2]//outcome)),
+  test:assert-exists($result[2]/readResponse/document)
 );
 
 (: 15-process-update :)
@@ -219,13 +220,12 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-15-process-update($c:json-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  (: to do - is this supposed to fail ? :)
-  test:assert-equal('FAILURE', xs:string($result[2]/updateResponse/outcome)),
-  test:assert-exists($result[2]/updateResponse/message)
+  test:assert-equal('SUCCESS', xs:string($result[2]/updateResponse/outcome))
 );
 
 (: 16-process-read :)

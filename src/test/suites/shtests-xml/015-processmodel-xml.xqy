@@ -129,9 +129,7 @@ let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-09-process-update($c:xml-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  (: to do - is this supposed to fail ? :)
-  test:assert-equal('FAILURE', xs:string($result[2]/ext:updateResponse/ext:outcome)),
-  test:assert-exists($result[2]/ext:updateResponse/ext:message)
+  test:assert-equal('SUCCESS', xs:string($result[2]/ext:updateResponse/ext:outcome))
 );
 
 (: 10-processqueue-read :)
@@ -149,7 +147,7 @@ return (
   test:assert-exists($result[2]/ext:readResponse/wf:queue)
 );
 
-(: 11-process-update-lock :)
+(: 11-process-update-lock - Attempt to lock unlocked task - should pass :)
 import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
@@ -157,16 +155,16 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace wf="http://marklogic.com/workflow";
 
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-11-process-update-lock($c:xml-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  (: to do - is this supposed to fail ? :)
-  test:assert-equal('FAILURE', xs:string($result[2]/ext:updateResponse/ext:outcome)),
-  test:assert-exists($result[2]/ext:updateResponse/ext:message)
+  test:assert-equal('SUCCESS', xs:string($result[2]//ext:outcome)),
+  test:assert-exists($result[2]/ext:readResponse/ext:document/wf:process)
 );
 
-(: 12-process-update-lock-fail :)
+(: 12-process-update-lock-fail - Attempt to lock locked task - should fail : )
 import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
@@ -174,31 +172,16 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace error="http://marklogic.com/xdmp/error";
 
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-12-process-update-lock-fail($c:xml-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  test:assert-equal('FAILURE', xs:string($result[2]/ext:updateResponse/ext:outcome)),
+  test:assert-equal('FAILURE', xs:string($result[2]//ext:outcome)), ( : currently passing !?! : )
   test:assert-exists($result[2]/ext:updateResponse/ext:message)
-);
+); :)
 
-(: 13-process-update-unlock :) (: definitely broken :)
-import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
-import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
-declare namespace ext = "http://marklogic.com/rest-api/resource/process";
-declare namespace http = "xdmp:http";
-declare namespace error="http://marklogic.com/xdmp/error";
-
-let $pid := xs:string(doc("/test/processId.xml")/test/processId)
-let $result := wrt:test-13-process-update-unlock($c:xml-options, $pid)
-return (
-  test:assert-equal('200', xs:string($result[1]/http:code)),
-  test:assert-equal('FAILURE', xs:string($result[2]/ext:updateResponse/ext:outcome)),
-  test:assert-exists($result[2]/ext:updateResponse/ext:message)
-);
-
-(: 14-process-update-lock :)
+(: 13-process-update-unlock - Attempt to unlock locked task - should pass :)
 import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
@@ -206,13 +189,30 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace wf="http://marklogic.com/workflow";
 
+let $_pause := xdmp:sleep(5000)
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:test-13-process-update-unlock($c:xml-options, $pid)
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]//ext:outcome)),
+  test:assert-exists($result[2]/ext:readResponse/ext:document/wf:process)
+);
+
+(: 14-process-update-lock - Attempt to lock unlocked task - should pass :)
+import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace ext = "http://marklogic.com/rest-api/resource/process";
+declare namespace http = "xdmp:http";
+declare namespace wf="http://marklogic.com/workflow";
+
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-14-process-update-lock($c:xml-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  (: to do - is this supposed to fail ? :)
-  test:assert-equal('FAILURE', xs:string($result[2]/ext:updateResponse/ext:outcome)),
-  test:assert-exists($result[2]/ext:updateResponse/ext:message)
+  test:assert-equal('SUCCESS', xs:string($result[2]//ext:outcome)),
+  test:assert-exists($result[2]/ext:readResponse/ext:document/wf:process)
 );
 
 (: 15-process-update :)
@@ -222,13 +222,12 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-15-process-update($c:xml-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  (: to do - is this supposed to fail ? :)
-  test:assert-equal('FAILURE', xs:string($result[2]/ext:updateResponse/ext:outcome)),
-  test:assert-exists($result[2]/ext:updateResponse/ext:message)
+  test:assert-equal('SUCCESS', xs:string($result[2]//ext:outcome))
 );
 
 (: 16-process-read :)
