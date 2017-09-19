@@ -34,16 +34,45 @@ declare function wrt:test-14-15-xml-payload ($pid)
   </ext:updateRequest>
 };
 
-declare function wrt:test-01-processmodel-create ($options)
+declare function wrt:processmodel-create ($options, $filename)
 {
   let $uri := fn:concat(
     "http://", $c:RESTHOST, ':', $c:RESTPORT,
-    "/v1/resources/processmodel?rs:name=015-restapi-tests.bpmn&amp;enable=true")
-  let $file := doc("/raw/data/015-restapi-tests.bpmn")
-  (:  let $process := xdmp:http-put($uri, $options, $file)
-:)
+    "/v1/resources/processmodel?rs:name=", $filename,
+    "&amp;enable=true")
+  let $fullpath := fn:concat("/raw/data/", $filename)
+  let $file := fn:doc($fullpath)
   return xdmp:http-put($uri, $options, $file)
 };
+
+declare function wrt:processmodel-publish ($options, $modelid)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/processmodel?rs:publishedId=",
+    $modelid)
+  let $file := <somexml/>
+  return xdmp:http-post($uri, $options, $file)
+};
+
+declare function wrt:process-create ($options, $payload)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/process")
+  let $file := $payload
+  return xdmp:http-put($uri, $options, $file)
+};
+
+declare function wrt:process-read ($options, $pid)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/process?rs:processid=", fn:encode-for-uri($pid))
+  return xdmp:http-get($uri, $options)
+};
+
+(: REST test specific functions :)
 
 declare function wrt:test-02-processmodel-read ($options)
 {
@@ -58,34 +87,8 @@ declare function wrt:test-03-processmodel-update ($options)
   let $uri := fn:concat(
     "http://", $c:RESTHOST, ':', $c:RESTPORT,
     "/v1/resources/processmodel?rs:name=015-restapi-tests.bpmn&amp;rs:major=1&amp;rs:minor=2")
-  let $file := doc("/raw/data/015-restapi-tests.bpmn")
+  let $file := fn:doc("/raw/data/015-restapi-tests.bpmn")
   return xdmp:http-put($uri, $options, $file)
-};
-
-declare function wrt:test-04-processmodel-publish ($options)
-{
-  let $uri := fn:concat(
-    "http://", $c:RESTHOST, ':', $c:RESTPORT,
-    "/v1/resources/processmodel?rs:publishedId=015-restapi-tests__1__2")
-  let $file := <somexml/>
-  return xdmp:http-post($uri, $options, $file)
-};
-
-declare function wrt:test-06-process-create ($options)
-{
-  let $uri := fn:concat(
-    "http://", $c:RESTHOST, ':', $c:RESTPORT,
-    "/v1/resources/process")
-  let $file := doc("/raw/data/06-payload.xml")
-  return xdmp:http-put($uri, $options, $file)
-};
-
-declare function wrt:test-07-process-read ($options, $pid)
-{
-  let $uri := fn:concat(
-    "http://", $c:RESTHOST, ':', $c:RESTPORT,
-    "/v1/resources/process?rs:processid=", fn:encode-for-uri($pid))
-  return xdmp:http-get($uri, $options)
 };
 
 declare function wrt:test-08-processinbox-read ($options)
@@ -168,15 +171,83 @@ declare function wrt:test-15-process-update ($options, $pid)
   return xdmp:http-post($uri, $options, $file)
 };
 
-declare function wrt:test-16-process-read ($options, $pid)
+
+(: functions specific to email tests... :)
+declare function wrt:test-25-processsubscription-create ($options)
 {
   let $uri := fn:concat(
     "http://", $c:RESTHOST, ':', $c:RESTPORT,
-    "/v1/resources/process?rs:processid=", fn:encode-for-uri($pid))
+    "/v1/resources/processsubscription")
+  let $file := fn:doc("/raw/data/25-payload.xml")
+  return xdmp:http-put($uri, $options, $file)
+};
+
+declare function wrt:test-26-processsubscription-read ($options)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/processsubscription?rs:name=email-sub-test")
   return xdmp:http-get($uri, $options)
 };
 
+declare function wrt:test-27-document-create ($options)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/documents?uri=/some/doc.xml&amp;collection=/test/email/sub")
+  let $file := fn:doc("/raw/data/27-payload.xml")
+  return xdmp:http-put($uri, $options, $file)
+};
 
+declare function wrt:test-28-processsearch-read ($options)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/processsearch?rs:processname=022-email-test__1__0")
+  return xdmp:http-get($uri, $options)
+};
 
+declare function wrt:test-29-processasset-create ($options)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/processasset?rs:model=021-initiating-attachment",
+    "&amp;rs:major=1&amp;rs:minor=3&amp;rs:asset=RejectedEmail.txt")
+  let $file := fn:doc("/raw/data/RejectedEmail.txt")
+  return xdmp:http-put($uri, $options, $file)
+};
 
+declare function wrt:test-30-processasset-read ($options)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/processasset?rs:model=021-initiating-attachment",
+    "&amp;rs:major=1&amp;rs:minor=3&amp;rs:asset=RejectedEmail.txt")
+  return xdmp:http-get($uri, $options)
+};
 
+declare function wrt:test-31-processasset-delete ($options)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/processasset?rs:model=021-initiating-attachment",
+    "&amp;rs:major=1&amp;rs:minor=3&amp;rs:asset=RejectedEmail.txt")
+  return xdmp:http-delete($uri, $options)
+};
+
+(: big jump - only 91 was being run in shtests :)
+declare function wrt:test-91-processengine-read ($options)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/processengine")
+  return xdmp:http-get($uri, $options)
+};
+
+declare function wrt:test-92-processengine-delete ($options)
+{
+  let $uri := fn:concat(
+    "http://", $c:RESTHOST, ':', $c:RESTPORT,
+    "/v1/resources/processengine")
+  return xdmp:http-delete($uri, $options)
+};

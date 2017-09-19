@@ -7,7 +7,7 @@ import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test
 declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
-let $process := wrt:test-01-processmodel-create ($c:json-options)
+let $process := wrt:processmodel-create ($c:json-options, "015-restapi-tests.bpmn")
 (: not working with XML ? :)
 return ( (:
   test:assert-equal('200', xs:string($process[1]/http:code)),
@@ -57,7 +57,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
 (: not working with XML ? :)
-let $result := wrt:test-04-processmodel-publish($c:json-options)
+let $result := wrt:processmodel-publish($c:json-options, "015-restapi-tests__1__2")
 return ( (:
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:updateResponse/ext:outcome)),
@@ -76,7 +76,8 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
-let $result := wrt:test-06-process-create($c:xml-options)
+let $payload := doc("/raw/data/06-payload.xml")
+let $result := wrt:process-create($c:xml-options, $payload)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:createResponse/ext:outcome)),
@@ -93,7 +94,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
-let $result := wrt:test-07-process-read($c:xml-options, $pid)
+let $result := wrt:process-read($c:xml-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)),
@@ -238,7 +239,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
-let $result := wrt:test-16-process-read($c:xml-options, $pid)
+let $result := wrt:process-read($c:xml-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)),
