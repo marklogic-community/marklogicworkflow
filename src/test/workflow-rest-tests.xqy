@@ -7,8 +7,10 @@ declare function wrt:test-09-11-12-xml-payload ($pid)
 {
   <ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
     <ext:processId>{$pid}</ext:processId>
-    <wf:data></wf:data>
-    <wf:attachments></wf:attachments>
+    <wf:data>
+    </wf:data>
+    <wf:attachments>
+    </wf:attachments>
   </ext:updateRequest>
 };
 

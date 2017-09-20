@@ -64,21 +64,13 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
-(: JSON not working ! :)
 let $payload := doc("/raw/data/06-payload.xml")
-let $result := wrt:process-create($c:xml-options, $payload)
+let $result := wrt:process-create($c:json-options, $payload)
 return (
-(:
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/createResponse/outcome)),
   test:assert-exists(xs:string($result[2]/createResponse/processId)),
-  xdmp:set-session-field("processId", xs:string($result[2]/createResponse/processId)),
-  xdmp:log(fn:concat("processId:", xdmp:quote($result[2])))
-  :)
-  test:assert-equal('200', xs:string($result[1]/http:code)),
-  test:assert-equal('SUCCESS', xs:string($result[2]/ext:createResponse/ext:outcome)),
-  test:assert-exists(xs:string($result[2]/ext:createResponse/ext:processId)),
-  xdmp:document-insert("/test/processId.xml", <test><processId>{xs:string($result[2]/ext:createResponse/ext:processId)}</processId></test>),
+  xdmp:document-insert("/test/processId.xml", <test><processId>{xs:string($result[2]/createResponse/processId)}</processId></test>),
   xdmp:log(fn:concat("processId:", xdmp:quote($result[2])))
 );
 
