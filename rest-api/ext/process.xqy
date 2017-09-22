@@ -150,21 +150,23 @@ function ext:post(
    $params  as map:map,
    $input   as document-node()*
 ) as document-node()* {
+  let $_ := xdmp:log(fn:concat("REST EXT params=", xdmp:quote($params)), "debug")
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $_ := xdmp:log(fn:concat("REST EXT preftype: " , $preftype), "debug")
 
- let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $part := (map:get($params,"part"),"document")[1]
+  let $_ := xdmp:log(fn:concat("REST EXT part: ", $part), "debug")
 
- let $part := (map:get($params,"part"),"document")[1]
+  let $_ := xdmp:log(fn:concat("REST EXT input: ", $input), "debug")
+  let $pid := map:get($params,"processid") (: this is stripping the '+' symbol if sent unencoded :)
+  (:let $proc := wfu:get($pid):)
+  let $_ := xdmp:log(fn:concat("REST EXT ProcessId: ", $pid), "debug")
+  let $props := wfu:getProperties($pid)
 
- let $_ := xdmp:log($input)
- let $pid := map:get($params,"processid")
- (:let $proc := wfu:get($pid):)
- let $_ := xdmp:log("REST EXT ProcessId: " || $pid)
- let $props := wfu:getProperties($pid)
- (:
- let $_ := xdmp:log("CURRENT STEP INFO")
- let $_ := xdmp:log($props/wf:currentStep)
- :)
- let $res :=
+  let $_ := xdmp:log("CURRENT STEP INFO", "debug")
+  let $_ := xdmp:log($props (: /wf:currentStep :) , "debug")
+
+  let $res :=
    if ("true" = map:get($params,"complete")) then
      (: sanity check that the specified process' status is on a user task :)
      if ("userTask" = $props/wf:currentStep/wf:step-type) then
@@ -187,6 +189,7 @@ function ext:post(
 
      if ("true" = map:get($params,"lock")) then
        (: Lock the work item, and return its details as if get had been called. If already locked, instead return an error :)
+       let $_ := xdmp:log("REST EXT call to lock work item", "debug")
        let $feedback := wfu:lock($pid)
        let $update :=
          if (fn:empty($feedback)) then

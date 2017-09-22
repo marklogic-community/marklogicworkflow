@@ -1,0 +1,8 @@
+<ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
+  <ext:processId>{PID}</ext:processId>
+  <wf:data>
+    <complete-data>Some data added by complete action</complete-data>
+  </wf:data>
+  <wf:attachments>
+  </wf:attachments>
+</ext:updateRequest>

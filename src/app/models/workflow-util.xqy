@@ -281,6 +281,8 @@ declare function m:lock($processId as xs:string) as xs:string? {
   (: when it works, should return empty-sequence() :)
   (: Check that this is a human queue task or user task :)
   let $props := m:getProperties($processId)
+  let $_ := xdmp:log(fn:concat("WF Utils lock pid=", $processId), "debug")
+  let $_ := xdmp:log(fn:concat("WF Utils props=", xdmp:quote($props)), "debug")
   return
     if ($props/wf:currentStep/wf:step-type = "userTask" and $props/wf:currentStep/wf:step-status = "ENTERED") then
       if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
