@@ -105,13 +105,11 @@ equivalent to our .editorconfig file.
 #### Test your code (pre-release mainly)
 
 We are working hard to improve MarkLogic Workflow's testing. If you add new actions
-in process models then please write unit tests in the shtests directory.
-When finished, verify that the self-test works.
+in process models then please write unit tests using the [Roxy framework](https://github.com/marklogic-community/roxy/wiki/Unit-Testing).
 
-```sh
-$ cd shtests
-$ ./all.sh
-```
+The default location for the test interface is http://localhost:8042/test/ - note that tests e2e-rest-process-json and e2e-rest-process-xml will attempt to create a user (**test-workflow-user**) during setup and remove it during the teardown phase.
+
+When finished, verify that the self-test works.
 
 Make sure that all tests pass. Please, do not submit patches that fail.
 
