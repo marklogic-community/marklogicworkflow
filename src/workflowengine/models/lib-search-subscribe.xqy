@@ -274,7 +274,7 @@ declare function ss:do-create-config($shortname as xs:string) as xs:string {
   return
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
-    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";' ||
+    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/models/lib-search-subscribe.xqy";' ||
     'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
     'declare variable $my:shortname as xs:string external;' ||
     'ah:create-config($my:shortname)',
@@ -286,7 +286,7 @@ declare function ss:do-create-config($shortname as xs:string) as xs:string {
 declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,$options as element()*) as empty-sequence() {
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
-    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";' ||
+    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/models/lib-search-subscribe.xqy";' ||
     'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
     'declare variable $my:alert-name as xs:string external;' ||
     'declare variable $my:query as cts:query external;' ||
@@ -300,7 +300,7 @@ declare function ss:do-create-rule($alert-name as xs:string,$query as cts:query,
 declare function ss:do-create-action($alert-name as xs:string,$alert-module as xs:string,$dbname as xs:string?,$options as element()*) {
   xdmp:eval(
     'xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; ' ||
-    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/app/models/lib-search-subscribe.xqy";' ||
+    'import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/models/lib-search-subscribe.xqy";' ||
     'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";' ||
     'declare variable $my:alert-name as xs:string external;' ||
     'declare variable $my:alert-module as xs:string external;' ||

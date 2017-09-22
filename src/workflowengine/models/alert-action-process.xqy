@@ -11,7 +11,7 @@ import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic
 declare namespace wf = "http://marklogic.com/workflow";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
 declare variable $alert:config-uri as xs:string external;
 declare variable $alert:doc as node() external;

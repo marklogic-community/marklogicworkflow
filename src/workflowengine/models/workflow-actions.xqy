@@ -2,7 +2,7 @@ xquery version "1.0-ml";
 
 module namespace m="http://marklogic.com/workflow-actions";
 
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 
 declare namespace prop = "http://marklogic.com/xdmp/property";
@@ -51,8 +51,8 @@ declare function complete-userTask($processId as xs:string,$data as node()*,$att
 
 (: INTERNAL METHODS :)
 declare function update-generic($processId as xs:string,$data as node()*,$attachments as node()*) as node()? {
-  let $_ := xdmp:log("In wfa:update-generic")     
-  
+  let $_ := xdmp:log("In wfa:update-generic")
+
 	let $previous-data := fn:doc(wfu:getProcessUri($processId))/wf:process/wf:data
 	let $previous-attach := fn:doc(wfu:getProcessUri($processId))/wf:process/wf:attachments
 
@@ -62,9 +62,9 @@ declare function update-generic($processId as xs:string,$data as node()*,$attach
         element wf:data {
           ($previous-data/* except $data/(let $qname := fn:node-name(.) return $previous-data/*[fn:node-name(.) eq $qname])),
           $data
-        } 
+        }
       ),
-      xdmp:node-replace(fn:doc(wfu:getProcessUri($processId))/wf:process/wf:attachments, 
+      xdmp:node-replace(fn:doc(wfu:getProcessUri($processId))/wf:process/wf:attachments,
       	(: Keep previous data if not newly sent and add new elements :)
         element wf:attachments {
           ($previous-attach/* except $previous-attach/*[@name eq $attachments/@name]),

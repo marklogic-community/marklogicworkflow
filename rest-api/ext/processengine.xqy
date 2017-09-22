@@ -6,8 +6,8 @@ module namespace ext = "http://marklogic.com/rest-api/resource/processengine";
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
-import module namespace wfadmin="http://marklogic.com/workflow-admin" at "/app/models/workflow-admin.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
+import module namespace wfadmin="http://marklogic.com/workflow-admin" at "/workflowengine/models/workflow-admin.xqy";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";

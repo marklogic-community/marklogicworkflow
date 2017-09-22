@@ -5,7 +5,8 @@ To install via roxy, within the roxy directory, edit the properties file for the
     ./ml local bootstrap
     ./ml local deploy modules
     ./ml local deploy cpf
-    # ./ml local deploy content
+
+Note that if left as is, the [Roxy test harness](https://github.com/marklogic-community/roxy/wiki/Unit-Testing) will also be set up at http://localhost:8042/test/
 
 ### Configure MIME types
 
