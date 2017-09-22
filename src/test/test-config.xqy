@@ -23,28 +23,4 @@ declare variable $c:PASSWORD := "@ml.password";
 declare variable $c:RESTHOST := "localhost";
 declare variable $c:RESTPORT := "@ml.test-port";
 
-(: to do - change to send json too :)
-declare variable $c:json-options :=
-  <options xmlns="xdmp:http">
-    <authentication method="digest">
-      <username>{$c:USER}</username>
-      <password>{$c:PASSWORD}</password>
-    </authentication>
-    <headers>
-      <content-type>application/xml</content-type>
-      <accept>application/json</accept>
-    </headers>
-  </options>;
-
-declare variable $c:xml-options :=
-  <options xmlns="xdmp:http">
-    <authentication method="digest">
-      <username>{$c:USER}</username>
-      <password>{$c:PASSWORD}</password>
-    </authentication>
-    <headers>
-      <content-type>application/xml</content-type>
-      <accept>application/xml</accept>
-    </headers>
-  </options>;
 
