@@ -4,8 +4,8 @@ module namespace ext = "http://marklogic.com/rest-api/resource/processasset";
 
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
-import module namespace wfi="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfi="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 

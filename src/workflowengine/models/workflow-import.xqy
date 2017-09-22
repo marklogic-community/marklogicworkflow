@@ -11,10 +11,10 @@ import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cp
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
 
 
-import module namespace stack="http://marklogic.com/stack" at "/app/models/lib-stack.xqy";
+import module namespace stack="http://marklogic.com/stack" at "/workflowengine/models/lib-stack.xqy";
 
 
-import module namespace ss = "http://marklogic.com/alerts/alerts" at "/app/models/lib-alerts.xqy";
+import module namespace ss = "http://marklogic.com/alerts/alerts" at "/workflowengine/models/lib-alerts.xqy";
 
 (: TODO replace following outgoing routes with call to m:b2getNextSteps() :)
 
@@ -25,7 +25,7 @@ declare function m:install-and-convert($doc as node(),$filename as xs:string,$ma
   (: 1. Save document in to DB :)
   let $uri := "/workflow/models/" || $filename
   let $_ :=
-    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:uri as xs:string external;declare variable $m:doc as node() external;'
+    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";declare variable $m:uri as xs:string external;declare variable $m:doc as node() external;'
       || 'xdmp:document-insert($m:uri,$m:doc,xdmp:default-permissions(),(xdmp:default-collections(),"http://marklogic.com/workflow/model"))'
       ,
       (xs:QName("m:uri"),$uri,xs:QName("m:doc"),$doc),
@@ -129,7 +129,7 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
   (: 1. Create Pipeline from raw process model :)
   (: Determine type from root element :)
   let $pmap :=
-    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:major as xs:string external;declare variable $m:minor as xs:string external;m:create($m:processmodeluri,$m:major,$m:minor)',
+    xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";declare variable $m:processmodeluri as xs:string external;declare variable $m:major as xs:string external;declare variable $m:minor as xs:string external;m:create($m:processmodeluri,$m:major,$m:minor)',
       (xs:QName("m:processmodeluri"),$processmodeluri,xs:QName("m:major"),$major,xs:QName("m:minor"),$minor),
       <options xmlns="xdmp:eval">
         <isolation>different-transaction</isolation>
@@ -156,7 +156,7 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
     (: 2. Get this pipeline's URI :)
     (: let $puri := "http://marklogic.com/cpf/pipelines/"||xs:string($localPipelineId)||".xml" :)
     let $puri :=
-      xdmp:eval('xquery version "1.0-ml";import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:id as xs:string external;p:get($m:id)/fn:base-uri(.)',
+      xdmp:eval('xquery version "1.0-ml";import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";import module namespace m="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";declare variable $m:id as xs:string external;p:get($m:id)/fn:base-uri(.)',
         (xs:QName("m:id"),$pname),
         <options xmlns="xdmp:eval">
           <isolation>different-transaction</isolation>
@@ -166,7 +166,7 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
 
     (: 3. Install pipeline in modules DB (so that CPF runs it) and get the MODULES DB PID (not content db pid as above) :)
     let $pid :=
-      xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";declare variable $m:puri as xs:string external;m:install($m:puri)',
+      xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";declare variable $m:puri as xs:string external;m:install($m:puri)',
         (xs:QName("m:puri"),$puri),
         <options xmlns="xdmp:eval">
           <isolation>different-transaction</isolation>
@@ -189,7 +189,7 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
 
 declare function m:subscribe-process($subscriptionName as xs:string, $processuri as xs:string,$query as element(cts:query)) as xs:unsignedLong {
   (: TODO remove existing config with same subscription name, if it exists :)
-  ss:add-alert($subscriptionName,$query,(),"/app/models/action-process.xqy",xdmp:modules-database(),
+  ss:add-alert($subscriptionName,$query,(),"/workflowengine/models/action-process.xqy",xdmp:modules-database(),
     <process-name>{$processuri}</process-name>)
 };
 
@@ -265,7 +265,7 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
   (: NOTE above also removes all child pipelines too - those starting with PROCESS__MAJOR__MINOR :)
   let $_ := xdmp:log("wfi:create : Now recreating pipeline(s)")
   let $pmap :=
-        xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";'
+        xdmp:eval('xquery version "1.0-ml";import module namespace m="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";'
           || 'declare variable $m:pname as xs:string external;'
           || 'declare variable $m:root as element() external;'
           || 'm:do-create($m:pname,$m:root)'

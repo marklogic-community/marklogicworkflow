@@ -4,3 +4,4 @@ eclipse/org.eclipse.bpmn2.modeler.runtime.jboss.jbpm5
 .DS_Store
 shtests/*-out.txt
 shtests/output.log
+.idea/*
