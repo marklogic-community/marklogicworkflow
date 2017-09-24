@@ -253,6 +253,26 @@
 -->
       </range-element-indexes>
       <range-element-attribute-indexes>
+        <range-element-attribute-index>
+          <scalar-type>string</scalar-type>
+          <parent-namespace-uri>http://marklogic.com/workflow</parent-namespace-uri>
+          <parent-localname>process</parent-localname>
+          <namespace-uri/>
+          <localname>id</localname>
+          <collation>http://marklogic.com/collation/</collation>
+          <range-value-positions>false</range-value-positions>
+          <invalid-values>ignore</invalid-values>
+        </range-element-attribute-index>
+        <range-element-attribute-index>
+          <scalar-type>string</scalar-type>
+          <parent-namespace-uri>http://marklogic.com/workflow</parent-namespace-uri>
+          <parent-localname>attachment</parent-localname>
+          <namespace-uri/>
+          <localname>uri</localname>
+          <collation>http://marklogic.com/collation/</collation>
+          <range-value-positions>false</range-value-positions>
+          <invalid-values>ignore</invalid-values>
+        </range-element-attribute-index>
 <!--
         Sample for:
           <person name="bob" xmlns="http://marklogic.com/ns/sample"/>

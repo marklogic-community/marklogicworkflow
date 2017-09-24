@@ -1,4 +1,4 @@
-## Roxy Installation
+### Roxy Installation
 
 To install via roxy, within the roxy directory, edit the properties file for the target environment - for example, ``deploy/local.properties`` and run the following commands:
 

@@ -55,7 +55,7 @@ try {
   (: If still none, throw failure message (misconfiguration) :)
   return
     (
-      xdmp:email($messageXml)
+      if(fn:empty($messageXml)) then () else xdmp:email($messageXml)
       ,
       wfu:complete( $cpf:document-uri, $cpf:transition, (), $st )
     )

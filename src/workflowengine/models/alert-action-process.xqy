@@ -9,7 +9,6 @@ xquery version "1.0-ml";
 
 import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";
 declare namespace wf = "http://marklogic.com/workflow";
-import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
@@ -29,12 +28,12 @@ let $pid :=   wfu:create($procname,$alert:doc/element(),
 return ()
 
 
-(:)
+(:
   xdmp:document-insert($procname || "/" || sem:uuid-string() || ".xml",
    <process xmlns="http://marklogic.com/workflow/process">
     <data>
     {
-      (: TODO check config for mappings options - rather than map entire document in:)
+      ( : TODO check config for mappings options - rather than map entire document in : )
       $alert:doc/element()
     }
     </data>

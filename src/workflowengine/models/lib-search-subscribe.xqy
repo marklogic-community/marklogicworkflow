@@ -104,7 +104,7 @@ declare function ss:unsubscribe-and-delete-search($searchname,$notificationurl) 
 declare function ss:save-subscribe-search($searchdoc as cts:query,$searchname as xs:string,$notificationurl as xs:string,$alert-detail as xs:string?,$content-type as xs:string?) {
   (: use current user on app server :)
   ( xdmp:eval(
-      fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/modules/lib-search-subscribe.xqy";',
+      fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/modules/lib-search-subscribe.xqy";',
                 'declare variable $my:searchdoc as cts:query external;declare variable $my:searchname as xs:string external;',
                 'ah:do-save($my:searchdoc,$my:searchname)'),
       (xs:QName("my:searchdoc"),$searchdoc,xs:QName("my:searchname"),$searchname),
@@ -160,14 +160,14 @@ declare function ss:do-subscribe-check($notificationurl as xs:string,$searchname
 declare function ss:do-add-action-rule($alert-name as xs:string,$notificationurl as xs:string,$alert-module as xs:string?,$alert-detail as xs:string,$content-type as xs:string,$searchname as xs:string,$cpf-domain as xs:string,$dbname as xs:string,$searchdoc as cts:query?) as xs:boolean {
 
   let $e2 := xdmp:eval(
-    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/modules/lib-search-subscribe.xqy";',
+    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/modules/lib-search-subscribe.xqy";',
               'declare variable $my:alert-name as xs:string external;declare variable $my:alert-module as xs:string external;declare variable $my:dbname as xs:string external;',
               'ah:create-action($my:alert-name,$my:alert-module,$my:dbname,())'),
     (xs:QName("my:alert-name"),$alert-name,xs:QName("my:alert-module"),$alert-module,xs:QName("my:dbname"),$dbname),
     <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
   )
   let $e3 := xdmp:eval(
-    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/modules/lib-search-subscribe.xqy";',
+    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/modules/lib-search-subscribe.xqy";',
               'declare variable $my:alert-name as xs:string external;declare variable $my:alert-detail as xs:string external;declare variable $my:content-type as xs:string external;',
               'declare variable $my:notificationurl as xs:string external;declare variable $my:searchname as xs:string external;declare variable $my:searchdoc as cts:query external;',
               'ah:create-rule-notify($my:alert-name,$my:alert-detail,$my:content-type,$my:notificationurl,$my:searchname,$my:searchdoc)'),
@@ -180,7 +180,7 @@ declare function ss:do-add-action-rule($alert-name as xs:string,$notificationurl
 
 declare function ss:do-subscribe($notificationurl as xs:string,$alert-module as xs:string?,$alert-detail as xs:string,$content-type as xs:string,$searchname as xs:string,$cpf-domain as xs:string,$dbname as xs:string,$searchdoc as cts:query?) as xs:boolean {
   let $alert-name := xdmp:eval(
-    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/modules/lib-search-subscribe.xqy";',
+    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/modules/lib-search-subscribe.xqy";',
               'declare variable $my:notificationurl as xs:string external;declare variable $my:searchname as xs:string external;',
               'ah:create-config($my:notificationurl,$my:searchname)'),
     (xs:QName("my:notificationurl"),$notificationurl,xs:QName("my:searchname"),$searchname),
@@ -188,7 +188,7 @@ declare function ss:do-subscribe($notificationurl as xs:string,$alert-module as 
   )
   let $e2 := ss:do-add-action-rule($alert-name,$notificationurl ,$alert-module,$alert-detail,$content-type,$searchname,$cpf-domain,$dbname,$searchdoc)
   let $e4 := xdmp:eval(
-    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/modules/lib-search-subscribe.xqy";',
+    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/modules/lib-search-subscribe.xqy";',
               'declare variable $my:alert-name as xs:string external;declare variable $my:cpf-domain as xs:string external;',
               'ah:cpf-enable($my:alert-name,$my:cpf-domain)'),
     (xs:QName("my:alert-name"),$alert-name,xs:QName("my:cpf-domain"),$cpf-domain),
@@ -207,7 +207,7 @@ declare function ss:do-unsubscribe($notificationurl as xs:string,$searchname as 
       alert:rule-remove($alert-name,$rule/@id)
 
   let $l := xdmp:eval(
-    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/modules/lib-search-subscribe.xqy";',
+    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/modules/lib-search-subscribe.xqy";',
               'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";',
               'declare variable $my:alert-name as xs:string external;',
               'alert:config-set-cpf-domain-names(alert:config-get($my:alert-name), ())'),
@@ -215,7 +215,7 @@ declare function ss:do-unsubscribe($notificationurl as xs:string,$searchname as 
     <options xmlns="xdmp:eval"><isolation>different-transaction</isolation></options>
   )(:)
   let $e1 := xdmp:eval(
-    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/modules/lib-search-subscribe.xqy";',
+    fn:concat('xquery version "1.0-ml"; declare namespace my="http://marklogic.com/alerts"; import module namespace ah = "http://marklogic.com/search/subscribe" at "/workflowengine/modules/lib-search-subscribe.xqy";',
               'import module namespace alert="http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";',
               'declare variable $my:alert-name as xs:string external;',
               'alert:config-delete($my:alert-name)'),

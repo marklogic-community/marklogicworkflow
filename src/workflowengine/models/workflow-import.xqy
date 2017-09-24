@@ -1,20 +1,15 @@
 xquery version "1.0-ml";
 
 module namespace m="http://marklogic.com/workflow-import";
-declare namespace wf="http://marklogic.com/workflow";
-
-declare namespace sc="http://www.w3.org/2005/07/scxml";
-declare namespace b2="http://www.omg.org/spec/BPMN/20100524/MODEL";
-
 
 import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
-
-
 import module namespace stack="http://marklogic.com/stack" at "/workflowengine/models/lib-stack.xqy";
-
-
 import module namespace ss = "http://marklogic.com/alerts/alerts" at "/workflowengine/models/lib-alerts.xqy";
+
+declare namespace wf="http://marklogic.com/workflow";
+declare namespace sc="http://www.w3.org/2005/07/scxml";
+declare namespace b2="http://www.omg.org/spec/BPMN/20100524/MODEL";
 
 (: TODO replace following outgoing routes with call to m:b2getNextSteps() :)
 

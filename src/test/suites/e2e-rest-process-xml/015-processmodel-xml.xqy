@@ -17,6 +17,12 @@ return ( (:
   test:assert-equal('SUCCESS', xs:string($process[2]/createResponse/outcome)),
   test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/createResponse/modelId))
 );
+(:
+  <ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
+    <ext:outcome>SUCCESS</ext:outcome>
+    <ext:modelId>015-restapi-tests__1__0</ext:modelId>
+  </ext:createResponse>
+:)
 
 (: 02-processmodel-read :)
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
@@ -48,6 +54,12 @@ return ( (:
   test:assert-equal('SUCCESS', xs:string($result[2]/createResponse/outcome)),
   test:assert-equal('015-restapi-tests__1__2', xs:string($result[2]/createResponse/modelId))
 );
+(:
+  <ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
+    <ext:outcome>SUCCESS</ext:outcome>
+    <ext:modelId>015-restapi-tests__1__2</ext:modelId>
+  </ext:createResponse>
+:)
 
 (: 04-processmodel-publish :)
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
@@ -66,6 +78,12 @@ return ( (:
   test:assert-equal('SUCCESS', xs:string($result[2]/updateResponse/outcome)),
   test:assert-exists(xs:string($result[2]/updateResponse/domainId))
 );
+(:
+  <ext:updateResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
+    <ext:outcome>SUCCESS</ext:outcome>
+    <ext:domainId>16663957717060497977</ext:domainId>
+  </ext:updateResponse>
+:)
 
 (: there is and has never been 05 :)
 
@@ -100,13 +118,21 @@ return (
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)),
   test:assert-exists($result[2]/ext:readResponse/ext:document)
 );
+(:
+  <ext:readResponse xmlns:ext="http://marklogic.com/rest-api/resource/process">
+    <ext:outcome>SUCCESS</ext:outcome>
+    <ext:document/>
+  </ext:readResponse>
+:)
 
 (: 08-processinbox-read :)
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace cpf = "http://marklogic.com/cpf";
 declare namespace ext = "http://marklogic.com/rest-api/resource/processinbox";
 declare namespace http = "xdmp:http";
+declare namespace prop = "http://marklogic.com/xdmp/property";
 declare namespace wf="http://marklogic.com/workflow";
 
 let $_pause := xdmp:sleep(5000)
@@ -115,7 +141,23 @@ let $result := wrt:test-08-processinbox-read($const:xml-options)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)),
-  test:assert-exists($result[2]/ext:readResponse/wf:inbox/wf:task[@processid=$pid])
+  test:assert-exists($result[2]/ext:readResponse/wf:inbox/wf:task[@processid=$pid]),
+  let $task := $result[2]/ext:readResponse/wf:inbox/wf:task[@processid=$pid]
+  return (
+    test:assert-exists($task/wf:process-data/wf:process/wf:data),
+    test:assert-exists($task/wf:process-data/wf:process/wf:attachments),
+    test:assert-exists($task/wf:process-data/wf:process/wf:audit-trail),
+    test:assert-exists($task/wf:process-data/wf:process/wf:metrics),
+    test:assert-exists($task/wf:process-data/wf:process/wf:process-definition-name),
+    let $properties := $task/wf:process-properties/prop:properties
+    return (
+      test:assert-equal('done', xs:string($properties/cpf:processing-status)),
+      test:assert-equal('user', xs:string($properties/wf:currentStep/wf:type)),
+      test:assert-equal('admin', xs:string($properties/wf:currentStep/wf:assignee)),
+      test:assert-equal('userTask', xs:string($properties/wf:currentStep/wf:step-type)),
+      test:assert-equal('ENTERED', xs:string($properties/wf:currentStep/wf:step-status))
+    )
+  )
 );
 
 (: 09-process-update :)
