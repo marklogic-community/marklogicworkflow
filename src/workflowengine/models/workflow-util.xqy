@@ -4,8 +4,6 @@ module namespace m="http://marklogic.com/workflow-util";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
-
-
 import module namespace ss = "http://marklogic.com/search/subscribe" at "/workflowengine/models/lib-search-subscribe.xqy";
 
 declare namespace prop = "http://marklogic.com/xdmp/property";
@@ -16,7 +14,15 @@ declare namespace error="http://marklogic.com/xdmp/error";
 (:
  : Create a new process and activate it.
  :)
-declare function m:create($pipelineName as xs:string,$data as element()*,$attachments as element()*,$parent as xs:string?,$forkid as xs:string?,$branchid as xs:string?) as xs:string {
+declare function m:create(
+    $pipelineName as xs:string,
+    $data as element()*,
+    $attachments as element()*,
+    $parent as xs:string?,
+    $forkid as xs:string?,
+    $branchid as xs:string?
+) as xs:string {
+  let $_ := xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments)),"debug")
   let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
   let $uri := "/workflow/processes/"||$pipelineName||"/"||$id || ".xml"
   let $_ :=
@@ -74,18 +80,28 @@ declare function m:getSubscription($name as xs:string) as element()? {
  : Returns a process document with the given id
  :)
 declare function m:get($processId as xs:string) as element(wf:process)? {
-  fn:collection("http://marklogic.com/workflow/processes")/wf:process[./@id = $processId]
+  fn:doc(m:getProcessUri($processId))/wf:process
+};
+
+(:
+ : Delete a process document with the given id
+ :)
+declare function m:delete($processId as xs:string) as empty-sequence() {
+  let $process-uri := m:getProcessUri($processId)
+  return
+    if(fn:doc-available($process-uri)) then xdmp:document-delete($process-uri)
+    else ()
 };
 
 (:
  : Returns the (CPF and MarkLogic Workflow) properties fragment for the given process id
  :)
 declare function m:getProperties($processId as xs:string) as element(prop:properties)? {
-  xdmp:document-properties((fn:collection("http://marklogic.com/workflow/processes")/wf:process[./@id = $processId]/fn:base-uri(.)))/prop:properties
+  xdmp:document-properties(m:getProcessUri($processId))/prop:properties
 };
 
 declare function m:getProcessUri($processId as xs:string) as xs:string? {
-  (fn:collection("http://marklogic.com/workflow/processes")/wf:process[./@id = $processId]/fn:base-uri(.))
+  cts:uri-match("/workflow/processes/*", ("any"), cts:element-attribute-range-query(xs:QName("wf:process"), xs:QName("id"), "=", $processId))
 };
 
 declare function m:getProcessInstanceAsset($processUri as xs:string,$assetname as xs:string) as node()? {
@@ -285,7 +301,7 @@ declare function m:lock($processId as xs:string) as xs:string? {
   let $_ := xdmp:log(fn:concat("WF Utils props=", xdmp:quote($props)), "debug")
   return
     if ($props/wf:currentStep/wf:step-type = "userTask" and $props/wf:currentStep/wf:step-status = "ENTERED") then
-      if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
+      if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "dynamicUser" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
         if (fn:empty($props/wf:currentStep/wf:lock)) then
           (: lock and return success :) (: TODO check what happens if this call fails... :)
           (
@@ -318,7 +334,7 @@ declare function m:unlock($processId as xs:string) as xs:string? {
 let $props := m:getProperties($processId)
 return
   if ($props/wf:currentStep/wf:step-type = "userTask" and $props/wf:currentStep/wf:step-status = "ENTERED") then
-    if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
+    if ($props/wf:currentStep/wf:type = "user" or $props/wf:currentStep/wf:type = "dynamicUser" or $props/wf:currentStep/wf:type = "queue" or $props/wf:currentStep/wf:type = "role") then
       if (fn:empty($props/wf:currentStep/wf:lock)) then
         () (: Just succeed, rather than error - means we are alreay unlocked! :)
       else

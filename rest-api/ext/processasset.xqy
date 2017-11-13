@@ -3,14 +3,11 @@ xquery version "1.0-ml";
 module namespace ext = "http://marklogic.com/rest-api/resource/processasset";
 
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
-
 import module namespace wfi="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
-
 declare namespace roxy = "http://marklogic.com/roxy";
-
 declare namespace rapi = "http://marklogic.com/rest-api";
 
 
@@ -52,6 +49,7 @@ function ext:get(
  :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:put(
     $context as map:map,
     $params  as map:map,

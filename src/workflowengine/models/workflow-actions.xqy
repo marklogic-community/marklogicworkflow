@@ -19,16 +19,16 @@ declare namespace error="http://marklogic.com/xdmp/error";
 (: EXTERNAL CALLABLE FUNCTIONS - update-* updates the task, but does not complete it. complete-* does update and complete. :)
 
 declare function update-userTask($processId as xs:string,$data as node()*,$attachments as node()*) as node()? {
-  let $_ := xdmp:log("In wfa:update-userTask")
+  let $_ := xdmp:log("In wfa:update-userTask processId: "|| $processId, "debug")
   return
-    update-generic($processId,$data,$attachments)
+    update-generic($processId, $data, $attachments)
 };
 
 (:
  : Complete a user task, moving it on to the next step. (Just marks as complete)
  :)
 declare function complete-userTask($processId as xs:string,$data as node()*,$attachments as node()*) as node()? {
-  let $_ := xdmp:log("In wfa:complete-userTask")
+  let $_ := xdmp:log("In wfa:complete-userTask processId: "|| $processId, "debug")
   let $unlock :=
     if (fn:not(fn:empty(wfu:getProperties($processId)/wf:currentStep/wf:lock))) then
       wfu:unlock($processId) (: We call this to ensure this user has the current lock, even though wf:currentStep will be deleted :)
@@ -51,27 +51,27 @@ declare function complete-userTask($processId as xs:string,$data as node()*,$att
 
 (: INTERNAL METHODS :)
 declare function update-generic($processId as xs:string,$data as node()*,$attachments as node()*) as node()? {
-  let $_ := xdmp:log("In wfa:update-generic")
-
-	let $previous-data := fn:doc(wfu:getProcessUri($processId))/wf:process/wf:data
-	let $previous-attach := fn:doc(wfu:getProcessUri($processId))/wf:process/wf:attachments
+  let $_ := xdmp:log("In wfa:update-generic processId: "|| $processId, "debug")
+  let $doc := fn:doc(wfu:getProcessUri($processId))
+  let $previous-data := $doc/wf:process/wf:data
+  let $previous-attach := $doc/wf:process/wf:attachments
 
   return (
-      xdmp:node-replace(fn:doc(wfu:getProcessUri($processId))/wf:process/wf:data,
+      xdmp:node-replace($doc/wf:process/wf:data,
         (: Keep previous data if not newly sent and add new elements :)
         element wf:data {
           ($previous-data/* except $data/(let $qname := fn:node-name(.) return $previous-data/*[fn:node-name(.) eq $qname])),
           $data
         }
       ),
-      xdmp:node-replace(fn:doc(wfu:getProcessUri($processId))/wf:process/wf:attachments,
-      	(: Keep previous data if not newly sent and add new elements :)
+      xdmp:node-replace($doc/wf:process/wf:attachments,
+        (: Keep previous data if not newly sent and add new elements :)
         element wf:attachments {
           ($previous-attach/* except $previous-attach/*[@name eq $attachments/@name]),
           $attachments
         }
       )
-  )
+    )
 };
 
 (:

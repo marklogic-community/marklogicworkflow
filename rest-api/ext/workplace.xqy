@@ -3,7 +3,6 @@ xquery version "1.0-ml";
 module namespace ext = "http://marklogic.com/rest-api/resource/workplace";
 
 declare namespace roxy = "http://marklogic.com/roxy";
-
 declare namespace rapi = "http://marklogic.com/rest-api";
 
 (:

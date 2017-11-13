@@ -3,14 +3,12 @@ xquery version "1.0-ml";
 module namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
-
 import module namespace wfi="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
-
+declare namespace rapi= "http://marklogic.com/rest-api";
 declare namespace roxy = "http://marklogic.com/roxy";
-
 
 (:
  : Get the process model by exact name
@@ -53,6 +51,7 @@ function ext:get(
  :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:put(
     $context as map:map,
     $params  as map:map,
@@ -105,6 +104,7 @@ function ext:put(
  :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:post(
     $context as map:map,
     $params  as map:map,

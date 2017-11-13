@@ -1,5 +1,3 @@
-
-
 (: process.xqy - Start a new, or modify an existing, MarkLogic Workflow process
  :
  :)
@@ -9,15 +7,13 @@ module namespace ext = "http://marklogic.com/rest-api/resource/process";
 
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
-
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 import module namespace wfa="http://marklogic.com/workflow-actions" at "/workflowengine/models/workflow-actions.xqy";
 
+declare namespace rapi = "http://marklogic.com/rest-api";
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
-
-declare namespace rapi = "http://marklogic.com/rest-api";
 
 (:
  : To add parameters to the functions, specify them in the params annotations.
@@ -174,7 +170,8 @@ function ext:post(
 
        (: call wfu complete on it :)
        let $_ := xdmp:log("Calling wfa:complete-userTask")
-       let $feedback := wfa:complete-userTask($pid,$input/wf:data/node(),$input/wf:attachments/node())
+       let $feedback := wfa:complete-userTask($pid, $input/wf:data/node(), $input/wf:attachments/node())
+       (: let $feedback := wfa:complete-userTask($pid,$input/ext:updateRequest/wf:data/node(),$input/ext:updateRequest/wf:attachments/node()) :)
        (: Could return errors with data or attachments :)
        return
          if (fn:not(fn:empty($feedback))) then
@@ -243,7 +240,8 @@ function ext:post(
             else
               $update
         else
-          () (: Just default to updating the data, but doing nothing around locking :)
+          (: Just default to updating the data, but doing nothing around locking :)
+          wfa:update-userTask($pid,$input/ext:updateRequest/wf:data/node(),$input/ext:updateRequest/wf:attachments/node())
 
 
  let $out := ($res,<ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>)[1]
@@ -264,3 +262,26 @@ function ext:post(
     }
   )
 };
+
+declare
+%roxy:params("")
+function ext:delete(
+  $context as map:map,
+  $params  as map:map,
+  $input   as document-node()*
+) as document-node()* {
+
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+
+  let $pid := map:get($params,"processid")
+  let $_ := xdmp:log("REST EXT ProcessId: " || $pid)
+  let $_ := wfu:delete($pid)
+
+  return
+    (
+      map:put($context, "output-types", $preftype),
+      xdmp:set-response-code(200, "OK"),
+      document {()}
+    )
+};
+
