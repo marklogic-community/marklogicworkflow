@@ -7,6 +7,7 @@ import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test
 declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
+let $_testlog := xdmp:log("E2E XML TEST: 01-processmodel-create")
 let $process := wrt:processmodel-create ($const:json-options, "015-restapi-tests.bpmn")
 (: not working with XML ? :)
 return ( (:
@@ -31,6 +32,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace http = "xdmp:http";
 declare namespace bpmn2 = "http://www.omg.org/spec/BPMN/20100524/MODEL";
 
+let $_testlog := xdmp:log("E2E XML TEST: 02-processmodel-read")
 let $result := wrt:test-02-processmodel-read($const:xml-options)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
@@ -44,6 +46,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
+let $_testlog := xdmp:log("E2E XML TEST: 03-processmodel-update")
 (: not working with XML ? :)
 let $result := wrt:test-03-processmodel-update($const:json-options)
 return ( (:
@@ -68,6 +71,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
+let $_testlog := xdmp:log("E2E XML TEST: 04-processmodel-publish")
 (: not working with XML ? :)
 let $result := wrt:processmodel-publish($const:json-options, "015-restapi-tests__1__2")
 return ( (:
@@ -94,6 +98,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
+let $_testlog := xdmp:log("E2E XML TEST: 06-process-create")
 let $payload := doc("/raw/data/06-payload.xml")
 let $result := wrt:process-create($const:xml-options, $payload)
 return (
@@ -111,6 +116,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
+let $_testlog := xdmp:log("E2E XML TEST: 07-process-read")
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:process-read($const:xml-options, $pid)
 return (
@@ -135,7 +141,8 @@ declare namespace http = "xdmp:http";
 declare namespace prop = "http://marklogic.com/xdmp/property";
 declare namespace wf="http://marklogic.com/workflow";
 
-let $_pause := xdmp:sleep(5000)
+let $_testlog := xdmp:log("E2E XML TEST: 08-processinbox-read")
+let $_pause := xdmp:sleep(10000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-08-processinbox-read($const:xml-options)
 return (
@@ -167,6 +174,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
+let $_testlog := xdmp:log("E2E XML TEST: 09-process-update")
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-09-process-update($const:xml-options, $pid)
 return (
@@ -182,6 +190,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/processqueue";
 declare namespace http = "xdmp:http";
 declare namespace wf="http://marklogic.com/workflow";
 
+let $_testlog := xdmp:log("E2E XML TEST: 10-processqueue-read")
 let $result := wrt:test-10-processqueue-read($const:xml-options)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
@@ -197,6 +206,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace wf="http://marklogic.com/workflow";
 
+let $_testlog := xdmp:log("E2E XML TEST: 11-process-update-lock")
 let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-11-process-update-lock($const:xml-options, $pid)
@@ -214,6 +224,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace error="http://marklogic.com/xdmp/error";
 
+let $_testlog := xdmp:log("E2E XML TEST: 12-process-update-lock-fail")
 let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-12-process-update-lock-fail($const:xml-failure-options, $pid)
@@ -231,6 +242,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace wf="http://marklogic.com/workflow";
 
+let $_testlog := xdmp:log("E2E XML TEST: 13-process-update-unlock")
 let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-13-process-update-unlock($const:xml-options, $pid)
@@ -248,6 +260,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 declare namespace wf="http://marklogic.com/workflow";
 
+let $_testlog := xdmp:log("E2E XML TEST: 14-process-update-lock")
 let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-14-process-update-lock($const:xml-options, $pid)
@@ -264,6 +277,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
+let $_testlog := xdmp:log("E2E XML TEST: 15-process-update")
 let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:test-15-process-update($const:xml-options, $pid)
@@ -279,6 +293,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
+let $_testlog := xdmp:log("E2E XML TEST: 16-process-read")
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:process-read($const:xml-options, $pid)
 return (

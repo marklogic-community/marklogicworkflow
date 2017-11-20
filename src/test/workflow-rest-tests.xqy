@@ -42,7 +42,7 @@ declare function wrt:processmodel-create ($options, $filename)
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/resources/processmodel?rs:name=", $filename,
     "&amp;enable=true")
-  let $fullpath := fn:concat("/raw/data/", $filename)
+  let $fullpath := fn:concat("/raw/bpmn/", $filename)
   let $file := fn:doc($fullpath)
   return xdmp:http-put($uri, $options, $file)
 };
@@ -74,6 +74,15 @@ declare function wrt:process-read ($options, $pid)
   return xdmp:http-get($uri, $options)
 };
 
+declare function wrt:process-read-all ($options, $pid)
+{
+  let $uri := fn:concat(
+    "http://", $const:RESTHOST, ':', $const:RESTPORT,
+    "/v1/resources/process?rs:processid=", fn:encode-for-uri($pid),
+    "&amp;rs:part=all")
+  return xdmp:http-get($uri, $options)
+};
+
 (: REST test specific functions :)
 
 declare function wrt:test-02-processmodel-read ($options)
@@ -89,7 +98,7 @@ declare function wrt:test-03-processmodel-update ($options)
   let $uri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/resources/processmodel?rs:name=015-restapi-tests.bpmn&amp;rs:major=1&amp;rs:minor=2")
-  let $file := fn:doc("/raw/data/015-restapi-tests.bpmn")
+  let $file := fn:doc("/raw/bpmn/015-restapi-tests.bpmn")
   return xdmp:http-put($uri, $options, $file)
 };
 

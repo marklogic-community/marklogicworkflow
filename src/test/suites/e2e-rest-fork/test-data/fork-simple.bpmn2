@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- origin at X=0.0 Y=0.0 -->
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ext="http://org.eclipse.bpmn2/ext" xmlns:ns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://marklogic.com/workflow" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.omg.org/spec/DD/20100524/DI http://www.omg.org/spec/DD/20100524/DI-XMI http://www.omg.org/spec/DD/20100524/DC http://www.omg.org/spec/DD/20100524/DC-XMI http://www.omg.org/spec/BPMN/20100524/DI http://www.omg.org/spec/BPMN/20100524/DI-XMI" id="Definition" exporter="org.eclipse.bpmn2.modeler.core" exporterVersion="1.1.4.201509111742" targetNamespace="http://marklogic.com/workflow">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ext="http://org.eclipse.bpmn2/ext" xmlns:ns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://marklogic.com/workflow" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.omg.org/spec/DD/20100524/DI http://www.omg.org/spec/DD/20100524/DI-XMI http://www.omg.org/spec/DD/20100524/DC http://www.omg.org/spec/DD/20100524/DC-XMI http://www.omg.org/spec/BPMN/20100524/DI http://www.omg.org/spec/BPMN/20100524/DI-XMI" id="Definition" exporter="org.eclipse.bpmn2.modeler.core" exporterVersion="1.1.2.201502162150" targetNamespace="http://marklogic.com/workflow">
   <bpmn2:itemDefinition id="ItemDefinition_1" isCollection="false" structureRef="xs:string"/>
+  <bpmn2:resource id="Resource_1" name="DynamicUser1"/>
   <bpmn2:message id="Message_1" itemRef="ItemDefinition_1" name="BlankMessage">
     <bpmn2:extensionElements>
       <ext:style xsi:type="ns:anyType"/>
@@ -37,14 +38,20 @@
       <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
     </bpmn2:parallelGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_2" sourceRef="ParallelGateway_2" targetRef="EndEvent_1"/>
-    <bpmn2:task id="Task_1" name="Task 1">
+    <bpmn2:userTask id="Task_1" name="Task 1">
       <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_5</bpmn2:outgoing>
-    </bpmn2:task>
-    <bpmn2:task id="Task_2" name="Task 2">
+      <bpmn2:humanPerformer id="HumanPerformer_1" name="DynamicPerformer">
+        <bpmn2:resourceRef>Resource_1</bpmn2:resourceRef>
+        <bpmn2:resourceAssignmentExpression id="ResourceAssignmentExpression_1">
+          <bpmn2:formalExpression id="FormalExpression_1" language="http://www.w3.org/1999/XPath">$wf:process/wf:data/username/text()</bpmn2:formalExpression>
+        </bpmn2:resourceAssignmentExpression>
+      </bpmn2:humanPerformer>
+    </bpmn2:userTask>
+    <bpmn2:userTask id="Task_2" name="Task 2">
       <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_6</bpmn2:outgoing>
-    </bpmn2:task>
+    </bpmn2:userTask>
     <bpmn2:sequenceFlow id="SequenceFlow_3" sourceRef="ParallelGateway_1" targetRef="Task_1"/>
     <bpmn2:sequenceFlow id="SequenceFlow_4" sourceRef="ParallelGateway_1" targetRef="Task_2"/>
     <bpmn2:sequenceFlow id="SequenceFlow_5" sourceRef="Task_1" targetRef="ParallelGateway_2"/>
@@ -55,37 +62,37 @@
       <bpmndi:BPMNShape id="BPMNShape_StartEvent_1" bpmnElement="StartEvent_1">
         <dc:Bounds height="36.0" width="36.0" x="45.0" y="150.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_1">
-          <dc:Bounds height="10.0" width="20.0" x="53.0" y="186.0"/>
+          <dc:Bounds height="14.0" width="25.0" x="50.0" y="186.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_EndEvent_1" bpmnElement="EndEvent_1">
         <dc:Bounds height="36.0" width="36.0" x="570.0" y="150.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_2">
-          <dc:Bounds height="10.0" width="16.0" x="580.0" y="186.0"/>
+          <dc:Bounds height="14.0" width="22.0" x="577.0" y="186.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_ParallelGateway_1" bpmnElement="ParallelGateway_1" isMarkerVisible="true">
         <dc:Bounds height="50.0" width="50.0" x="210.0" y="143.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_4">
-          <dc:Bounds height="10.0" width="37.0" x="216.0" y="193.0"/>
+          <dc:Bounds height="14.0" width="49.0" x="210.0" y="193.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_ParallelGateway_2" bpmnElement="ParallelGateway_2" isMarkerVisible="true">
         <dc:Bounds height="50.0" width="50.0" x="466.0" y="143.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_5">
-          <dc:Bounds height="10.0" width="70.0" x="456.0" y="193.0"/>
+          <dc:Bounds height="28.0" width="93.0" x="445.0" y="193.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_Task_1" bpmnElement="Task_1">
         <dc:Bounds height="50.0" width="110.0" x="310.0" y="75.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_7">
-          <dc:Bounds height="10.0" width="28.0" x="351.0" y="95.0"/>
+          <dc:Bounds height="14.0" width="36.0" x="347.0" y="93.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_Task_2" bpmnElement="Task_2">
         <dc:Bounds height="50.0" width="110.0" x="310.0" y="220.0"/>
         <bpmndi:BPMNLabel id="BPMNLabel_8">
-          <dc:Bounds height="10.0" width="28.0" x="351.0" y="240.0"/>
+          <dc:Bounds height="14.0" width="36.0" x="347.0" y="238.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="SequenceFlow_1" sourceElement="BPMNShape_StartEvent_1" targetElement="BPMNShape_ParallelGateway_1">

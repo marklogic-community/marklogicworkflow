@@ -1,0 +1,12 @@
+<ext:createRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
+  <ext:processName>fork-conditional__1__0</ext:processName>
+  <ext:data>
+    <choiceA>B</choiceA>
+    <choiceB>C</choiceB>
+    <newassignee>admin</newassignee>
+  </ext:data>
+  <ext:attachments>
+    <wf:attachment name="Menace" uri="/some/squid.xml" />
+    <wf:attachment name="Document" uri="/initial/sampledoc.xml" />
+  </ext:attachments>
+</ext:createRequest>
