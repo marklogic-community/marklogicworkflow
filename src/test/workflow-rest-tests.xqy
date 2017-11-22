@@ -25,7 +25,7 @@ declare function wrt:test-13-xml-payload ($pid)
   </ext:updateRequest>
 };
 
-declare function wrt:test-14-15-xml-payload ($pid)
+declare function wrt:test-14-15-17-xml-payload ($pid)
 {
   <ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
     <ext:processId>{$pid}</ext:processId>
@@ -168,17 +168,17 @@ declare function wrt:test-14-process-update-lock ($options, $pid)
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/resources/process?rs:processid=", fn:encode-for-uri($pid),
     "&amp;rs:lock=true")
-  let $file := wrt:test-14-15-xml-payload($pid)
+  let $file := wrt:test-14-15-17-xml-payload($pid)
   return xdmp:http-post($uri, $options, $file)
 };
 
-declare function wrt:test-15-process-update ($options, $pid)
+declare function wrt:test-15-17-process-update ($options, $pid)
 {
   let $uri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/resources/process?rs:processid=", fn:encode-for-uri($pid),
     "&amp;rs:complete=true")
-  let $file := wrt:test-14-15-xml-payload($pid)
+  let $file := wrt:test-14-15-17-xml-payload($pid)
   return xdmp:http-post($uri, $options, $file)
 };
 

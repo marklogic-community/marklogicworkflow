@@ -280,7 +280,7 @@ declare namespace http = "xdmp:http";
 let $_testlog := xdmp:log("E2E XML TEST: 15-process-update")
 let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
-let $result := wrt:test-15-process-update($const:xml-options, $pid)
+let $result := wrt:test-15-17-process-update($const:xml-options, $pid)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]//ext:outcome))
@@ -301,5 +301,57 @@ return (
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)),
   test:assert-exists($result[2]/ext:readResponse/ext:document)
 );
+
+(: 17-process-update - should follow "with attachments" path :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace ext = "http://marklogic.com/rest-api/resource/process";
+declare namespace http = "xdmp:http";
+
+let $_testlog := xdmp:log("E2E XML TEST: 17-process-update")
+let $_pause := xdmp:sleep(5000)
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:test-15-17-process-update($const:xml-options, $pid)
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]//ext:outcome))
+);
+
+(: 18-process-read :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace ext = "http://marklogic.com/rest-api/resource/process";
+declare namespace http = "xdmp:http";
+declare namespace wf="http://marklogic.com/workflow";
+
+let $_testlog := xdmp:log("E2E XML TEST: 18-process-read")
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:process-read($const:xml-options, $pid)
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)),
+  test:assert-exists($result[2]/ext:readResponse/ext:document),
+  test:assert-equal($pid, xs:string($result[2]/ext:readResponse/ext:document/wf:process/@id)),
+  let $audit-trail := $result[2]/ext:readResponse/ext:document/wf:process/wf:audit-trail
+  return (
+    test:assert-exists($audit-trail/wf:audit[wf:state="http://marklogic.com/states/015-restapi-tests__1__2/ExclusiveGateway_1"][wf:description="Completed step"]),
+    test:assert-exists($audit-trail/wf:audit[wf:state="http://marklogic.com/states/015-restapi-tests__1__2/Task_1"][wf:description="Completed step"]),
+    test:assert-exists($audit-trail/wf:audit[wf:state="http://marklogic.com/states/015-restapi-tests__1__2/ExclusiveGateway_2"][wf:description="Completed step"]),
+    test:assert-exists($audit-trail/wf:audit[wf:state="http://marklogic.com/states/015-restapi-tests__1__2/ExclusiveGateway_3"][wf:description="Completed step"]),
+    test:assert-exists($audit-trail/wf:audit[wf:state="http://marklogic.com/states/015-restapi-tests__1__2/EndEvent_2"][wf:description="Completed step"])
+  )
+);
+
+
 (: let $_pause := xdmp:sleep(5000) :)
 
+(:
+
+  TO DO: create tests for other steps:
+    - with / without attachments
+    - (with attachments) document property matches / doesn't match
+    - date before / after 2000
+
+:)
