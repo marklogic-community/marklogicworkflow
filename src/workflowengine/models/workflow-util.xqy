@@ -22,7 +22,11 @@ declare function m:create(
     $forkid as xs:string?,
     $branchid as xs:string?
 ) as xs:string {
-  let $_ := xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments)),"debug")
+  let $_ :=
+    if (fn:not(fn:empty($parent)))
+    then xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments),
+      " parent: ", $parent, " forkid: ", $forkid, " branchid: ", $branchid),"debug")
+    else xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments)),"debug")
   let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
   let $uri := "/workflow/processes/"||$pipelineName||"/"||$id || ".xml"
   let $_ :=
@@ -48,7 +52,7 @@ declare function m:create(
  :)
 declare function m:createSubProcess($parentProcessUri as xs:string,$forkid as xs:string,$subProcessStatus as element(wf:branch-status)) as xs:string {
   let $parent := fn:doc($parentProcessUri)/wf:process
-  let $pipelineName := xs:string($parent/wf:process-definition-name) || "/" || xs:string($subProcessStatus/wf:branch)
+  let $pipelineName := (: xs:string($parent/wf:process-definition-name) || "/" || :) xs:string($subProcessStatus/wf:branch)
   return m:create($pipelineName,<data>{$parent/wf:data}</data>/*,<data>{$parent/wf:attachments}</data>/*,$parentProcessUri,$forkid,xs:string($subProcessStatus/wf:branch))
 };
 
@@ -504,7 +508,7 @@ declare function m:metric($processUri as xs:string,$state as xs:string,$start as
  : Note that the branchid holds a unique ID for this branch INSTANCE not the branch name. Branch name is derived
  : from the pipeline element. Status generally initialised to INPROGRESS. Could become COMPLETE or FAILED or ABANDONED
  :)
-declare function m:branch-status($branchid as xs:string, $pipeline as xs:string,$status as xs:string?) as element(wf:branch) {
+declare function m:branch-status($branchid as xs:string, $pipeline as xs:string,$status as xs:string?) as element(wf:branch-status) {
   <wf:branch-status>
     <wf:branch>{$branchid}</wf:branch>
     <wf:pipeline>{$pipeline}</wf:pipeline>
@@ -535,6 +539,7 @@ declare function m:fork($processUri as xs:string,$branch-defs as element(wf:bran
   (: Create document instance for each branch (under its current process name's version folder) :)
   (: map over parent URI and (optional) loop count :)
   let $forkid := xs:string(fn:current-dateTime()) || sem:uuid-string()
+  let $_log := xdmp:log(fn:concat("fork id:", $forkid))
   let $branches :=
     m:branches($forkid,(
       let $resultMap := map:map()

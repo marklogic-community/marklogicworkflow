@@ -15,7 +15,18 @@ try {
   let $_ := xdmp:log("MarkLogic Workflow initial selection action called for: "||$cpf:document-uri)
 
   (: determine next state by URI of the process document :)
-  let $middleName := fn:substring-before(fn:substring-after($cpf:document-uri,"/workflow/processes/"),"/")
+  (:
+    $cpf:document-uri examples:
+      "/workflow/processes/fork-simple__1__0/7de22e90-9352-42a3-bc48-ea7fe17cc5e3-2018-01-08T13:34:20.458597Z.xml",
+      "/workflow/processes/fork-simple__1__0/183c396d-f251-43e7-a947-f07245d9ea03-2018-01-09T10:37:25.7917Z.xml",
+      "/workflow/processes/fork-simple__1__0/Task_1/7de22e90-9352-42a3-bc48-ea7fe17cc5e3-2018-01-08T13:34:20.458597Z.xml",
+      "/workflow/processes/fork-simple__1__0/Task_2/183c396d-f251-43e7-a947-f07245d9ea03-2018-01-09T10:37:25.7917Z.xml",
+      "/workflow/processes/fork-simple__1__0/Task_1/Task__3/7de22e90-9352-42a3-bc48-ea7fe17cc5e3-2018-01-08T13:34:20.458597Z.xml",
+      "/workflow/processes/fork-simple__1__0/Task_2/Task__4/183c396d-f251-43e7-a947-f07245d9ea03-2018-01-09T10:37:25.7917Z.xml"
+  :)
+  let $split := fn:tokenize($cpf:document-uri, '/')
+  let $last := fn:count($split) - 1
+  let $middleName := fn:string-join(($split[4 to $last]), '/')
   let $_ := xdmp:log("Document is for process: " || $middleName)
   let $stateOverride := xs:anyURI("http://marklogic.com/states/" || $middleName || "__start")
   let $_ := xdmp:log("Next state is:-")

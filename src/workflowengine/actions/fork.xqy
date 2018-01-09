@@ -10,9 +10,14 @@ declare variable $cpf:document-uri as xs:string external;
 declare variable $cpf:transition as node() external;
 declare variable $cpf:options as element() external;
 
-(: Just call wfu:fork with $cpf:options/wf:branches spec :)
-try {
-  wfu:fork($cpf:document-uri,$cpf:options/wf:branches)
-} catch ($e) {
-  wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
-}
+(
+  xdmp:log(fn:concat("Fork called cpf:document-uri: ", $cpf:document-uri, " cpf:options: ", xdmp:quote($cpf:options) )),
+  (: Just call wfu:fork with $cpf:options/wf:branches spec :)
+  try {
+    if (fn:exists($cpf:options/wf:branches))
+    then wfu:fork($cpf:document-uri,$cpf:options/wf:branches)
+    else wfu:fork($cpf:document-uri,$cpf:options/wf:branch-definitions)
+  } catch ($e) {
+    wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
+  }
+)
