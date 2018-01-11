@@ -287,6 +287,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace http = "xdmp:http";
 
 let $_testlog := xdmp:log("E2E JSON TEST: 18-process-read")
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:process-read($const:json-options, $pid)
 return (

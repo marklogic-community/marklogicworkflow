@@ -12,7 +12,7 @@ declare variable $cpf:document-uri as xs:string external;
 declare variable $cpf:transition as node() external;
 declare variable $cpf:options as element() external;
 
-
+let $_ := xdmp:log( fn:concat("hasRendezvoused condition test on ", $cpf:document-uri) , "debug")
 let $activeFork := xdmp:document-properties($cpf:document-uri)/prop:properties/wf:branches[./wf:status = "INPROGRESS"]
 
 (: Check RV method :)

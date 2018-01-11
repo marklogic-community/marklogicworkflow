@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:pipeline xml:lang="zxx" xmlns:p="http://marklogic.com/cpf/pipelines">
+  <p:pipeline-id>8285677651365931589</p:pipeline-id>
+  <p:pipeline-name>fork-simple__1__0/Task_2</p:pipeline-name>
+  <p:pipeline-description>fork-simple__1__0/Task_2</p:pipeline-description>
+  <p:success-action>
+    <p:annotation>
+    </p:annotation>
+    <p:module>/MarkLogic/cpf/actions/success-action.xqy</p:module>
+    <opt:options xmlns:opt="/MarkLogic/cpf/actions/success-action.xqy">
+    </opt:options>
+  </p:success-action>
+  <p:failure-action>
+    <p:annotation>
+    </p:annotation>
+    <p:module>/MarkLogic/cpf/actions/failure-action.xqy</p:module>
+    <opt:options xmlns:opt="/MarkLogic/cpf/actions/failure-action.xqy">
+    </opt:options>
+  </p:failure-action>
+  <p:status-transition>
+    <p:annotation>Restart process on external action</p:annotation>
+    <p:status>updated</p:status>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+    <p:priority>500</p:priority>
+    <p:default-action>
+      <p:annotation>Check for restarting process.</p:annotation>
+      <p:module>/workflowengine/actions/restart.xqy</p:module>
+      <opt:options xmlns:opt="/workflowengine/actions/restart.xqy">
+      </opt:options>
+    </p:default-action>
+  </p:status-transition>
+  <p:state-transition>
+    <p:annotation>Standard placeholder for initial state</p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0/Task_2__start</p:state>
+    <p:on-success>http://marklogic.com/states/fork-simple__1__0/Task_2/Task_2</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+  </p:state-transition>
+  <p:state-transition>
+    <p:annotation>
+    </p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0/Task_2/Task_2</p:state>
+    <p:on-success>http://marklogic.com/states/fork-simple__1__0/Task_2/ParallelGateway_2</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+    <p:default-action>
+      <p:annotation>BPMN2 Task: Task 2</p:annotation>
+      <p:module>/workflowengine/actions/task.xqy</p:module>
+      <opt:options xmlns:opt="/workflowengine/actions/task.xqy">
+      </opt:options>
+    </p:default-action>
+  </p:state-transition>
+  <p:state-transition>
+    <p:annotation>
+    </p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0/Task_2/ParallelGateway_2</p:state>
+    <p:on-success>http://marklogic.com/states/fork-simple__1__0/Task_2__end</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+    <p:default-action>
+      <p:annotation>BPMN2 PARALLEL Gateway Placeholder: ParallelGateway_2</p:annotation>
+      <p:module>/workflowengine/actions/task.xqy</p:module>
+      <opt:options xmlns:opt="/workflowengine/actions/task.xqy">
+      </opt:options>
+    </p:default-action>
+  </p:state-transition>
+  <p:state-transition>
+    <p:annotation>Standard placeholder for final state</p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0/Task_2__end</p:state>
+    <p:on-success>http://marklogic.com/states/done</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+  </p:state-transition>
+</p:pipeline>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:pipeline xml:lang="zxx" xmlns:p="http://marklogic.com/cpf/pipelines">
+  <p:pipeline-id>16777465620663218130</p:pipeline-id>
+  <p:pipeline-name>fork-simple__1__0</p:pipeline-name>
+  <p:pipeline-description>fork-simple__1__0</p:pipeline-description>
+  <p:success-action>
+    <p:annotation>
+    </p:annotation>
+    <p:module>/MarkLogic/cpf/actions/success-action.xqy</p:module>
+    <opt:options xmlns:opt="/MarkLogic/cpf/actions/success-action.xqy">
+    </opt:options>
+  </p:success-action>
+  <p:failure-action>
+    <p:annotation>
+    </p:annotation>
+    <p:module>/MarkLogic/cpf/actions/failure-action.xqy</p:module>
+    <opt:options xmlns:opt="/MarkLogic/cpf/actions/failure-action.xqy">
+    </opt:options>
+  </p:failure-action>
+  <p:status-transition>
+    <p:annotation>Restart process on external action</p:annotation>
+    <p:status>updated</p:status>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+    <p:priority>500</p:priority>
+    <p:default-action>
+      <p:annotation>Check for restarting process.</p:annotation>
+      <p:module>/workflowengine/actions/restart.xqy</p:module>
+      <opt:options xmlns:opt="/workflowengine/actions/restart.xqy">
+      </opt:options>
+    </p:default-action>
+  </p:status-transition>
+  <p:state-transition>
+    <p:annotation>Standard placeholder for initial state</p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0__start</p:state>
+    <p:on-success>http://marklogic.com/states/fork-simple__1__0/StartEvent_1</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+  </p:state-transition>
+  <p:state-transition>
+    <p:annotation>
+    </p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0/EndEvent_1</p:state>
+    <p:on-success>http://marklogic.com/states/fork-simple__1__0__end</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+    <p:default-action>
+      <p:annotation>BPMN2 End Event: End</p:annotation>
+      <p:module>/workflowengine/actions/endEvent.xqy</p:module>
+      <opt:options xmlns:opt="/workflowengine/actions/endEvent.xqy">
+      </opt:options>
+    </p:default-action>
+  </p:state-transition>
+  <p:state-transition>
+    <p:annotation>
+    </p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0/ParallelGateway_1__rv</p:state>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+    <p:execute>
+      <p:annotation>Check if child processes are complete on entry</p:annotation>
+      <p:condition>
+        <p:annotation>Check if child processes are finished</p:annotation>
+        <p:module>/workflowengine/conditions/hasRendezvoused.xqy</p:module>
+        <opt:options xmlns:opt="/workflowengine/conditions/hasRendezvoused.xqy">
+        </opt:options>
+      </p:condition>
+      <p:action>
+        <p:annotation>BPMN2 Parallel Gateway Rendezvous: RendezvousStep</p:annotation>
+        <p:module>/workflowengine/actions/genericComplete.xqy</p:module>
+        <opt:options xmlns:opt="/workflowengine/actions/genericComplete.xqy">
+          <wf:state xmlns:wf="http://marklogic.com/workflow">EndEvent_1</wf:state>
+        </opt:options>
+      </p:action>
+    </p:execute>
+  </p:state-transition>
+  <p:state-transition>
+    <p:annotation>
+    </p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0/ParallelGateway_1</p:state>
+    <p:on-success>http://marklogic.com/states/fork-simple__1__0/ParallelGateway_1__rv</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+    <p:default-action>
+      <p:annotation>BPMN2 PARALLEL Gateway Fork: ForkStep</p:annotation>
+      <p:module>/workflowengine/actions/fork.xqy</p:module>
+      <opt:options xmlns:opt="/workflowengine/actions/fork.xqy">
+        <wf:branch-definitions xmlns:wf="http://marklogic.com/workflow">
+          <wf:branch-definition>
+            <wf:pipeline>fork-simple__1__0</wf:pipeline>
+            <wf:branch>fork-simple__1__0/Task_1</wf:branch>
+          </wf:branch-definition>
+          <wf:branch-definition>
+            <wf:pipeline>fork-simple__1__0</wf:pipeline>
+            <wf:branch>fork-simple__1__0/Task_2</wf:branch>
+          </wf:branch-definition>
+          <wf:fork-method>ALL</wf:fork-method>
+          <wf:rendezvous-method>ALL</wf:rendezvous-method>
+        </wf:branch-definitions>
+      </opt:options>
+    </p:default-action>
+  </p:state-transition>
+  <p:state-transition>
+    <p:annotation>
+    </p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0/StartEvent_1</p:state>
+    <p:on-success>http://marklogic.com/states/fork-simple__1__0/ParallelGateway_1</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+    <p:default-action>
+      <p:annotation>BPMN2 start event: Start</p:annotation>
+      <p:module>/workflowengine/actions/startEvent.xqy</p:module>
+      <opt:options xmlns:opt="/workflowengine/actions/startEvent.xqy">
+      </opt:options>
+    </p:default-action>
+  </p:state-transition>
+  <p:state-transition>
+    <p:annotation>Standard placeholder for final state</p:annotation>
+    <p:state>http://marklogic.com/states/fork-simple__1__0__end</p:state>
+    <p:on-success>http://marklogic.com/states/done</p:on-success>
+    <p:on-failure>http://marklogic.com/states/error</p:on-failure>
+  </p:state-transition>
+</p:pipeline>

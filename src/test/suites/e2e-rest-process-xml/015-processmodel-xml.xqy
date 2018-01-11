@@ -327,6 +327,7 @@ declare namespace http = "xdmp:http";
 declare namespace wf="http://marklogic.com/workflow";
 
 let $_testlog := xdmp:log("E2E XML TEST: 18-process-read")
+let $_pause := xdmp:sleep(5000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:process-read($const:xml-options, $pid)
 return (

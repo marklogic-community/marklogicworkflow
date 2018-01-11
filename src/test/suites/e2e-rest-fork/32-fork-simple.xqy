@@ -49,7 +49,9 @@ return ( (:
 (: 3 - check the pipelines :)
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
 let $pipelines := cts:uri-match("http://marklogic.com/cpf/pipelines/*.xml")
-return test:assert-equal(3, fn:count($pipelines))
+return
+  test:assert-equal(3, fn:count($pipelines))
+;
 
 (: 4 - create a new process :)
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
@@ -89,7 +91,7 @@ return (
   return (
     test:assert-equal('RUNNING', xs:string($properties/prop:properties/wf:status)),
     test:assert-equal('INPROGRESS', xs:string($properties/prop:properties/wf:branches/wf:status)),
-    test:assert-equal(2, fn:count($properties/prop:properties/wf:branches/wf:branch-status/wf:status[. = 'INPROGRESS'])),
+    test:assert-equal(1, fn:count($properties/prop:properties/wf:branches/wf:branch-status/wf:status[. = 'INPROGRESS'])),
     test:assert-exists(xs:string($properties/prop:properties/wf:branches/wf:fork)),
     let $forkid := xs:string($properties/prop:properties/wf:branches/wf:fork)
     let $fork1 := /wf:process[wf:forkid=$forkid][wf:branchid="fork-simple__1__0/Task_1"]
@@ -208,19 +210,9 @@ return (
   test:assert-exists($result[2]/ext:readResponse/ext:document),
   let $properties := $result[2]/ext:readResponse/ext:properties
   return (
-    test:assert-equal('RUNNING', xs:string($properties/prop:properties/wf:status)),
+    test:assert-equal('RUNNING', xs:string($properties/prop:properties/wf:status)), (: actually, we should have completed everything at this stage :)
     test:assert-equal('INPROGRESS', xs:string($properties/prop:properties/wf:branches/wf:status)),
-    test:assert-equal(2, fn:count($properties/prop:properties/wf:branches/wf:branch-status/wf:status[. = 'INPROGRESS'])),
-    test:assert-exists(xs:string($properties/prop:properties/wf:branches/wf:fork)),
-    let $forkid := xs:string($properties/prop:properties/wf:branches/wf:fork)
-    let $fork1 := /wf:process[wf:forkid=$forkid][wf:branchid="fork-simple__1__0/Task_1"]
-    let $fork2 := /wf:process[wf:forkid=$forkid][wf:branchid="fork-simple__1__0/Task_2"]
-    return (
-      xdmp:document-insert("/test/fork1ProcessId.xml", <test><processId>{xs:string($fork1/@id)}</processId></test>),
-      xdmp:document-insert("/test/fork2ProcessId.xml", <test><processId>{xs:string($fork2/@id)}</processId></test>),
-      test:assert-exists(xs:string($fork1/@id)),
-      test:assert-exists(xs:string($fork2/@id))
-    )
+    test:assert-equal(2, fn:count($properties/prop:properties/wf:branches/wf:branch-status/wf:status[. = 'COMPLETE']))
   )
 );
 

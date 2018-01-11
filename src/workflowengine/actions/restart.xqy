@@ -36,7 +36,7 @@ try {
       return wfu:complete( $cpf:document-uri, $cpf:transition, xs:anyURI($next), $startTime )
     else (
       (: From set-updated-action.xqy in CPF:)
-
+      xdmp:log(fn:concat("cpf:check-transition(",$cpf:document-uri,",",xdmp:quote($cpf:transition),")"), "debug"),
       if (cpf:check-transition($cpf:document-uri,$cpf:transition)) then
         (
           cpf:document-set-last-updated( $cpf:document-uri, fn:current-dateTime() )

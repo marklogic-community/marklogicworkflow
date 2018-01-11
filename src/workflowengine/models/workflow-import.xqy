@@ -1283,7 +1283,7 @@ declare function m:b2gatewayConvergingEnd($gatewayType as xs:string,$pname as xs
           "",xs:anyURI("http://marklogic.com/states/"||$pname||"__end" ),
           $failureState,(),
 
-          p:action("/workflowengine/actions/task.xqy","BPMN2 " || $gatewayType || " Gateway Placeholder: "||xs:string($state/@id),
+          p:action("/workflowengine/actions/task.xqy", "BPMN2 " || $gatewayType || " Gateway Placeholder: "||xs:string($state/@id),
             <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
             </p:options>
           )
