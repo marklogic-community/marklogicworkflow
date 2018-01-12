@@ -5,7 +5,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace prop = "http://marklogic.com/xdmp/property";
 
-let $processUri := "/workflow/processes/fork-simple__1__0/4daff6c3-aba5-4c02-bf38-6cf1bcb8d44c-2018-01-09T16:23:48.244058Z.xml"
+let $processUri := "/workflow/processes/fork-simple__1__0/5daff6c3-aba5-4c02-bf38-6cf1bcb8d44c-2018-01-09T16:23:48.244058Z.xml"
 let $branch-defs := <wf:branch-definitions xmlns:wf="http://marklogic.com/workflow">
   <wf:branch-definition>
     <wf:pipeline>fork-simple__1__0</wf:pipeline>

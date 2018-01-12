@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prop:properties xmlns:prop="http://marklogic.com/xdmp/property">
+  <cpf:processing-status xmlns:cpf="http://marklogic.com/cpf">done</cpf:processing-status>
+  <cpf:property-hash xmlns:cpf="http://marklogic.com/cpf">0d72017683d9db991cc2e770f20ec474</cpf:property-hash>
+  <cpf:last-updated xmlns:cpf="http://marklogic.com/cpf">2018-01-09T17:27:35.439963Z</cpf:last-updated>
+  <cpf:state xmlns:cpf="http://marklogic.com/cpf">http://marklogic.com/states/fork-simple__1__0/StartEvent_1</cpf:state>
+  <wf:start xmlns:wf="http://marklogic.com/workflow">2018-01-09T16:23:50.155466Z</wf:start>
+  <wf:status xmlns:wf="http://marklogic.com/workflow">COMPLETE</wf:status>
+  <cpf:self xmlns:cpf="http://marklogic.com/cpf">/workflow/processes/fork-simple__1__0/5daff6c3-aba5-4c02-bf38-6cf1bcb8d44c-2018-01-09T16:23:48.244058Z.xml</cpf:self>
+</prop:properties>
