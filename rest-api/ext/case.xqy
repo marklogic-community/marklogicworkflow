@@ -129,9 +129,9 @@ function ext:get(
 (:
  : POST - update a case instance, potentially changing data and status
  :
- : POST process?rs:caseid=1234&rs:close=true -> Closed case. Respects locks. (optionally) updates case data.
- : POST process?rs:caseid=1234&rs:lock=true -> Locks the case for the current user. (optionally) updates case data. Respects locks.
- : POST process?rs:caseid=1234&rs:unlock=true -> Unlocks the case if locked by current user. (optionally) updates case data. Respects locks.
+ : POST process?rs:caseid=1234&updatetag=ABCD1234&rs:close=true -> Closed case. Respects locks. (optionally) updates case data.
+ : POST process?rs:caseid=1234&updatetag=ABCD1234&rs:lock=true -> Locks the case for the current user. (optionally) updates case data. Respects locks.
+ : POST process?rs:caseid=1234&updatetag=ABCD1234&rs:unlock=true -> Unlocks the case if locked by current user. (optionally) updates case data. Respects locks.
  :)
 declare
 %roxy:params("")
@@ -151,13 +151,13 @@ function ext:post(
 
  let $res :=
    if ("true" = map:get($params,"close")) then 
-     if (fn:true() = cc:case-close($caseid,
+     if (fn:true() = cc:case-close($caseid,xs:string(map:get($params,"updatetag")),
        $input/ext:updateRequest/ext:data/element(),$input/ext:updateRequest/ext:attachments/c:attachment) ) then 
        <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
      else 
        <ext:updateResponse><ext:outcome>FAILURE</ext:outcome><ext:message>Case could not be closed.</ext:message><ext:feedback></ext:feedback></ext:updateResponse>
    else
-     if (fn:true() = cc:case-update($caseid,
+     if (fn:true() = cc:case-update($caseid,xs:string(map:get($params,"updatetag")),
        $input/ext:updateRequest/ext:data/element(),$input/ext:updateRequest/ext:attachments/c:attachment)) then 
        <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
      else

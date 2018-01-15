@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case-template xmlns="" id="" update-tag="ABCD1234">
+    <metadata>        
+        <name></name>
+        <type></type>
+        <organisation></organisation>        
+    </metadata>
+    <template>
+        <data>           
+            <publication-date></publication-date>
+            <latest-version></latest-version>
+            <close-case-at-last-phase></close-case-at-last-phase> <!-- to be reviewed, might not be needed -->
+        </data>
+        <phases>
+            <phase template-id="phaseTemplateUid1">
+                <data>
+                    <name>Initial</name>
+                    <public-name>Initial Phase</public-name>
+                    <activate-next-phase>yes/no</activate-next-phase><!-- to be reviewed, might not be needed -->
+                </data>      
+                <activities>
+                    <activity template-id="activityTemplateUid2" type="process" name="review_approval_workflow">                                                                             
+                    </activity>
+                    <activity template-id="activityTemplateUid1" name="">
+                        <metadata>
+                            <standard lov="/uri/to/reference-data1.xml">yes/no</standard>
+                            <duration>30d</duration>
+                            <applies-to></applies-to>                                                        
+                        </metadata>
+                        <data>
+                            <name>ContactCustomer</name>
+                            <public-name></public-name>
+                            <planned-start-date></planned-start-date>
+                            <actual-start-date></actual-start-date>
+                            <planned-end-date></planned-end-date>
+                            <actual-end-date></actual-end-date>
+                            <mandatory lov="/uri/to/reference-data1.xml">yes/no</mandatory>
+                            <meeting-schedule lov="/uri/to/reference-data2.xml">id-of-the-schedule</meeting-schedule>
+                        </data>          
+                        <status lov="/uri/to/reference-status-data.xml">NotActive</status>
+                        <description>Please phone the customer to let them know we are handling their case, and ask for any missing info</description>
+                        <notes>Any notes here to record for this activity, outcomes, or information to the person completing it.</notes>
+                        <results>
+                            <result type="" minOccurs="0" maxOccurs="*" uri="">                        
+                                <values>
+                                    <value></value>
+                                </values>                                                           
+                            </result>
+                        </results>
+                    </activity>
+                </activities>
+                <graph>
+                    <rdf>
+                        <skos:TopConcept>
+                            <skos:Description>Case</skos:Description>
+                            <skos:hasNarrower>http://koop/graph/ns/phase1</skos:hasNarrower>
+                            <skos:hasNarrower>http://koop/graph/ns/phase2</skos:hasNarrower>
+                            <skos:hasNarrower>http://koop/graph/ns/phase3</skos:hasNarrower>
+                        </skos:TopConcept>
+                        <skos:Concept ref="http://koop/graph/ns/phase1">
+                            <skos:Description>Case</skos:Description>
+                            <skos:hasNarrower>http://koop/graph/ns/activity1</skos:hasNarrower>
+                            <skos:hasNarrower>http://koop/graph/ns/activity2</skos:hasNarrower>
+                            <skos:hasNarrower>http://koop/graph/ns/activity3</skos:hasNarrower>                                
+                        </skos:Concept>
+                        <skos:Concept ref="http://koop/graph/ns/phase2">
+                            <skos:Description>Case</skos:Description>
+                        </skos:Concept>
+                        <skos:Concept ref="http://koop/graph/ns/phase3">
+                            <skos:Description>Case</skos:Description>
+                        </skos:Concept>
+                    </rdf>
+                </graph>
+                    case has phases - phases have activities - phases have an order - activities has an order
+                    use SKOS with broader and narrower                 
+            </phase>
+        </phases>    
+        <attachments>
+            <attachment type="" minOccurs="0" maxOccurs="*" uri=""/>
+        </attachments>
+        <status></status>
+        <active-phase></active-phase>
+    </template>
+    <audit-trail>
+        <audit>
+            <by>afowler</by><when>20170118T130413Z</when>
+            <category>Lifecycle|Administrative</category><status>Closed|Open (at point After update)</status>
+            <description>Some textual description</description><detail><!-- Contains the dataUpdates and attachmentUpdates elements in their entirety --></detail>
+        </audit>
+    </audit-trail>
+    <metrics>
+        <!-- Currently blank, but reserved for future use (just like in MarkLogic Workflow) -->
+    </metrics>    
+    <status>NotActive|Open</status>
+    <parent>567890</parent>
+</case-template>
+

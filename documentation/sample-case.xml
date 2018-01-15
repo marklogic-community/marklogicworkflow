@@ -1,0 +1,80 @@
+<case xmlns="" id="123456" update-tag="ABCD1234" template-id="caseTemp001">
+    <data>        
+        <!-- Arbitrary elements provided by the application. -->
+        <publication-date></publication-date>
+        <latest-version></latest-version>
+    </data>
+    <phases>
+        <phase id="phaseUid1" template-id="phaseTemplateUid1">      
+            <data>
+                <name>Initial</name>
+                <public-name></public-name>        
+            </data>      
+            <activities>
+                <activity id="uid1" type="process" name="review_approval_workflow">
+                    <!-- TODO from a activity spawn the workflow, when workflow finishes it should complete the activity -->                                                     
+                </activity>
+                <activity id="uid2" template-id="activityTemplateUid1">
+                    <data>
+                        <name>ContactCustomer</name>
+                        <public-name></public-name>
+                        <planned-start-date></planned-start-date>
+                        <actual-start-date></actual-start-date>
+                        <planned-end-date></planned-end-date>
+                        <actual-end-date></actual-end-date>
+                        <mandatory>yes/no</mandatory>
+                    </data>          
+                    <status>NotActive|Open|Completed|Skipped</status> <!-- See audit-trail for relevant completion information -->
+                    <description>Please phone the customer to let them know we are handling their case, and ask for any missing info</description>
+                    <notes>Any notes here to record for this activity, outcomes, or information to the person completing it.</notes>
+                    <results>
+                        <result id="resultUid1" type="attachment">                        
+                            <values>
+                                <value>attachmentId1</value>
+                            </values>                                                           
+                        </result>                
+                        <result id="resultUid2" type="singleValue" uri="/reference/type-list.xml">
+                            <values>
+                                <value>
+                                </value>
+                            </values>                                                           
+                        </result>            
+                        <result id="resultUid3" type="multipleValue" uri="/reference/type-list.xml">                                                           
+                            <values>
+                                <value>
+                                </value>
+                            </values>                                                           
+                        </result>            
+                    </results>
+                </activity>
+            </activities>
+            <sem:triples>
+                <sem:triple>
+                    case has phases - phases have activities - phases have an order - activities has an order
+                    use SKOS with broader and narrower 
+                </sem:triple>                
+            </sem:triples>            
+        </phase>
+    </phases>    
+    <attachments>
+        <attachment id="attachmentId1" name="AccountOpeningForm" uri="/some/doc.xml" cardinality="1" /> <!-- A MarkLogic document attachment -->
+        <attachment id="attachmentId2" name="PDFRendering" uri="" cardinality="1" /> <!-- Named attachment, not currently linked to any system content -->
+        <attachment id="attachmentId3" name="CRMReference" system-type="OracleCRM" system-name="MyCRMSystem" system-id="1234567890" cardinality="1" /> <!-- external reference -->
+        <attachment id="attachmentId4" name="RelatedContent" uri="/my/saved/search.xml" cardinality="*" /> <!-- MarkLogic Saved Search (aka Smart Folder) -->
+    </attachments>
+    <audit-trail>
+        <audit>
+            <by>afowler</by><when>20170118T130413Z</when>
+            <category>Lifecycle|Administrative</category><status>Closed|Open (at point After update)</status>
+            <description>Some textual description</description><detail><!-- Contains the dataUpdates and attachmentUpdates elements in their entirety --></detail>
+        </audit>
+    </audit-trail>
+    <metrics>
+        <!-- Currently blank, but reserved for future use (just like in MarkLogic Workflow) -->
+    </metrics>
+    <status>NotActive|Open|Closed|Provisional|Cancelled</status>
+    <active-phase>phaseUid1</active-phase>
+    <locked>true|false</locked>
+    <locked-by>afowler</locked-by>    
+    <parent>567890</parent>
+</case>
