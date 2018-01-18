@@ -547,6 +547,79 @@
         </privilege>
       </privileges>
     </role>
+    <role>
+      <role-name>case-internal</role-name>
+      <description>An internal role for users of the case management application</description>
+      <role-names>
+      </role-names>
+      <permissions>
+        <permission>
+          <capability>execute</capability>
+          <role-name>case-internal</role-name>
+        </permission>
+        <permission>
+          <capability>update</capability>
+          <role-name>case-internal</role-name>
+        </permission>
+        <permission>
+          <capability>insert</capability>
+          <role-name>case-internal</role-name>
+        </permission>
+        <permission>
+          <capability>read</capability>
+          <role-name>case-internal</role-name>
+        </permission>
+      </permissions>
+      <collections>
+        <collection>
+          <collection-name>http://marklogic.com/casemanagement/cases</collection-name>
+        </collection>
+      </collections>
+      <privileges>
+      </privileges>
+    </role>
+    <role>
+      <role-name>case-administrator</role-name>
+      <description>A role for administrators of the case management application</description>
+      <role-names>
+      </role-names>
+      <permissions>
+        <permission>
+          <capability>update</capability>
+          <role-name>case-administrator</role-name>
+        </permission>
+        <permission>
+          <capability>read</capability>
+          <role-name>case-administrator</role-name>
+        </permission>
+      </permissions>
+      <collections>
+        <collection>
+          <collection-name>http://marklogic.com/casemanagement/cases</collection-name>
+        </collection>
+      </collections>
+      <privileges>
+      </privileges>
+    </role>
+    <role>
+      <role-name>case-user</role-name>
+      <description>A role for users of the case management application</description>
+      <role-names>
+      </role-names>
+      <permissions>
+        <permission>
+          <capability>read</capability>
+          <role-name>case-user</role-name>
+        </permission>
+      </permissions>
+      <collections>
+        <collection>
+          <collection-name>http://marklogic.com/casemanagement/cases</collection-name>
+        </collection>
+      </collections>
+      <privileges>
+      </privileges>
+    </role>
   </roles>
   <users xmlns="http://marklogic.com/xdmp/security">
     <user>

@@ -1,0 +1,21 @@
+<activity id="1" template-id="unique-tid" xmlns="http://marklogic.com/workflow/case">
+  <data>
+    <name>Contact Customer</name>
+    <public-name>Contact Customer</public-name>
+    <planned-start-date>11-05-2017</planned-start-date>
+    <planned-end-date>10-06-2017</planned-end-date>
+    <actual-start-date>15-05-2017</actual-start-date>
+    <actual-end-date>14-06-2017</actual-end-date>
+  </data>
+  <status>NotActive</status>
+  <description>string</description>
+  <notes>string</notes>
+  <results>
+    <result id="unique-id">
+      <type>attachment</type>
+      <values>
+        <value>string</value>
+      </values>
+    </result>
+  </results>
+</activity>
