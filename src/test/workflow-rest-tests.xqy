@@ -41,7 +41,7 @@ declare function wrt:processmodel-create ($options, $filename)
   let $uri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/resources/processmodel?rs:name=", $filename,
-    "&amp;enable=true")
+    "&amp;rs:enable=true")
   let $fullpath := fn:concat("/raw/data/", $filename)
   let $file := fn:doc($fullpath)
   return xdmp:http-put($uri, $options, $file)
