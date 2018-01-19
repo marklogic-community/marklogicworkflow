@@ -28,7 +28,7 @@ class MLClient
 
   def initialize(options)
     @ml_username = options[:user_name]
-    @ml_password = options[:password].xquery_unsafe
+    @ml_password = options[:password]
     @logger = options[:logger] || logger
     @request = {}
 
@@ -88,13 +88,15 @@ class MLClient
     }
   end
 
-  def go(url, verb, headers = {}, params = nil, body = nil, xcc = false)
+  def go(url, verb, headers = nil, params = nil, body = nil, xcc = false)
     logger.debug(%Q{[#{verb.upcase}]\t#{url}})
     password_prompt
     request_params = build_request_params(url, verb)
     # configure headers
-    headers.each do |k, v|
-      request_params[:request][k] = v
+    if headers
+      headers.each do |k, v|
+        request_params[:request][k] = v
+      end
     end
 
     raise ExitException.new("Don't combine params and body. One or the other please") if (params && body)

@@ -23,6 +23,7 @@ module Roxy
     def initialize(options)
       @logger = options[:logger]
       @app_type = options[:properties]["ml.app-type"]
+      @server_version = options[:properties]["ml.server-version"].to_i
       @no_prompt = options[:no_prompt]
     end
 
@@ -44,7 +45,16 @@ module Roxy
     end
 
     def upgrade_base(tmp_dir)
-      FileUtils.cp tmp_dir + '/CHANGELOG.mdown', '.'
+      if File.exists?('CHANGELOG.mdown') then
+        FileUtils.rm_f 'CHANGELOG.mdown'
+      elsif File.exists?('CHANGELOG.md') then
+        FileUtils.rm_f 'CHANGELOG.md'
+      end
+      if File.exists?(tmp_dir + '/CHANGELOG.mdown') then
+        FileUtils.cp tmp_dir + '/CHANGELOG.mdown', '.'
+      elsif File.exists?(tmp_dir + '/CHANGELOG.md') then
+        FileUtils.cp tmp_dir + '/CHANGELOG.md', '.'
+      end
       FileUtils.cp tmp_dir + '/ml', '.'
       FileUtils.cp tmp_dir + '/ml.bat', '.'
       FileUtils.cp tmp_dir + '/version.txt', '.'
@@ -56,6 +66,10 @@ module Roxy
       else
         fork = find_arg(['--fork']) || 'marklogic'
         branch = find_arg(['--branch']) || 'master'
+
+        if @server_version < 7 && branch != "v1.7.0"
+          raise ExitException.new("Upgrades to branch #{branch} no longer supported for MarkLogic #{@server_version}, use 'v1.7.0' instead")
+        end
 
         print "This command will attempt to upgrade to the latest Roxy files.\n"
         print "Before running this command, you should have checked all your code\n"
