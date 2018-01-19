@@ -2,16 +2,17 @@ xquery version "1.0-ml";
 
 module namespace m="http://marklogic.com/casemanagement/case-crud";
 
+import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 (:
  : Create a new process and activate it.
  :)
-declare function m:case-create($data as element(c:case), $parent as xs:string?) as xs:string {
+declare function m:case-create($caseTemplateName as xs:string, $data as element(c:case), $permissions as xs:string*, $parent as xs:string?) as xs:string {
   let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
-  let $uri := fn:concat("/casemanagement/cases/notemplate/", $id, ".xml")
+  let $uri := fn:concat("/casemanagement/cases/", $caseTemplateName, "/", $id, ".xml")
   let $_ := xdmp:log(fn:concat("creating case for id:", $id, ", uri:", $uri), "debug")
-  let $_ := m:createCaseDocument($uri, $data)
+  let $_ := clib:createCaseDocument($uri, $data, $permissions)
   return $id
 };
 (:
@@ -34,22 +35,7 @@ declare function m:case-create($caseTemplateName as xs:string,$data as element()
   return $id
 };
 :)
-declare private function m:createCaseDocument($uri as xs:string, $doc as element()) as xs:boolean {
-  let $_ := xdmp:document-insert($uri, $doc,
-        (
-          xdmp:default-permissions(),
-          xdmp:permission("case-internal",("read","update")),
-          (: xdmp:permission("workflow-status",("read")), :) (: WARNING DO NOT UNCOMMENT - reading should be wrapped and amped to prevent data leakage :)
-          xdmp:permission("case-administrator",("read","update")),
-          xdmp:permission("case-user",("read")) (: TODO replace this with the EXACT user, dynamically, as required :)
-        ),
-        (
-          xdmp:default-collections(),
-          "http://marklogic.com/casemanagement/cases"
-        )
-  )
-  return fn:true()
-};
+
 (:
 declare private function m:audit-create($caseId as xs:string,$status as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as element(c:audit) {
   <c:audit><c:by>{xdmp:get-current-user()}</c:by><c:when>{fn:current-dateTime()}</c:when>
@@ -106,10 +92,22 @@ declare function m:case-update($caseId as xs:string,$updateTag as xs:string,$dat
  :)
 declare function m:case-get($caseId as xs:string, $lockForUpdate as xs:boolean?) as element(c:case)? {
   (:  let $_secure := xdmp:security-assert($cdefs:privCaseUser, "execute") :)
+  let $collection := "http://marklogic.com/casemanagement/cases"
 
-  (: fn:collection("http://marklogic.com/casemanagement/cases")/c:case[@id = $caseId][1] ( : sanity check :)
-  let $uri := fn:concat("/casemanagement/cases/notemplate/", $caseId, ".xml")
-  return doc($uri)/c:case
+  let $case := fn:collection($collection)/c:case[@id = $caseId][1] (: sanity check :)
+  return
+    if ($case)
+    then $case
+    else
+      let $dir := "/casemanagement/cases/"
+      let $uri := cts:uri-match(fn:concat($dir, '*/', $caseId, ".xml"))
+      return cts:search(
+        fn:collection($collection),
+        (: cts:and-query(( :)
+        (:  cts:directory-query($dir, "infinity"), :)
+        cts:document-query($uri)
+        (: )) :)
+      )/c:case[1]
   (: TODO add audit entry item :)
   (: TODO add locked audit entry item too :)
 };

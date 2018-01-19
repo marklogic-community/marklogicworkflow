@@ -40,9 +40,18 @@ declare namespace rapi = "http://marklogic.com/rest-api";
  :  </ext:attachments>
  : </ext:createRequest>
  :)
+
+(:
+Post Endpoint
+        - create a new case instance, case instance XML can be sent from the client
+        - generate UID for case.
+        - permissions - see user authorisation
+        - maintain audit-trail
+:)
+
 declare
 %rapi:transaction-mode("update")
-%roxy:params("") (:  :)
+%roxy:params("template=xs:string", "permissions=xs:string")
 function ext:post(
     $context as map:map,
     $params  as map:map,
@@ -52,13 +61,16 @@ function ext:post(
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else
     if ("text/plain" = map:get($context,"accept-types")) then "text/plain" else "application/json"
 
-  (: TODO make case template name mandatory :)
-
   let $_ := xdmp:log(fn:concat("context:", xdmp:quote($context)), "debug")
   let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
   let $_ := xdmp:log(fn:concat("input:", xdmp:quote($input)), "debug")
 
-  let $res := cc:case-create($input/element(), ()) (: Blank parent case id for now :)
+  (: TODO get permissions from params :)
+  let $permissions := map:get($params, "permissions")
+  (: TODO make case template name mandatory :)
+  let $templateName := (map:get($params, "template"), "notemplate")[1]
+
+  let $res := cc:case-create($templateName, $input/element(), $permissions, ()) (: Blank template and parent for now :)
 
   let $out := <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:caseId>{$res}</ext:caseId></ext:createResponse>
 
@@ -74,7 +86,7 @@ function ext:post(
       else
         let $config := json:config("custom")
         let $cx := map:put($config, "text-value", "label" )
-        let $cx := map:put($config , "camel-case", fn:true() )
+        let $cx := map:put($config ,"camel-case", fn:true() )
         return
           json:transform-to-json($out, $config)
     }
