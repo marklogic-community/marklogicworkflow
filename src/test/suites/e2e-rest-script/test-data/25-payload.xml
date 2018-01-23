@@ -1,0 +1,13 @@
+<ext:createRequest xmlns:ext="http://marklogic.com/rest-api/resource/processsubscription">
+  <ext:processName>022-email-test__1__0</ext:processName>
+  <ext:name>email-sub-test</ext:name>  
+  <ext:domain>
+   <ext:name>Some folder alerting domain</ext:name>
+   <ext:type>directory</ext:type>
+   <ext:path>/some/</ext:path>
+   <ext:depth>0</ext:depth>
+  </ext:domain>
+  <ext:query>
+    <cts:collection-query xmlns:cts="http://marklogic.com/cts"><cts:uri>/test/email/sub</cts:uri></cts:collection-query>
+  </ext:query>
+</ext:createRequest>
