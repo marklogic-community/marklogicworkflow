@@ -4,7 +4,12 @@ module namespace clib="http://marklogic.com/casemanagement/case-lib";
 
 declare namespace c="http://marklogic.com/workflow/case";
 
-declare function clib:createCaseDocument($uri as xs:string, $doc as element(), $permissions-string as xs:string*) as xs:boolean {
+declare function clib:get-case-document-uri($caseId as xs:string){
+  let $dir := "/casemanagement/cases/"
+  return cts:uri-match(fn:concat($dir, '*/', $caseId, ".xml"))
+};
+
+declare function clib:create-case-document($uri as xs:string, $doc as element(), $permissions-string as xs:string*) as xs:boolean {
   let $permissions := clib:decode-permissions($permissions-string)
   let $_ := xdmp:document-insert($uri, $doc,
         $permissions,
@@ -25,6 +30,12 @@ declare function clib:decode-permissions ($permissions-string as xs:string*) as 
     xdmp:permission("case-administrator",("read","update")),
     xdmp:permission("case-user",("read")) (: TODO replace this with the EXACT user, dynamically, as required :)
   )
+};
+
+declare function clib:update-case-document($caseId as xs:string, $doc as element(), $permissions-string as xs:string*) as xs:boolean {
+  (: At the moment we're doing a straight swap... :)
+  let $uri := clib:get-case-document-uri($caseId)
+  return clib:create-case-document($uri, $doc, $permissions-string)
 };
 
 (:

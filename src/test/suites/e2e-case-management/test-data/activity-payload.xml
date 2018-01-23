@@ -1,4 +1,4 @@
-<activity id="1" template-id="unique-tid" xmlns="http://marklogic.com/workflow/case">
+<activity id="activity1" template-id="activity1" xmlns="http://marklogic.com/workflow/case">
   <data>
     <name>Contact Customer</name>
     <public-name>Contact Customer</public-name>
@@ -7,11 +7,11 @@
     <actual-start-date>15-05-2017</actual-start-date>
     <actual-end-date>14-06-2017</actual-end-date>
   </data>
-  <status>NotActive</status>
+  <status>Active</status>
   <description>string</description>
   <notes>string</notes>
   <results>
-    <result id="unique-id">
+    <result id="result1">
       <type>attachment</type>
       <values>
         <value>string</value>

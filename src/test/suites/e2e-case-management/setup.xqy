@@ -6,6 +6,7 @@ import module namespace deploy  = "http://marklogic.com/roxy/deploy-rest-resourc
 let $_modules-import := deploy:deploy()
 
 return (
-  test:load-test-file("01-payload.xml", xdmp:database(), "/raw/data/01-payload.xml"),
-  test:load-test-file("03-payload.xml", xdmp:database(), "/raw/data/03-payload.xml")
+  test:load-test-file("case-post-payload.xml", xdmp:database(), "/raw/data/case-post-payload.xml"),
+  test:load-test-file("case-put-payload.xml", xdmp:database(), "/raw/data/case-put-payload.xml"),
+  test:load-test-file("activity-payload.xml", xdmp:database(), "/raw/data/activity-payload.xml")
 )

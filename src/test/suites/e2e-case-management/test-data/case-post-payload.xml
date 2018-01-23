@@ -1,14 +1,14 @@
-<case id="1" xmlns="http://marklogic.com/workflow/case" template-id="unique-tid">
+<case id="1" xmlns="http://marklogic.com/workflow/case" template-id="ctemplate1">
   <data>
     <latest-version>0</latest-version>
     <publication-date>12-04-2016</publication-date>
   </data>
   <active-phase>phaseUid1</active-phase>
   <phases>
-    <phase id="unique-id" template-id="unique-tid">
+    <phase id="phase1" template-id="ptemplate1">
       <data>
         <name>Intial</name>
-        <public-name>Initial</public-name>
+        <public-name>Initial Case Example</public-name>
       </data>
       <activities>
       </activities>
