@@ -143,9 +143,10 @@ let $uri := fn:concat(
 let $response := xdmp:http-put($uri, $const:xml-options)
 
 return (
-  test:assert-equal('200', xs:string($response[1]/http:code)),
-  test:assert-equal('FAILURE', xs:string($response[2]/ext:updateResponse/ext:outcome)),
-  test:assert-equal('Nothing to update', xs:string($response[2]/ext:updateResponse/ext:details))
+  test:assert-equal('405', xs:string($response[1]/http:code)),
+  test:assert-equal('Validation exception', xs:string($response[1]/http:message)),
+  test:assert-equal('Nothing to update', xs:string($response[2]/error:error-response/error:message))
 );
 
 (: 17-20 TBD... :)
+
