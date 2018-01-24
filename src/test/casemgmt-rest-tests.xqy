@@ -3,6 +3,7 @@ module namespace cmrt = "http://marklogic.com/roxy/casemanagement/rest-tests";
 
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace error = "http://marklogic.com/xdmp/error";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
@@ -123,8 +124,8 @@ declare function cmrt:get-case-fail ($caseId, $options)
 {
   let $response := cmrt:get-case($caseId, $options)
   return (
-    test:assert-equal('200', xs:string($response[1]/http:code)),
-    test:assert-equal('FAILURE', xs:string($response[2]/ext:readResponse/ext:outcome)),
-    test:assert-equal(fn:concat('caseId ', $caseId, ' not found'), xs:string($response[2]/ext:readResponse/ext:details))
+    test:assert-equal('400', xs:string($response[1]/http:code)),
+    test:assert-equal('Invalid ID supplied', xs:string($response[1]/http:message)),
+    test:assert-equal(fn:concat('caseId ', $caseId, ' not found'), xs:string($response[2]/error:error-response/error:message))
   )
 };

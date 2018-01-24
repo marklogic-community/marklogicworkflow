@@ -36,12 +36,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
 let $caseId := cmrt:get-case-id("/test/case1.xml")
-let $response := cmrt:get-case($caseId, $const:xml-options)
-return (
-  test:assert-equal('200', xs:string($response[1]/http:code)),
-  test:assert-equal('FAILURE', xs:string($response[2]/ext:readResponse/ext:outcome)),
-  test:assert-equal(fn:concat('caseId ', $caseId, ' not found'), xs:string($response[2]/ext:readResponse/ext:details))
-);
+return cmrt:get-case-fail($caseId, $const:xml-options);
 
 (: 05 - rollback transaction1 :)
 import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
@@ -62,9 +57,4 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
 let $caseId := cmrt:get-case-id("/test/case1.xml")
-let $response := cmrt:get-case($caseId, $const:xml-options)
-return (
-  test:assert-equal('200', xs:string($response[1]/http:code)),
-  test:assert-equal('FAILURE', xs:string($response[2]/ext:readResponse/ext:outcome)),
-  test:assert-equal(fn:concat('caseId ', $caseId, ' not found'), xs:string($response[2]/ext:readResponse/ext:details))
-);
+return cmrt:get-case-fail($caseId, $const:xml-options);
