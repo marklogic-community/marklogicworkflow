@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <activity id="activity1" template-id="activity1" xmlns="http://marklogic.com/workflow/case">
   <data>
     <name>Contact Customer</name>
