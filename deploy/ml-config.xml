@@ -582,6 +582,10 @@
       <role-name>case-administrator</role-name>
       <description>A role for administrators of the case management application</description>
       <role-names>
+        <role-name>case-user</role-name>
+        <role-name>workflow-role</role-name>
+        <role-name>rest-admin</role-name>
+        <role-name>rest-extension-user</role-name>
       </role-names>
       <permissions>
         <permission>
@@ -592,23 +596,28 @@
           <capability>read</capability>
           <role-name>case-administrator</role-name>
         </permission>
-      </permissions>
-      <collections>
-        <collection>
-          <collection-name>http://marklogic.com/casemanagement/cases</collection-name>
-        </collection>
-      </collections>
-      <privileges>
-      </privileges>
-    </role>
-    <role>
-      <role-name>case-user</role-name>
-      <description>A role for users of the case management application</description>
-      <role-names>
-      </role-names>
-      <permissions>
+        <permission>
+          <capability>insert</capability>
+          <role-name>case-administrator</role-name>
+        </permission>
+        <permission>
+          <capability>node-update</capability>
+          <role-name>case-administrator</role-name>
+        </permission>
+        <permission>
+          <capability>update</capability>
+          <role-name>case-user</role-name>
+        </permission>
+        <permission>
+          <capability>insert</capability>
+          <role-name>case-user</role-name>
+        </permission>
         <permission>
           <capability>read</capability>
+          <role-name>case-user</role-name>
+        </permission>
+        <permission>
+          <capability>node-update</capability>
           <role-name>case-user</role-name>
         </permission>
       </permissions>
@@ -618,6 +627,71 @@
         </collection>
       </collections>
       <privileges>
+        <privilege xml:lang="zxx">
+          <privilege-name>unprotected-collections</privilege-name>
+          <action>http://marklogic.com/xdmp/privileges/unprotected-collections</action>
+          <kind>execute</kind>
+        </privilege>
+        <privilege xml:lang="zxx">
+          <privilege-name>unprotect-collection</privilege-name>
+          <action>http://marklogic.com/xdmp/privileges/unprotect-collection</action>
+          <kind>execute</kind>
+        </privilege>
+        <privilege xml:lang="zxx">
+          <privilege-name>any-uri</privilege-name>
+          <action>http://marklogic.com/xdmp/privileges/any-uri</action>
+          <kind>execute</kind>
+        </privilege>
+      </privileges>
+    </role>
+    <role>
+      <role-name>case-user</role-name>
+      <description>A role for users of the case management application</description>
+      <role-names>
+        <role-name>case-user</role-name>
+        <role-name>workflow-role</role-name>
+        <role-name>rest-reader</role-name>
+        <role-name>rest-writer</role-name>
+      </role-names>
+      <permissions>
+        <permission>
+          <capability>read</capability>
+          <role-name>case-user</role-name>
+        </permission>
+        <permission>
+          <capability>update</capability>
+          <role-name>case-user</role-name>
+        </permission>
+        <permission>
+          <capability>insert</capability>
+          <role-name>case-user</role-name>
+        </permission>
+        <permission>
+          <capability>node-update</capability>
+          <role-name>case-user</role-name>
+        </permission>
+      </permissions>
+      <collections>
+        <collection>
+          <collection-name>http://marklogic.com/casemanagement/cases</collection-name>
+        </collection>
+      </collections>
+      <privileges>
+        <privilege xml:lang="zxx">
+          <privilege-name>unprotected-collections</privilege-name>
+          <action>http://marklogic.com/xdmp/privileges/unprotected-collections</action>
+          <kind>execute</kind>
+        </privilege>
+        <privilege xml:lang="zxx">
+          <privilege-name>unprotect-collection</privilege-name>
+          <action>http://marklogic.com/xdmp/privileges/unprotect-collection</action>
+          <kind>execute</kind>
+        </privilege>
+        <privilege xml:lang="zxx">
+          <privilege-name>any-uri</privilege-name>
+          <action>http://marklogic.com/xdmp/privileges/any-uri</action>
+          <kind>execute</kind>
+        </privilege>
       </privileges>
     </role>
   </roles>
