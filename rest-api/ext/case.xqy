@@ -8,7 +8,8 @@ xquery version "1.0-ml";
 module namespace ext = "http://marklogic.com/rest-api/resource/case";
 
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
-import module namespace cc="http://marklogic.com/casemanagement/case-crud" at "/casemanagement/models/case-crud.xqy";
+import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
+import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf = "http://marklogic.com/workflow";
@@ -25,7 +26,7 @@ declare namespace rapi = "http://marklogic.com/rest-api";
 
 (:
  : Fetch a case by its UUID
- : ?rs:caseid = the string id returned from PUT /resource/case or cc:case-create
+ : ?rs:caseid = the string id returned from PUT /resource/case or ch:case-create
  :)
 declare
 %roxy:params("caseId=xs:string")
@@ -35,47 +36,37 @@ function ext:get(
 ) as document-node()*
 {
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
-  let $part := (map:get($params,"part"),"document")[1]
 
   let $_ := xdmp:log($params)
   let $_ := xdmp:log($context)
-  let $caseid := map:get($params,"caseId")
 
-  let $out :=
-    if (fn:empty($caseid))
-    then (
-      404, "Case not found", "caseId parameter is required"
-    )
-    else
-      let $case := cc:case-get($caseid, fn:false())
-      return
-        if ($case)
-        then (
-          200, "OK",
-          <ext:readResponse>
-            <ext:outcome>SUCCESS</ext:outcome>
-            {$case}
-          </ext:readResponse>
-        )
-        else (
-          400, "Invalid ID supplied", fn:concat("caseId ", $caseid, " not found")
-        )
+  let $caseid := map:get($params,"caseId")
+  let $validate := ch:validate(map:get($params,"caseId"), fn:false(), fn:false(), fn:false())
+  let $status-code := map:get($validate,"status-code")
+  let $response-message := map:get($validate,"response-message")
   return
-    if (200 = $out[1])
-    then  (
-      xdmp:set-response-code($out[1], $out[2]),
-      document {
-        if ("application/xml" = $preftype) then
-          $out[3]
-        else
-          let $config := json:config("custom")
-          let $cx := map:put($config, "text-value", "label" )
-          let $cx := map:put($config , "camel-case", fn:true() )
-          return
-            json:transform-to-json($out[3], $config)
-      }
-    )
-    else fn:error((),"RESTAPI-SRVEXERR", ($out[1], $out[2], $out[3]))
+    if (200 = $status-code)
+    then
+      let $document := (: TODO - permissions: what if ch:case-get fails... :)
+        <ext:readResponse>
+          <ext:outcome>SUCCESS</ext:outcome>
+          {ch:case-get($caseid, fn:false())}
+        </ext:readResponse>
+      return (
+        map:put($context, "output-types", $preftype),
+        xdmp:set-response-code($status-code, $response-message),
+        document {
+          if ("application/xml" = $preftype) then
+            $document
+          else
+            let $config := json:config("custom")
+            let $cx := map:put($config, "text-value", "label")
+            let $cx := map:put($config, "camel-case", fn:true())
+            return
+              json:transform-to-json(map:get($validate,"document"), $config)
+        }
+      )
+    else fn:error((), "RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($validate,"error-detail")))
 };
 
 (:
@@ -111,39 +102,32 @@ function ext:post(
   let $permissions := map:get($params, "permissions")
   (: TODO make case template name mandatory :)
   let $template-name := (map:get($params, "template"), "notemplate")[1]
+  let $case-doc := $input/element()
 
-  let $out :=
-    if (fn:empty($input/element()))
-    then (
-      405, "Invalid input", "Nothing to insert"
-    )
-    else
-      let $res := cc:case-create($template-name, $input/element(), $permissions, ()) (: Blank template and parent for now :)
-      return (
-        200, "OK",
-        <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:caseId>{$res}</ext:caseId></ext:createResponse>,
-        $res
-      )
-
+  let $validate := ch:validate(clib:get-new-case-id($case-doc), fn:true(), fn:exists($case-doc), fn:true())
+  let $status-code := map:get($validate,"status-code")
+  let $response-message := map:get($validate,"response-message")
   return
-    if (200 = $out[1])
-    then (
-      map:put($context, "output-types", $preftype),
-      xdmp:set-response-code($out[1], $out[2]),
-      document {
-        if ("application/xml" = $preftype) then
-          $out[3]
-        else if ("text/plain" = $preftype) then
-          $out[4]
-        else
-          let $config := json:config("custom")
-          let $cx := map:put($config, "text-value", "label" )
-          let $cx := map:put($config ,"camel-case", fn:true() )
-          return
-            json:transform-to-json($out[3], $config)
-      }
-    )
-    else fn:error((),"RESTAPI-SRVEXERR", ($out[1], $out[2], $out[3]))
+    if (200 = $status-code)
+    then
+      let $res := ch:case-create($template-name, $case-doc, $permissions, ()) (: Blank template and parent for now :)
+      return (
+        map:put($context, "output-types", $preftype),
+        xdmp:set-response-code($status-code, $response-message),
+        document {
+          if ("application/xml" = $preftype) then
+            <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:caseId>{$res}</ext:caseId></ext:createResponse>
+          else if ("text/plain" = $preftype) then
+            $res
+          else
+            let $config := json:config("custom")
+            let $cx := map:put($config, "text-value", "label" )
+            let $cx := map:put($config ,"camel-case", fn:true() )
+            return
+              json:transform-to-json($res, $config)
+        }
+      )
+    else fn:error((),"RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($validate,"error-detail")))
 };
 
 (:
@@ -163,52 +147,45 @@ function ext:put(
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
   let $_ := xdmp:log($input)
-  let $caseid := map:get($params,"caseId")
+  let $caseid := map:get($params, "caseId")
   let $_ := xdmp:log(fn:concat("REST EXT caseId: ", $caseid), "debug")
   (: TODO get permissions from params :)
   let $permissions := map:get($params, "permissions")
+  let $case-doc := $input/element()
+
+  let $validate := ch:validate($caseid, fn:false(), fn:exists($case-doc), fn:true())
+  let $status-code := map:get($validate,"status-code")
+  let $response-message := map:get($validate,"response-message")
 
   let $out :=
-    if (fn:empty($caseid))
-    then (
-     404, "Case not found", "caseId parameter is required"
-    )
-    else
-      if (fn:empty($input/element()))
-      then (
-        405, "Validation exception", "Nothing to update"
-      )
+    if (200 = $status-code)
+    then
+      if (fn:true() = ch:case-update($caseid, $input/element(), $permissions, ()))
+      then <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
       else
-        let $case := cc:case-get($caseid, fn:true())
-        return
-          if ($case)
-          then
-            if (fn:true() = cc:case-update($caseid, $input/element(), $permissions, ()))
-            then (
-              200, "OK",
-              <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>)
-            else (
-              405, "Validation exception", "Case could not be updated"
-            )
-          else (
-            400, "Invalid ID supplied", fn:concat("caseId ", $caseid, " not found")
-          )
+        let $validate := map:new((
+          map:entry("status-code", 405),
+          map:entry("response-message", "Validation exception"),
+          map:entry("error-detail", "Case could not be updated")
+        ))
+        return <ext:updateResponse><ext:outcome>FAILURE</ext:outcome></ext:updateResponse>
+    else ()
   return
-    if (200 = $out[1])
+    if (200 = $status-code)
     then (
       map:put($context, "output-types", $preftype),
-      xdmp:set-response-code($out[1], $out[2]),
+      xdmp:set-response-code($status-code, $response-message),
       document {
         if ("application/xml" = $preftype) then
-          $out[3]
+          $out
         else
           let $config := json:config("custom")
           let $cx := map:put($config, "text-value", "label" )
           let $cx := map:put($config , "camel-case", fn:true() )
           return
-            json:transform-to-json($out[3], $config)
+            json:transform-to-json($out, $config)
       }
     )
-    else fn:error((),"RESTAPI-SRVEXERR", ($out[1], $out[2], $out[3]))
+    else fn:error((),"RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($validate,"error-detail")))
 };
 

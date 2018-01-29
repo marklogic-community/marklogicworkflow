@@ -2,11 +2,19 @@ xquery version "1.0-ml";
 
 module namespace clib="http://marklogic.com/casemanagement/case-lib";
 
+import module namespace const = "http://marklogic.com/casemanagement/case-constants" at "/casemanagement/models/case-constants.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
+
 declare namespace c="http://marklogic.com/workflow/case";
 
 declare function clib:get-case-document-uri($caseId as xs:string){
-  let $dir := "/casemanagement/cases/"
-  return cts:uri-match(fn:concat($dir, '*/', $caseId, ".xml"))
+  cts:uri-match(fn:concat($const:case-dir, '*/', $caseId, ".xml"))
+};
+
+declare function clib:get-new-case-id($doc as element()?){
+  if (fn:exists($doc/@id))
+  then xs:string($doc/@id)
+  else wfu:new-workflow-id()
 };
 
 declare function clib:create-case-document($uri as xs:string, $doc as element(), $permissions-string as xs:string*) as xs:boolean {
@@ -15,7 +23,7 @@ declare function clib:create-case-document($uri as xs:string, $doc as element(),
         $permissions,
         (
           xdmp:default-collections(),
-          "http://marklogic.com/casemanagement/cases"
+          $const:case-collection
         )
   )
   return fn:true()
@@ -25,9 +33,8 @@ declare function clib:decode-permissions ($permissions-string as xs:string*) as 
   (: TODO: implement properly... :)
   (
     xdmp:default-permissions(),
-    xdmp:permission("case-internal",("read","update")),
+    $const:case-permissions,
     (: xdmp:permission("workflow-status",("read")), :) (: WARNING DO NOT UNCOMMENT - reading should be wrapped and amped to prevent data leakage :)
-    xdmp:permission("case-administrator",("read","update")),
     xdmp:permission("case-user",("read")) (: TODO replace this with the EXACT user, dynamically, as required :)
   )
 };
