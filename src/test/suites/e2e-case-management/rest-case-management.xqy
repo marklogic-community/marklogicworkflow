@@ -144,9 +144,7 @@ let $response := xdmp:http-put($uri, $const:xml-options)
 
 return (
   test:assert-equal('405', xs:string($response[1]/http:code)),
-  test:assert-equal('Validation exception', xs:string($response[1]/http:message)),
+  test:assert-equal('Invalid input', xs:string($response[1]/http:message)),
   test:assert-equal('Nothing to update', xs:string($response[2]/error:error-response/error:message))
 );
-
-(: 17-20 TBD... :)
 
