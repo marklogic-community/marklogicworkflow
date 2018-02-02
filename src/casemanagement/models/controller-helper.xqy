@@ -9,12 +9,14 @@ import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/j
 declare namespace c="http://marklogic.com/workflow/case";
 
 declare function ch:validate(
-  $caseid as xs:string?,         (: should always be supplied - new case will supply new caseid :)
-  $new-case as xs:boolean,       (: is this new? :)
+  $caseid as xs:string?,         (: should always be supplied - new case will supply new id :)
+  $new-case as xs:boolean,       (: is this case new? :)
   $input-data as xs:boolean,     (: is there data? :)
   $input-expected as xs:boolean  (: should there be data? :)
 ) as map:map {
-  map:new(
+  map:new((
+    map:entry("caseId", $caseid),
+    xdmp:log("in ch:validate", "debug"),
     (: supplied caseid ? :)
     if (fn:empty($caseid))
     then (
@@ -56,7 +58,149 @@ declare function ch:validate(
             map:entry("response-message", "Invalid ID supplied"),
             map:entry("error-detail", fn:concat("caseId ", $caseid, " not found"))
           )
-  )
+  ))
+};
+
+declare function ch:validate-data(
+  $input-data as xs:boolean,     (: is there data? :)
+  $input-expected as xs:boolean  (: should there be data? :)
+) as map:map { (
+  xdmp:log("in ch:validate-data", "debug"),
+  map:new((
+    if (
+      (($input-expected) and ($input-data))
+        or fn:not($input-expected) (: and fn:not($input-data)) - ignore input data if not expected :)
+    )
+    then (
+      map:entry("status-code", 200),
+      map:entry("response-message", "OK")
+    )
+    else (
+      map:entry("status-code", 405),
+      map:entry("response-message", "Validation exception"),
+      map:entry("error-detail", "Nothing to update")
+    )
+  )) )
+};
+
+declare function ch:validate-activity(
+  $caseid as xs:string?,
+  $phaseid as xs:string?,
+  $activityid as xs:string?,     (: should always be supplied - new activity will supply new id :)
+  $new-activity as xs:boolean    (: is this activity new? :)
+) as map:map {
+  map:new((
+    map:entry("caseId", $caseid),
+    map:entry("phaseId", $phaseid),
+    map:entry("activityId", $activityid),
+    xdmp:log("in ch:validate-activity", "debug"),
+    (: supplied activityid ? :)
+    if (fn:empty($activityid))
+    then (
+      map:entry("status-code", 404),
+      map:entry("response-message", "Activity not found"),
+      map:entry("error-detail", "activityId parameter is required")
+    )
+    else
+      (: check if activity already exists : )
+      let $case := clib:get-case-document($caseid)
+      let $activity-exists := fn:exists($case/c:case/c:phases/c:phase/c:activities/c:activity[@id=$activityid]) :)
+      let $activity-exists :=
+        xdmp:estimate(
+          cts:search(
+            fn:collection($const:case-collection),
+            cts:element-attribute-range-query(
+              xs:QName("c:activity"), xs:QName("id"), "=", $activityid) )
+        )
+      return
+        if ($activity-exists)
+        then
+          if ($new-activity)
+          then (
+            map:entry("status-code", 400),
+            map:entry("response-message", "Invalid ID supplied"),
+            map:entry("error-detail", fn:concat("activityId ", $activityid, " exists"))
+          )
+          else (
+            map:entry("status-code", 200),
+            map:entry("response-message", "OK")
+          )
+        else (: activity doesn't exist :)
+          if ($new-activity)
+          then (
+            map:entry("status-code", 200),
+            map:entry("response-message", "OK")
+          )
+          else (
+            map:entry("status-code", 400),
+            map:entry("response-message", "Invalid ID supplied"),
+            map:entry("error-detail", fn:concat("caseId ", $caseid, " not found"))
+          )
+  ))
+};
+
+declare function ch:validation(
+  $action-name as xs:string,
+  $params as map:map,
+  $input-data as element()?
+) as map:map {
+  (:
+   : 3 functions ?
+   : - validate case
+   : - validate activity
+   : - validate data
+   : return ids
+   :)
+  let $action := $const:validation/c:action[@name = $action-name]
+  let $_ := xdmp:log(fn:concat("validation action name:", $action-name, " action:", xdmp:quote($action)) , "debug" )
+  let $new-case :=
+    if (fn:exists($action/c:case/c:case-exists))
+    then
+      if ("true" = xs:string($action/c:case/c:case-exists))
+      then fn:false()
+      else fn:true()
+    else fn:false()
+  let $input-expected :=
+    if ("true" = xs:string($action/c:data/c:data-expected))
+    then fn:true()
+    else fn:false()
+  let $caseid :=
+    if (map:contains($params, "caseId"))
+    then map:get($params, "caseId")
+    else
+      if ($new-case)
+      then clib:get-new-id($input-data)
+      else ()
+
+  let $validation-map :=
+    if ($caseid)
+    then ch:validate($caseid, $new-case, fn:exists($input-data), $input-expected)
+    else ch:validate-data(fn:exists($input-data), $input-expected)
+  return (: validation for caseactivity :)
+    if ( (200 = map:get($validation-map, "status-code")) and (fn:exists($action/c:activity)))
+    then
+      let $new-activity :=
+        if ("true" = xs:string($action/c:activity/c:activity-exists))
+        then fn:false()
+        else fn:true()
+      let $phaseid :=
+        if (map:contains($params, "phaseId"))
+        then map:get($params, "phaseId")
+        else
+          if ($new-activity)
+          then clib:get-new-id(())
+          else ()
+      let $activityid :=
+        if (map:contains($params, "activityId"))
+        then map:get($params, "activityId")
+        else
+          if ($new-activity)
+          then clib:get-new-id($input-data)
+          else ()
+        let $validation-map := ch:validate-activity($caseid, $phaseid, $activityid, $new-activity)
+      return $validation-map
+    else
+      $validation-map
 };
 
 declare function ch:make-rest-response($output as map:map, $context as map:map, $preftype as xs:string) {
@@ -87,9 +231,9 @@ declare function ch:make-rest-response($output as map:map, $context as map:map, 
 (:
  : Create a new process and activate it.
  :)
-declare function ch:case-create($case-template-name as xs:string, $data as element(c:case), $permissions as xs:string*, $parent as xs:string?) as xs:string {
-  let $id := clib:get-new-case-id($data)
+declare function ch:case-create($id, $case-template-name as xs:string, $data as element(c:case), $permissions as xs:string*, $parent as xs:string?) as xs:string {
   let $uri := fn:concat($const:case-dir, $case-template-name, "/", $id, ".xml")
+  (: need to ensure that the id is added as an attribute :)
   let $_ := xdmp:log(fn:concat("creating case for id:", $id, ", uri:", $uri), "debug")
   let $_ := clib:create-case-document($uri, $data, $permissions)
   return $id
@@ -173,10 +317,9 @@ declare function ch:case-update($case-id as xs:string, $data as element(c:case),
  : Returns true is locked, or if read succeeds without a need for a lock (i.e. lock wasn't requested)
  :)
 declare function ch:case-get($case-id as xs:string, $lock-for-update as xs:boolean?) as element(c:case)? {
+  (: TODO - REMOVE! deprecated by clib:get-case-document :)
   (:  let $_secure := xdmp:security-assert($cdefs:privCaseUser, "execute") :)
-  let $collection := "http://marklogic.com/casemanagement/cases"
-
-  let $case := fn:collection($collection)/c:case[@id = $case-id][1] (: sanity check :)
+  let $case := clib:get-case-document($case-id)
   return
     if ($case)
     then $case
@@ -184,7 +327,7 @@ declare function ch:case-get($case-id as xs:string, $lock-for-update as xs:boole
       let $dir := "/casemanagement/cases/"
       let $uri := clib:get-case-document-uri($case-id)
       return cts:search(
-        fn:collection($collection),
+        fn:collection($const:case-collection),
         (: cts:and-query(( :)
         (:  cts:directory-query($dir, "infinity"), :)
         cts:document-query($uri)
@@ -225,3 +368,48 @@ declare function ch:case-close($case-id as xs:string,$updateTag as xs:string,$da
       return fn:true()
     return fn:false()
 }; :)
+
+
+declare function ch:caseactivity-create(
+  $case-id as xs:string,
+  $phase-id as xs:string,
+  $activity-id as xs:string,
+  $activity as element(c:activity)
+) as xs:string {
+  let $_log := xdmp:log(fn:concat("caseactivity-create called on case ", $case-id))
+  let $case := clib:get-case-document($case-id)
+  (: TODO - check whether to insert the activity id too :)
+  let $_insert :=
+    if ($case/c:case/c:phases/c:phase[@id=$phase-id])
+    then (
+      xdmp:log(fn:concat("update phase ", $phase-id, " with activity ", $activity-id)),
+      xdmp:node-insert-child(
+        $case/c:case/c:phases/c:phase[@id=$phase-id]/c:activities,
+        $activity)
+    )
+    else (
+      xdmp:log(fn:concat("new phase ", $phase-id, " with activity ", $activity-id)),
+      xdmp:node-insert-child(
+        $case/c:case/c:phases,
+        element c:phase {
+          attribute id { $phase-id },
+          element c:activities {
+            $activity }
+        } )
+    )
+  return $activity-id
+};
+
+declare function ch:caseactivity-update(
+  $activity-id as xs:string,
+  $activity as element(c:activity)
+) as xs:string {
+  let $_log := xdmp:log(fn:concat("caseactivity-update called on activity ", $activity-id))
+  let $case := clib:get-case-document-from-activity($activity-id)
+  let $_update :=
+      xdmp:node-replace(
+        $case/c:case/c:phases/c:phase/c:activities/c:activity[@id=$activity-id],
+        $activity)
+  return $activity-id
+};
+

@@ -1,11 +1,11 @@
 xquery version "1.0-ml";
 
 (:
- : case.xqy - Create a new, or modify an existing, MarkLogic Case instance document
+ : caseactivity.xqy - Create a new, or modify an existing activity within a MarkLogic Case instance document
  : API spec: https://app.swaggerhub.com/apis/eouthwaite/case-management-api/1.0.1
  :)
 
-module namespace ext = "http://marklogic.com/rest-api/resource/case";
+module namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
 
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
@@ -25,11 +25,11 @@ declare namespace rapi = "http://marklogic.com/rest-api";
  :)
 
 (:
- : Fetch a case by its UUID
- : ?rs:caseid = the string id returned from PUT /resource/case or ch:case-create
+ : Fetch a caseactivity by its UUID
+ : ?rs:caseid = the string id returned from PUT /resource/caseactivity or ch:caseactivity-create
  :)
 declare
-%roxy:params("caseId=xs:string")
+%roxy:params("activityId=xs:string")
 function ext:get(
   $context as map:map,
   $params  as map:map
@@ -40,17 +40,20 @@ function ext:get(
   let $_ := xdmp:log($params)
   let $_ := xdmp:log($context)
 
-  let $caseid := map:get($params,"caseId")
-  let $validate := ch:validate(map:get($params,"caseId"), fn:false(), fn:false(), fn:false())
+  let $_ := xdmp:log(fn:concat("about to call validation action name:", "get activity", " params:", xdmp:quote($params)) (:, "debug":) )
+
+  let $validate := ch:validation("get activity", $params, ())
+  let $_ := xdmp:log(fn:concat("validate:", xdmp:quote($validate)), "debug")
+
   let $status-code := map:get($validate,"status-code")
   let $response-message := map:get($validate,"response-message")
   return
     if (200 = $status-code)
     then
-      let $document := (: TODO - permissions: what if clib:get-case-document fails... :)
+      let $document := (: TODO - what if clib:get-activity-document fails... :)
         <ext:readResponse>
           <ext:outcome>SUCCESS</ext:outcome>
-          {clib:get-case-document($caseid)}
+          {clib:get-activity-document(map:get($validate,"activityId"))}
         </ext:readResponse>
       return (
         map:put($context, "output-types", $preftype),
@@ -70,12 +73,12 @@ function ext:get(
 };
 
 (:
- : Create a new case document instance
+ : Create a new caseactivity document instance
  :)
 
 (:
  : Post Endpoint
- :       - create a new case instance, case instance XML can be sent from the client
+ :       - create a new caseactivity instance; XML can be sent from the client
  :       - generate UID for case.
  :       - TODO permissions - see user authorisation
  :       - TODO maintain audit-trail
@@ -84,40 +87,46 @@ function ext:get(
 
 declare
 %rapi:transaction-mode("update")
-%roxy:params("template=xs:string", "permissions=xs:string")
+%roxy:params("caseId=xs:string", "phaseId=xs:string")
 function ext:post(
     $context as map:map,
     $params  as map:map,
     $input   as document-node()*
 ) as document-node()? {
 
-  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else
-    if ("text/plain" = map:get($context,"accept-types")) then "text/plain" else "application/json"
+  let $preftype := if ("application/xml" = map:get($context, "accept-types")) then "application/xml" else
+    if ("text/plain" = map:get($context, "accept-types")) then "text/plain" else "application/json"
 
   let $_ := xdmp:log(fn:concat("context:", xdmp:quote($context)), "debug")
   let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
   let $_ := xdmp:log(fn:concat("input:", xdmp:quote($input)), "debug")
 
-  (: TODO get permissions from params :)
-  let $permissions := map:get($params, "permissions")
-  (: TODO make case template name mandatory :)
-  let $template-name := (map:get($params, "template"), "notemplate")[1]
-  let $case-doc := $input/element(c:case)
-  let $caseid := clib:get-new-id($case-doc)
+  let $activity-doc := $input/element(c:activity)
+  (:
+  let $caseid := map:get($params, "caseId")
+  let $phaseid := map:get($params, "phaseId")
+  let $activityid := clib:get-new-id($activity-doc)
+:)
 
-  let $validate := ch:validate($caseid, fn:true(), fn:exists($case-doc), fn:true())
+  (:  let $validate := ch:validate($caseid, fn:false(), $activityid, fn:true(), fn:exists($activity-doc), fn:true()) ( : TODO - check whether phase is new too? :)
+  let $validate := ch:validation("new activity", $params, $activity-doc)
   let $status-code := map:get($validate,"status-code")
   let $response-message := map:get($validate,"response-message")
   return
     if (200 = $status-code)
     then
-      let $res := ch:case-create($caseid, $template-name, $case-doc, $permissions, ()) (: Blank template and parent for now :)
+      let $res := ch:caseactivity-create(
+        map:get($validate, "caseId"),
+        map:get($validate, "phaseId"),
+        map:get($validate, "activityId"),
+        $activity-doc)
+      (: TODO: what to do if this fails :)
       return (
         map:put($context, "output-types", $preftype),
         xdmp:set-response-code($status-code, $response-message),
         document {
           if ("application/xml" = $preftype) then
-            <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:caseId>{$res}</ext:caseId></ext:createResponse>
+            <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:caseactivityId>{$res}</ext:caseactivityId></ext:createResponse>
           else if ("text/plain" = $preftype) then
             $res
           else
@@ -128,17 +137,17 @@ function ext:post(
               json:transform-to-json($res, $config)
         }
       )
-    else fn:error((),"RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($validate,"error-detail")))
+    else fn:error((),"RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($validate, "error-detail")))
 };
 
 (:
- : PUT - update a case instance, potentially changing data and status
+ : PUT - update a case activity instance, potentially changing data and status
  :
  : currently just accepts XML to update whole document.
  :
  :)
 declare
-%roxy:params("caseId=xs:string")
+%roxy:params("activityId=xs:string")
 function ext:put(
    $context as map:map,
    $params  as map:map,
@@ -146,30 +155,21 @@ function ext:put(
 ) as document-node()? {
 
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $_ := xdmp:log(fn:concat("context:", xdmp:quote($context)), "debug")
+  let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
+  let $_ := xdmp:log(fn:concat("input:", xdmp:quote($input)), "debug")
 
-  let $_ := xdmp:log($input)
-  let $caseid := map:get($params, "caseId")
-  let $_ := xdmp:log(fn:concat("REST EXT caseId: ", $caseid), "debug")
-  (: TODO get permissions from params :)
-  let $permissions := map:get($params, "permissions")
-  let $case-doc := $input/element(c:case)
+  let $activity-doc := $input/element(c:activity)
+  let $validate := ch:validation("update activity", $params, $activity-doc)
 
-  let $validate := ch:validate($caseid, fn:false(), fn:exists($case-doc), fn:true())
   let $status-code := map:get($validate,"status-code")
   let $response-message := map:get($validate,"response-message")
 
   let $out :=
     if (200 = $status-code)
     then
-      if (fn:true() = ch:case-update($caseid, $case-doc, $permissions, ()))
-      then <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
-      else
-        let $validate := map:new((
-          map:entry("status-code", 405),
-          map:entry("response-message", "Validation exception"),
-          map:entry("error-detail", "Case could not be updated")
-        ))
-        return <ext:updateResponse><ext:outcome>FAILURE</ext:outcome></ext:updateResponse>
+      let $res := ch:caseactivity-update(map:get($validate,"activityId"), $activity-doc)
+      return <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
     else ()
   return
     if (200 = $status-code)
@@ -189,4 +189,5 @@ function ext:put(
     )
     else fn:error((),"RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($validate,"error-detail")))
 };
+
 
