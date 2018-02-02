@@ -143,8 +143,116 @@ let $uri := fn:concat(
 let $response := xdmp:http-put($uri, $const:xml-options)
 
 return (
-  test:assert-equal('405', xs:string($response[1]/http:code)),
-  test:assert-equal('Invalid input', xs:string($response[1]/http:message)),
+  test:assert-equal('405',               xs:string($response[1]/http:code)),
+  test:assert-equal('Invalid input',     xs:string($response[1]/http:message)),
   test:assert-equal('Nothing to update', xs:string($response[2]/error:error-response/error:message))
+);
+
+(: 21 to 26 INSERT CASE ACTIVITY :)
+
+(: 21 - start transaction4 :)
+import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+cmrt:create-transaction ("/test/transaction4.xml");
+
+(: 22 - new activity 1 :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace wfc = "http://marklogic.com/workflow/case";
+declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
+declare namespace http = "xdmp:http";
+
+let $caseId := cmrt:get-case-id("/test/case2.xml")
+let $txid := cmrt:get-transaction-id("/test/transaction4.xml")
+let $activity :=
+  <wfc:activity id="phase2activity1" template-id="atemplate1">
+    <wfc:data>
+      <wfc:name>Contact Customer</wfc:name>
+      <wfc:public-name>Contact Customer</wfc:public-name>
+    </wfc:data>
+    <wfc:status>NotActive</wfc:status>
+    <wfc:description>string</wfc:description>
+    <wfc:notes>string</wfc:notes>
+  </wfc:activity>
+let $uri := fn:concat(
+  "http://", $const:RESTHOST, ':', $const:RESTPORT,
+  "/v1/resources/caseactivity?rs:caseId=", $caseId, "&amp;rs:phaseId=phase2&amp;txid=", $txid)
+let $response := xdmp:http-post($uri, $const:xml-options, $activity)
+return (
+  test:assert-equal('200',             xs:string($response[1]/http:code)),
+  test:assert-equal('OK',              xs:string($response[1]/http:message)),
+  test:assert-equal('SUCCESS',         xs:string($response[2]/ext:createResponse/ext:outcome)),
+  test:assert-equal('phase2activity1', xs:string($response[2]/ext:createResponse/ext:caseactivityId))
+);
+
+(: 23 - GET read case2 (not updated) :)
+import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace wfc = "http://marklogic.com/workflow/case";
+declare namespace ext = "http://marklogic.com/rest-api/resource/case";
+declare namespace http = "xdmp:http";
+
+let $caseId := cmrt:get-case-id("/test/case2.xml")
+let $response := cmrt:get-case($caseId, $const:xml-options)
+return (
+  test:assert-equal('200', xs:string($response[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($response[2]/ext:readResponse/ext:outcome)),
+  test:assert-exists($response[2]/ext:readResponse/wfc:case),
+  test:assert-not-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="phase2"]/wfc:activities/wfc:activity[@id="phase2activity1"])
+);
+
+(: 24 - new activity 2 :)
+import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace wfc = "http://marklogic.com/workflow/case";
+declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
+declare namespace http = "xdmp:http";
+
+let $caseId := cmrt:get-case-id("/test/case2.xml")
+let $txid := cmrt:get-transaction-id("/test/transaction4.xml")
+let $activity :=
+  <wfc:activity id="phase2activity2" template-id="atemplate1">
+    <wfc:data>
+      <wfc:name>Contact Customer Again</wfc:name>
+      <wfc:public-name>Contact Customer Again</wfc:public-name>
+    </wfc:data>
+    <wfc:status>NotActive</wfc:status>
+    <wfc:description>string</wfc:description>
+    <wfc:notes>string</wfc:notes>
+  </wfc:activity>
+let $uri := fn:concat(
+  "http://", $const:RESTHOST, ':', $const:RESTPORT,
+  "/v1/resources/caseactivity?rs:caseId=", $caseId, "&amp;rs:phaseId=phase2&amp;txid=", $txid)
+let $response := xdmp:http-post($uri, $const:xml-options, $activity)
+return (
+  test:assert-equal('200',       xs:string($response[1]/http:code)),
+  test:assert-equal('OK',        xs:string($response[1]/http:message)),
+  test:assert-equal('SUCCESS',   xs:string($response[2]/ext:createResponse/ext:outcome)),
+  test:assert-equal('phase2activity2', xs:string($response[2]/ext:createResponse/ext:caseactivityId))
+);
+
+(: 25 - commit transaction4 :)
+import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+let $txid := cmrt:get-transaction-id("/test/transaction4.xml")
+return cmrt:commit-transaction ($txid);
+
+(: 26 - GET read case2 (updated) :)
+import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace wfc = "http://marklogic.com/workflow/case";
+declare namespace ext = "http://marklogic.com/rest-api/resource/case";
+declare namespace http = "xdmp:http";
+
+let $caseId := cmrt:get-case-id("/test/case2.xml")
+let $response := cmrt:get-case($caseId, $const:xml-options)
+return (
+  test:assert-equal('200', xs:string($response[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($response[2]/ext:readResponse/ext:outcome)),
+  test:assert-exists($response[2]/ext:readResponse/wfc:case),
+  test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="phase2"]/wfc:activities/wfc:activity[@id="phase2activity1"]),
+  test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="phase2"]/wfc:activities/wfc:activity[@id="phase2activity2"])
 );
 
