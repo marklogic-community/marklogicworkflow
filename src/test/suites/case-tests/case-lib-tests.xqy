@@ -21,4 +21,16 @@ return (
   test:assert-meets-minimum-threshold(58, fn:string-length($caseid))
 );
 
+import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace sec="http://marklogic.com/xdmp/security";
+let $strings:= (
+  "case-user:read",
+  "case-user:update"
+)
+let $role := xdmp:role("case-user")
+let $perms := clib:decode-permissions(($strings))
+return (
+  test:assert-equal(2, fn:count($perms[/sec:role-id=$role]))
+);
 

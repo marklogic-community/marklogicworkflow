@@ -40,8 +40,7 @@ function ext:get(
   let $_ := xdmp:log($params)
   let $_ := xdmp:log($context)
 
-  let $caseid := map:get($params,"caseId")
-  let $validate := ch:validate(map:get($params,"caseId"), fn:false(), fn:false(), fn:false())
+  let $validate := ch:validation("get case", $params, ())
   let $status-code := map:get($validate,"status-code")
   let $response-message := map:get($validate,"response-message")
   return
@@ -50,7 +49,7 @@ function ext:get(
       let $document := (: TODO - permissions: what if clib:get-case-document fails... :)
         <ext:readResponse>
           <ext:outcome>SUCCESS</ext:outcome>
-          {clib:get-case-document($caseid)}
+          {clib:get-case-document( map:get($validate,"caseId") )}
         </ext:readResponse>
       return (
         map:put($context, "output-types", $preftype),
@@ -77,14 +76,13 @@ function ext:get(
  : Post Endpoint
  :       - create a new case instance, case instance XML can be sent from the client
  :       - generate UID for case.
- :       - TODO permissions - see user authorisation
  :       - TODO maintain audit-trail
  :       - TODO Error Handling!
  :)
 
 declare
 %rapi:transaction-mode("update")
-%roxy:params("template=xs:string", "permissions=xs:string")
+%roxy:params("template=xs:string", "permission=xs:string")
 function ext:post(
     $context as map:map,
     $params  as map:map,
@@ -98,20 +96,19 @@ function ext:post(
   let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
   let $_ := xdmp:log(fn:concat("input:", xdmp:quote($input)), "debug")
 
-  (: TODO get permissions from params :)
-  let $permissions := map:get($params, "permissions")
+  let $permissions := map:get($params, "permission")
   (: TODO make case template name mandatory :)
   let $template-name := (map:get($params, "template"), "notemplate")[1]
   let $case-doc := $input/element(c:case)
-  let $caseid := clib:get-new-id($case-doc)
 
-  let $validate := ch:validate($caseid, fn:true(), fn:exists($case-doc), fn:true())
+  let $validate := ch:validation("new case", $params, $case-doc)
   let $status-code := map:get($validate,"status-code")
   let $response-message := map:get($validate,"response-message")
   return
     if (200 = $status-code)
     then
-      let $res := ch:case-create($caseid, $template-name, $case-doc, $permissions, ()) (: Blank template and parent for now :)
+      let $caseid := map:get($validate, "caseId")
+      let $res := ch:case-create($caseid, $template-name, $case-doc, map:get($validate, "permissions"), ()) (: Blank template and parent for now :)
       return (
         map:put($context, "output-types", $preftype),
         xdmp:set-response-code($status-code, $response-message),
@@ -138,7 +135,7 @@ function ext:post(
  :
  :)
 declare
-%roxy:params("caseId=xs:string")
+%roxy:params("caseId=xs:string", "permission=xs:string")
 function ext:put(
    $context as map:map,
    $params  as map:map,
@@ -150,18 +147,16 @@ function ext:put(
   let $_ := xdmp:log($input)
   let $caseid := map:get($params, "caseId")
   let $_ := xdmp:log(fn:concat("REST EXT caseId: ", $caseid), "debug")
-  (: TODO get permissions from params :)
-  let $permissions := map:get($params, "permissions")
   let $case-doc := $input/element(c:case)
 
-  let $validate := ch:validate($caseid, fn:false(), fn:exists($case-doc), fn:true())
+  let $validate := ch:validation("update case", $params, $case-doc)
   let $status-code := map:get($validate,"status-code")
   let $response-message := map:get($validate,"response-message")
 
   let $out :=
     if (200 = $status-code)
     then
-      if (fn:true() = ch:case-update($caseid, $case-doc, $permissions, ()))
+      if (fn:true() = ch:case-update($caseid, $case-doc, map:get($validate, "permissions"), ()))
       then <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
       else
         let $validate := map:new((
@@ -169,7 +164,7 @@ function ext:put(
           map:entry("response-message", "Validation exception"),
           map:entry("error-detail", "Case could not be updated")
         ))
-        return <ext:updateResponse><ext:outcome>FAILURE</ext:outcome></ext:updateResponse>
+        return ()
     else ()
   return
     if (200 = $status-code)
