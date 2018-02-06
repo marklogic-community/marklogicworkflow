@@ -139,17 +139,33 @@ declare function ch:validate-activity(
   ))
 };
 
+declare function ch:validate-permissions($valid as map:map, $permissions-string as xs:string*) {
+  try {
+    let $_perms := map:put($valid, "permissions", clib:decode-permissions($permissions-string))
+    return $valid
+  }
+  catch ($exception) {
+    map:new((
+      map:entry("status-code", 405),
+      map:entry("response-message", "Invalid input"),
+      map:entry("error-detail", xs:string($exception/error:message))
+    ))
+  }
+};
+
 declare function ch:validation(
   $action-name as xs:string,
   $params as map:map,
   $input-data as element()?
 ) as map:map {
+  (: TODO - fix this: create single validation routine :)
   (:
-   : 3 functions ?
+   : 4 functions
    : - validate case
    : - validate activity
    : - validate data
-   : return ids
+   : - validate permissions
+   : return ids & permissions
    :)
   let $action := $const:validation/c:action[@name = $action-name]
   let $_ := xdmp:log(fn:concat("validation action name:", $action-name, " action:", xdmp:quote($action)) , "debug" )
@@ -173,7 +189,7 @@ declare function ch:validation(
       else ()
 
   let $validation-map :=
-    if ($caseid)
+    if (($caseid) or (fn:exists($action/c:case/c:case-exists)))
     then ch:validate($caseid, $new-case, fn:exists($input-data), $input-expected)
     else ch:validate-data(fn:exists($input-data), $input-expected)
   return (: validation for caseactivity :)
@@ -200,42 +216,22 @@ declare function ch:validation(
         let $validation-map := ch:validate-activity($caseid, $phaseid, $activityid, $new-activity)
       return $validation-map
     else
-      $validation-map
-};
-
-declare function ch:make-rest-response($output as map:map, $context as map:map, $preftype as xs:string) {
-  (: JUST GOOD RESPONSE ? :)
-  let $status-code := map:get($output,"status-code")
-  let $response-message := map:get($output,"response-message")
-  return
-    if (200 = $status-code)
-    then (
-      map:put($context, "output-types", $preftype),
-      xdmp:set-response-code($status-code, $response-message),
-      document {
-        if ("application/xml" = $preftype) then
-          map:get($output,"document")
-        else if ("text/plain" = $preftype) then
-          map:get($output,"text")
-        else
-          let $config := json:config("custom")
-          let $cx := map:put($config, "text-value", "label")
-          let $cx := map:put($config, "camel-case", fn:true())
-          return
-            json:transform-to-json(map:get($output,"document"), $config)
-      }
-    )
-    else fn:error((), "RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($output,"error-detail")))
+      if (
+        (200 = map:get($validation-map, "status-code"))
+          and (fn:exists($action/c:permissions/c:check-permissions))
+          and (map:contains($params, "permission")) )
+      then ch:validate-permissions($validation-map, map:get($params, "permission"))
+      else $validation-map
 };
 
 (:
  : Create a new process and activate it.
  :)
-declare function ch:case-create($id, $case-template-name as xs:string, $data as element(c:case), $permissions as xs:string*, $parent as xs:string?) as xs:string {
+declare function ch:case-create($id, $case-template-name as xs:string, $data as element(c:case), $permissions as element(sec:permission)*, $parent as xs:string?) as xs:string {
   let $uri := fn:concat($const:case-dir, $case-template-name, "/", $id, ".xml")
   (: need to ensure that the id is added as an attribute :)
   let $_ := xdmp:log(fn:concat("creating case for id:", $id, ", uri:", $uri), "debug")
-  let $_ := clib:create-case-document($uri, $data, $permissions)
+  let $_ := clib:create-case-document($id, $uri, $data, $permissions)
   return $id
 };
 (:
@@ -259,14 +255,9 @@ declare function ch:case-create($case-template-name as xs:string,$data as elemen
 };
 :)
 
-(:
-declare private function ch:audit-create($case-id as xs:string,$status as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as element(c:audit) {
-  <c:audit><c:by>{xdmp:get-current-user()}</c:by><c:when>{fn:current-dateTime()}</c:when>
-    <c:category>{$eventCategory}</c:category><c:status>{$status}</c:status>
-    <c:description>{$description}</c:description><c:detail>{$detail}</c:detail>
-  </c:audit>
-};
 
+
+(:
 declare private function ch:check-update-in-sequence($case as element(c:case),$updateTag as xs:string) as xs:boolean {
   $updateTag = $case/@c:update-tag
 };

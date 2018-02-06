@@ -17,6 +17,9 @@ declare variable $const:validation :=
       <data>
         <data-expected>true</data-expected>
       </data>
+      <permissions>
+        <check-permissions>true</check-permissions>
+      </permissions>
     </action>
     <action name="get case">
       <case>
@@ -30,6 +33,9 @@ declare variable $const:validation :=
       <data>
         <data-expected>true</data-expected>
       </data>
+      <permissions>
+        <check-permissions>true</check-permissions>
+      </permissions>
     </action>
     <action name="new activity">
       <case>
@@ -56,33 +62,4 @@ declare variable $const:validation :=
       </data>
     </action>
   </actions>;
-(:
-<actions xmlns="http://marklogic.com/casemanagement">
-  <action name="new case">
-    <case-exists>false</case-exists>
-    <data-expected>true</data-expected>
-  </action>
-  <action name="get case">
-    <case-exists>true</case-exists>
-  </action>
-  <action name="update case">
-    <case-exists>true</case-exists>
-    <data-expected>true</data-expected>
-  </action>
-  <action name="new activity">
-    <case-exists>true</case-exists>
-    <activity-exists>false</activity-exists>
-    <data-expected>true</data-expected>
-  </action>
-  <action name="get activity">
-    <case-exists>true</case-exists>
-    <activity-exists>true</activity-exists>
-  </action>
-  <action name="update activity">
-    <case-exists>true</case-exists>
-    <activity-exists>true</activity-exists>
-    <data-expected>true</data-expected>
-  </action>
-</actions>;
-:)
 
