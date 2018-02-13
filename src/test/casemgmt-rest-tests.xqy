@@ -7,6 +7,31 @@ declare namespace error = "http://marklogic.com/xdmp/error";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
+declare variable $user-one-options :=
+  <options xmlns="xdmp:http">
+    <authentication method="digest">
+      <username>test-case-user-one</username>
+      <password>test-case-user-one</password>
+    </authentication>
+    <headers>
+      <content-type>application/xml</content-type>
+      <accept>application/xml</accept>
+    </headers>
+  </options>;
+
+declare variable $user-two-options :=
+  <options xmlns="xdmp:http">
+    <authentication method="digest">
+      <username>test-case-user-two</username>
+      <password>test-case-user-two</password>
+    </authentication>
+    <headers>
+      <content-type>application/xml</content-type>
+      <accept>application/xml</accept>
+    </headers>
+  </options>;
+
+
 (: ID specific functions :)
 
 declare function cmrt:get-case-id ($cdocuri)
@@ -44,7 +69,7 @@ declare function cmrt:create-transaction ($tdocuri)
   let $txuri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/transactions")
-  let $response := xdmp:http-post($txuri, $const:xml-options)
+  let $response := xdmp:http-post($txuri, $user-one-options)
   let $tx := xs:string($response/http:headers/http:location)
   let $txid := fn:substring-after($tx, "/v1/transactions/")
   return (
@@ -64,7 +89,7 @@ declare function cmrt:commit-transaction ($txid)
   let $txuri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/transactions/", $txid, "?result=commit")
-  let $response := xdmp:http-post($txuri, $const:xml-options)
+  let $response := xdmp:http-post($txuri, $user-one-options)
   return (
     test:assert-equal('204', xs:string($response/http:code)),
     test:assert-equal('Committed', xs:string($response/http:message))
@@ -76,7 +101,7 @@ declare function cmrt:rollback-transaction ($txid)
   let $txuri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/transactions/", $txid, "?result=rollback")
-  let $response := xdmp:http-post($txuri, $const:xml-options)
+  let $response := xdmp:http-post($txuri, $user-one-options)
   return (
     test:assert-equal('204', xs:string($response/http:code)),
     test:assert-equal('Rolled Back', xs:string($response/http:message))

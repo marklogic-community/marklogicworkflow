@@ -37,8 +37,9 @@ function ext:get(
 {
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
-  let $_ := xdmp:log($params)
-  let $_ := xdmp:log($context)
+  let $_ := xdmp:log("REST EXT GET:", "debug")
+  let $_ := xdmp:log(fn:concat("context:", xdmp:quote($context)), "debug")
+  let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
 
   let $validate := ch:validation("get case", $params, ())
   let $status-code := map:get($validate,"status-code")
@@ -92,6 +93,7 @@ function ext:post(
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else
     if ("text/plain" = map:get($context,"accept-types")) then "text/plain" else "application/json"
 
+  let $_ := xdmp:log("REST EXT POST:", "debug")
   let $_ := xdmp:log(fn:concat("context:", xdmp:quote($context)), "debug")
   let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
   let $_ := xdmp:log(fn:concat("input:", xdmp:quote($input)), "debug")
@@ -144,9 +146,10 @@ function ext:put(
 
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
-  let $_ := xdmp:log($input)
-  let $caseid := map:get($params, "caseId")
-  let $_ := xdmp:log(fn:concat("REST EXT caseId: ", $caseid), "debug")
+  let $_ := xdmp:log("REST EXT PUT:", "debug")
+  let $_ := xdmp:log(fn:concat("context:", xdmp:quote($context)), "debug")
+  let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
+  let $_ := xdmp:log(fn:concat("input:", xdmp:quote($input)), "debug")
   let $case-doc := $input/element(c:case)
 
   let $validate := ch:validation("update case", $params, $case-doc)
@@ -156,7 +159,7 @@ function ext:put(
   let $out :=
     if (200 = $status-code)
     then
-      if (fn:true() = ch:case-update($caseid, $case-doc, map:get($validate, "permissions"), ()))
+      if (fn:true() = ch:case-update(map:get($validate, "caseId"), $case-doc, map:get($validate, "permissions"), ()))
       then <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>
       else
         let $validate := map:new((

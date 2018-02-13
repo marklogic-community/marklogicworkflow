@@ -29,7 +29,7 @@ let $strings:= (
   "case-user:update"
 )
 let $role := xdmp:role("case-user")
-let $perms := clib:decode-permissions(($strings))
+let $perms := clib:decode-permissions(($strings), "true")
 return (
   test:assert-equal(2, fn:count($perms[/sec:role-id=$role]))
 );

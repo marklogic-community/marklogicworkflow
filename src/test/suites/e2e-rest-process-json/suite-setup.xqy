@@ -5,7 +5,7 @@ import module namespace deploy  = "http://marklogic.com/roxy/deploy-rest-resourc
 import module namespace uh = "http://marklogic.com/roxy/test-models/workflow-users-test-helper" at "/test/workflow-users-test-helper.xqy";
 
 let $_modules-import := deploy:deploy()
-let $_lock-fail-user := uh:create-user("test-workflow-user", "test-workflow-user", "test-workflow-user",
+let $_lock-fail-user := uh:create-user("test-workflow-user", "test-workflow-user",
   ("workflow-role-unit-test", "rest-reader", "rest-writer") )
 
 return (
