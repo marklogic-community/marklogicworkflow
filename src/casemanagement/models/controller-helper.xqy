@@ -139,9 +139,9 @@ declare function ch:validate-activity(
   ))
 };
 
-declare function ch:validate-permissions($valid as map:map, $permissions-string as xs:string*) {
+declare function ch:validate-permissions($valid as map:map, $permissions-string as xs:string*, $new-permissions as xs:string) {
   try {
-    let $_perms := map:put($valid, "permissions", clib:decode-permissions($permissions-string))
+    let $_perms := map:put($valid, "permissions", clib:decode-permissions($permissions-string, $new-permissions))
     return $valid
   }
   catch ($exception) {
@@ -155,7 +155,7 @@ declare function ch:validate-permissions($valid as map:map, $permissions-string 
 
 declare function ch:validation(
   $action-name as xs:string,
-  $params as map:map,
+  $params as map:map?,
   $input-data as element()?
 ) as map:map {
   (: TODO - fix this: create single validation routine :)
@@ -214,14 +214,30 @@ declare function ch:validation(
           then clib:get-new-id($input-data)
           else ()
         let $validation-map := ch:validate-activity($caseid, $phaseid, $activityid, $new-activity)
-      return $validation-map
+      return
+        if (map:contains($validation-map, "status-code"))
+        then $validation-map
+        else
+          map:new((
+            map:entry("status-code", 500),
+            map:entry("response-message", "Internal error"),
+            map:entry("error-detail", "Unable to process caseactivity")
+          ))
+
     else
       if (
         (200 = map:get($validation-map, "status-code"))
-          and (fn:exists($action/c:permissions/c:check-permissions))
-          and (map:contains($params, "permission")) )
-      then ch:validate-permissions($validation-map, map:get($params, "permission"))
-      else $validation-map
+          and (fn:exists($action/c:permissions/c:new-permissions)))
+      then ch:validate-permissions($validation-map, map:get($params, "permission"), xs:string($action/c:permissions/c:new-permissions))
+      else
+        if (map:contains($validation-map, "status-code"))
+        then $validation-map
+        else
+          map:new((
+            map:entry("status-code", 500),
+            map:entry("response-message", "Internal error"),
+            map:entry("error-detail", "Unable to process")
+          ))
 };
 
 (:
@@ -306,10 +322,10 @@ declare function ch:case-update($case-id as xs:string, $data as element(c:case),
 (:
  : Default is to not lock for update (read only)
  : Returns true is locked, or if read succeeds without a need for a lock (i.e. lock wasn't requested)
- :)
+ : )
 declare function ch:case-get($case-id as xs:string, $lock-for-update as xs:boolean?) as element(c:case)? {
-  (: TODO - REMOVE! deprecated by clib:get-case-document :)
-  (:  let $_secure := xdmp:security-assert($cdefs:privCaseUser, "execute") :)
+  ( : TODO - REMOVE! deprecated by clib:get-case-document : )
+  ( :  let $_secure := xdmp:security-assert($cdefs:privCaseUser, "execute") : )
   let $case := clib:get-case-document($case-id)
   return
     if ($case)
@@ -319,14 +335,14 @@ declare function ch:case-get($case-id as xs:string, $lock-for-update as xs:boole
       let $uri := clib:get-case-document-uri($case-id)
       return cts:search(
         fn:collection($const:case-collection),
-        (: cts:and-query(( :)
-        (:  cts:directory-query($dir, "infinity"), :)
+        ( : cts:and-query(( : )
+        ( :  cts:directory-query($dir, "infinity"), : )
         cts:document-query($uri)
-        (: )) :)
+        ( : )) : )
       )/c:case[1]
-  (: TODO add audit entry item :)
-  (: TODO add locked audit entry item too :)
-};
+  ( : TODO add audit entry item : )
+  ( : TODO add locked audit entry item too : )
+}; :)
 
 (:
  : Succeeds and returns true if case successfully updated and closed
@@ -376,7 +392,11 @@ declare function ch:caseactivity-create(
       xdmp:log(fn:concat("update phase ", $phase-id, " with activity ", $activity-id)),
       xdmp:node-insert-child(
         $case/c:case/c:phases/c:phase[@id=$phase-id]/c:activities,
-        $activity)
+        $activity),
+      xdmp:node-insert-child(
+        $case/c:case/c:audit-trail,
+        clib:audit-create("Open", "Lifecycle", fn:concat("Case Activity ", $activity-id, " Inserted"))
+      )
     )
     else (
       xdmp:log(fn:concat("new phase ", $phase-id, " with activity ", $activity-id)),
@@ -386,21 +406,32 @@ declare function ch:caseactivity-create(
           attribute id { $phase-id },
           element c:activities {
             $activity }
-        } )
+        } ),
+      xdmp:node-insert-child(
+        $case/c:case/c:audit-trail,
+        clib:audit-create("Open", "Lifecycle", fn:concat("Case Activity ", $activity-id, " Inserted"))
+      )
     )
   return $activity-id
 };
 
 declare function ch:caseactivity-update(
   $activity-id as xs:string,
-  $activity as element(c:activity)
+  $updates as element(c:activity)
 ) as xs:string {
   let $_log := xdmp:log(fn:concat("caseactivity-update called on activity ", $activity-id))
   let $case := clib:get-case-document-from-activity($activity-id)
-  let $_update :=
+  let $current-activity := $case/c:case/c:phases/c:phase/c:activities/c:activity[@id=$activity-id]
+  let $updated-activity := clib:update-activity($current-activity, $updates)
+  let $_update := (
       xdmp:node-replace(
-        $case/c:case/c:phases/c:phase/c:activities/c:activity[@id=$activity-id],
-        $activity)
+        $current-activity,
+        $updated-activity),
+      xdmp:node-insert-child(
+        $case/c:case/c:audit-trail,
+        clib:audit-create("Open", "Lifecycle", fn:concat("Case Activity ", $activity-id, " Updated"))
+      )
+  )
   return $activity-id
 };
 

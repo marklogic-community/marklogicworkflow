@@ -18,7 +18,7 @@ declare variable $const:validation :=
         <data-expected>true</data-expected>
       </data>
       <permissions>
-        <check-permissions>true</check-permissions>
+        <new-permissions>true</new-permissions>
       </permissions>
     </action>
     <action name="get case">
@@ -34,7 +34,7 @@ declare variable $const:validation :=
         <data-expected>true</data-expected>
       </data>
       <permissions>
-        <check-permissions>true</check-permissions>
+        <new-permissions>false</new-permissions>
       </permissions>
     </action>
     <action name="new activity">

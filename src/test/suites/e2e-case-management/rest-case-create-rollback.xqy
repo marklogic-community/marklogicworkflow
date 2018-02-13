@@ -13,7 +13,7 @@ declare namespace http = "xdmp:http";
 
 let $filename := "case-post-payload.xml"
 let $txid := cmrt:get-transaction-id("/test/transaction1.xml")
-let $process := cmrt:create-case ($filename, $const:xml-options, $txid)
+let $process := cmrt:create-case ($filename, $cmrt:user-one-options, $txid)
 let $caseId := xs:string($process[2]/ext:createResponse/ext:caseId)
 return (
   test:assert-equal('200', xs:string($process[1]/http:code)),
@@ -36,7 +36,7 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
 let $caseId := cmrt:get-case-id("/test/case1.xml")
-return cmrt:get-case-fail($caseId, $const:xml-options);
+return cmrt:get-case-fail($caseId, $cmrt:user-one-options);
 
 (: 05 - rollback transaction1 :)
 import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
@@ -57,4 +57,4 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
 let $caseId := cmrt:get-case-id("/test/case1.xml")
-return cmrt:get-case-fail($caseId, $const:xml-options);
+return cmrt:get-case-fail($caseId, $cmrt:user-one-options);

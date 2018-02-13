@@ -35,6 +35,17 @@ declare function clib:get-activity-document($activity-id as xs:string){
   return $case/c:case/c:phases/c:phase/c:activities/c:activity[@id=$activity-id]
 };
 
+declare function clib:insert-case-document($uri as xs:string, $doc as element(), $permissions as element(sec:permission)*) as xs:boolean {
+  let $_ := xdmp:document-insert($uri, $doc,
+    $permissions,
+    (
+      xdmp:default-collections(),
+      $const:case-collection
+    )
+  )
+  return fn:true()
+};
+
 declare function clib:create-case-document($id, $uri as xs:string, $doc as element(), $permissions as element(sec:permission)*) as xs:boolean {
   let $audit := <c:audit-trail>{clib:audit-create("Created", "Lifecycle", "Case Created")}</c:audit-trail>
   let $case-doc :=
@@ -46,21 +57,107 @@ declare function clib:create-case-document($id, $uri as xs:string, $doc as eleme
         $audit
       )
     }
-  let $_ := xdmp:document-insert($uri, $case-doc,
-    $permissions,
-    (
-      xdmp:default-collections(),
-      $const:case-collection
-    )
-  )
-  return fn:true()
+  return clib:insert-case-document($uri, $case-doc, $permissions)
 };
 
-declare function clib:update-case-document($case-id as xs:string, $doc as element(), $permissions as element(sec:permission)*) as xs:boolean {
-  (: need to check permissions... :)
-  let $uri := clib:get-case-document-uri($case-id)
-  return clib:create-case-document($case-id, $uri, $doc, $permissions)
+declare function clib:update-activity(
+  $original as element(c:activity),
+  $update as element(c:activity)
+) as element(c:activity)
+{
+  ( xdmp:log(fn:concat("original:", xdmp:quote($original)), "debug"), xdmp:log(fn:concat("update:", xdmp:quote($update)), "debug"),
+  element c:activity { (
+    for $attribute in ($original/@*)
+    return attribute {name($attribute)} {$attribute},
+
+    let $names := for $t_attr in ($original/@*) return name($t_attr)
+    for $attribute in ($update/@*[not(name(.) = ($names))])
+    return attribute {name($attribute)} {$attribute},
+
+    for $section in $original/element()
+    return typeswitch($section)
+      case element(c:data) return
+        if (fn:exists($update/c:data/*))
+        then $update/c:data
+        else $section
+      case element(c:status) return
+        if (xs:string($section) != xs:string($update/c:status))
+        then $update/c:status
+        else $section
+      case element(c:description) return
+        if (xs:string($section) != xs:string($update/c:description))
+        then $update/c:description
+        else $section
+      case element(c:notes) return
+        if (xs:string($section) != xs:string($update/c:notes))
+        then $update/c:notes
+        else $section
+      case element(c:results) return
+        if (fn:exists($update/c:results/*))
+        then $update/c:results
+        else $section
+      default return
+        $section
+  ) } )
 };
+
+declare function clib:update-document(
+  $original as element(c:case),
+  $update as element(c:case)
+) as element(c:case)
+{
+  ( xdmp:log(fn:concat("original:", xdmp:quote($original)), "debug"), xdmp:log(fn:concat("update:", xdmp:quote($update)), "debug"),
+  element c:case { (
+    for $attribute in ($original/@*)
+    return attribute {name($attribute)} {$attribute},
+
+    let $names := for $t_attr in ($original/@*) return name($t_attr)
+    for $attribute in ($update/@*[not(name(.) = ($names))])
+    return attribute {name($attribute)} {$attribute},
+
+    for $section in $original/element()
+    return typeswitch($section)
+      case element(c:data) return
+        if (fn:exists($update/c:data/*))
+        then $update/c:data
+        else $section
+      case element(c:active-phase) return
+        if (xs:string($section) != xs:string($update/c:active-phase))
+        then $update/c:active-phase
+        else $section
+      case element(c:phases) return
+        if (fn:exists($update/c:phases/*))
+        then $update/c:phases (: Assumed that changes to activities dealt with elsewhere... :)
+        else $section
+      case element(c:attachments) return
+        if (fn:exists($update/c:attachments/*))
+        then $update/c:attachments
+        else $section
+      case element(c:status) return
+        if (xs:string($section) != xs:string($update/c:status))
+        then $update/c:status
+        else $section
+      case element(c:parent) return
+        if (xs:string($section) != xs:string($update/c:parent))
+        then $update/c:parent
+        else $section
+      case element(c:audit-trail) return
+        element c:audit-trail {
+          $section/c:audit,
+          clib:audit-create("Open", "Lifecycle", "Case Updated")
+        }
+      default return
+        $section
+  ) } )
+};
+
+declare function clib:update-case-document($case-id as xs:string, $update-doc as element(), $permissions as element(sec:permission)*) as xs:boolean {
+  let $uri := clib:get-case-document-uri($case-id)
+  let $case-doc := doc($uri)
+  let $new-doc := clib:update-document($case-doc/*, $update-doc)
+  return clib:insert-case-document($uri, $new-doc, ($permissions, xdmp:document-get-permissions($uri)))
+};
+
 (:
 declare function clib:case-update($case-id as xs:string,$updateTag as xs:string,$dataUpdates as element()*,
   $attachmentUpdates as element()*) as xs:boolean {
@@ -90,7 +187,7 @@ declare function clib:case-update($case-id as xs:string,$updateTag as xs:string,
 }; :)
 
 
-declare private function clib:audit-create(
+declare function clib:audit-create(
   $status as xs:string,
   $eventCategory as xs:string,
   $description as xs:string
@@ -180,26 +277,33 @@ declare function clib:case-close($case-id as xs:string,$updateTag as xs:string,$
     return fn:false()
 }; :)
 
-declare function clib:decode-permissions ($permissions-pairs as xs:string*) as element(sec:permission)* {
+declare function clib:decode-permissions ($permissions-pairs as xs:string*, $new-permissions as xs:string)
+  as element(sec:permission)*
+{
+  (: TODO - pick up xdmp:document-get-permissions($uri) :)
   if (fn:exists($permissions-pairs))
   then
     let $perms :=
-      for $permissions-string in $permissions-pairs
-      let $pair := fn:tokenize($permissions-string, ":")
-      return (
-        xdmp:log(fn:concat("decode-permissions got:",$permissions-string)),
-        xdmp:permission($pair[1], $pair[2])
-      )
+        for $permissions-string in $permissions-pairs
+        let $pair := fn:tokenize($permissions-string, ":")
+        return (
+          xdmp:log(fn:concat("decode-permissions got:",$permissions-string)),
+          xdmp:permission($pair[1], $pair[2])
+        )
     return (
       xdmp:log(fn:concat("permissions:", xdmp:quote($perms))),
       xdmp:default-permissions(),
       $const:case-permissions,
       $perms
     )
-  else (
-    xdmp:default-permissions(),
-    $const:case-permissions,
-    (: xdmp:permission("workflow-status",("read")), :) (: WARNING DO NOT UNCOMMENT - reading should be wrapped and amped to prevent data leakage :)
-    xdmp:permission("case-user",("read")) (: TODO replace this with the EXACT user, dynamically, as required :)
-  )
+  else
+    if ("true" = $new-permissions)
+    then (
+      xdmp:log("No permissions, new - returning default"),
+      xdmp:default-permissions(),
+      $const:case-permissions,
+      (: xdmp:permission("workflow-status",("read")), :) (: WARNING DO NOT UNCOMMENT - reading should be wrapped and amped to prevent data leakage :)
+      xdmp:permission("case-user",("read")) (: TODO replace this with the EXACT user, dynamically, as required :)
+    )
+    else xdmp:log("No permissions, update - returning empty")
 };
