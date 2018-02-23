@@ -25,68 +25,52 @@ Primary Case (for current process instance)
 ## Sample case document
 
 ```xml
-<case xmlns="" id="123456" update-tag="ABCD1234">
-  <data>
-    <!-- Arbitrary elements provided by the application. -->
-  </data>
-  <attachments>
-    <attachment id="1" name="AccountOpeningForm" uri="/some/doc.xml" cardinality="1" /> <!-- A MarkLogic document attachment -->
-    <attachment id="2" name="PDFRendering" uri="" cardinality="1" /> <!-- Named attachment, not currently linked to any system content -->
-    <attachment id="3" name="CRMReference" system-type="OracleCRM" system-name="MyCRMSystem" system-id="1234567890" cardinality="1" /> <!-- external reference -->
-    <attachment id="4" name="RelatedContent" uri="/my/saved/search.xml" cardinality="*" /> <!-- MarkLogic Saved Search (aka Smart Folder) -->
-  </attachments>
-  <audit-trail>
-    <by>afowler</by><when>20170118T130413Z</when>
-    <category>Lifecycle|Administrative</category><status>Closed|Open (at point After update)</status>
-    <description>Some textual description</description><detail><!-- Contains the dataUpdates and attachmentUpdates elements in their entirety --></detail>
-  </audit-trail>
-  <phases>
-    <phase id="phaseUid1">      
-      <metadata>
-        <name>Initial</name>
-        <public-name></public-name>        
-      </metadata>      
-      <activities>
-        <activity id="uid1">
-          <metadata>
-            <name>ContactCustomer</name>
-            <public-name></public-name>
-          </metadata>          
-          <status>NotActive|Open|Completed|Skipped</status> <!-- See audit-trail for relevant completion information -->
-          <description>Please phone the customer to let them know we are handling their case, and ask for any missing info</description>
-          <notes>Any notes here to record for this activity, outcomes, or information to the person completing it.</notes>
-          <results>
-            <result type="attachment">                        
-                <values>
-                    <value>attachmentId1</value>
-                </values>                                                           
-            </result>                
-            <result type="singleValue" uri="/reference/type-list.xml">
-                <values>
-                    <value>
-                    </value>
-                </values>                                                           
-            </result>            
-            <result type="multipleValue" uri="/reference/type-list.xml">                                                           
-                <values>
-                    <value>
-                    </value>
-                </values>                                                           
-            </result>            
-          </results>
-        </activity>
-      </activities>
-    </phase>
-  </phases>
-  <metrics>
-    <!-- Currently blank, but reserved for future use (just like in MarkLogic Workflow) -->
-  </metrics>
-  <status>NotActive|Open|Closed|Provisional|Cancelled</status>
-  <active-phase>phaseUid1</active-phase>
-  <locked>true|false</locked>
-  <locked-by>afowler</locked-by>
-  <case-template-name>Account Opening Request</case-template-name>
-  <parent>567890</parent>
+<case id="1" xmlns="http://marklogic.com/workflow/case" template-id="ctemplate1">
+	<data>
+		<latest-version>0</latest-version>
+		<publication-date>12-04-2016</publication-date>
+	</data>
+	<active-phase>phaseUid1</active-phase>
+	<phases>
+		<phase id="phase1" template-id="ptemplate1">
+			<data>
+				<name>Intial</name>
+				<public-name>Updated Case Example</public-name>
+			</data>
+			<activities>
+				<activity id="activity1" template-id="atemplate1">
+					<data>
+						<name>Contact Customer</name>
+						<public-name>Contact Customer</public-name>
+						<planned-start-date>11-05-2017</planned-start-date>
+						<planned-end-date>10-06-2017</planned-end-date>
+						<actual-start-date>15-05-2017</actual-start-date>
+						<actual-end-date>14-06-2017</actual-end-date>
+					</data>
+					<status>NotActive</status>
+					<description>string</description>
+					<notes>string</notes>
+					<results>
+						<result id="result1">
+							<type>attachment</type>
+							<values>
+								<value>string</value>
+							</values>
+						</result>
+					</results>
+				</activity>
+			</activities>
+			<graph>
+				<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+				</RDF>
+			</graph>
+		</phase>
+	</phases>
+	<attachments>
+		<attachment>string</attachment>
+	</attachments>
+	<status>NotActive</status>
+	<parent>567892</parent>
 </case>
 ```
 
