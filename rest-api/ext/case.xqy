@@ -133,7 +133,7 @@ function ext:post(
 (:
  : PUT - update a case instance, potentially changing data and status
  :
- : currently just accepts XML to update whole document.
+ : accepts XML containing sections to update and replaces them within the document.
  :
  :)
 declare

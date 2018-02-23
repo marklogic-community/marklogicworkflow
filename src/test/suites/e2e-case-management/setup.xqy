@@ -10,7 +10,8 @@ return (
   test:load-test-file("case-put-payload.xml", xdmp:database(), "/raw/data/case-put-payload.xml"),
   test:load-test-file("activity-payload.xml", xdmp:database(), "/raw/data/activity-payload.xml"),
   test:load-test-file("22345.xml", xdmp:database(), "/raw/data/22345.xml"),
-  test:load-test-file("22345.xml", xdmp:database(), "/casemanagement/cases/notemplate/22345.xml")
+  test:load-test-file("22345.xml", xdmp:database(), "/casemanagement/cases/notemplate/22345.xml"),
+  test:load-test-file("32345.xml", xdmp:database(), "/casemanagement/cases/notemplate/32345.xml")
 );
 
 (
@@ -20,6 +21,21 @@ return (
   ),
   xdmp:document-set-permissions(
     "/casemanagement/cases/notemplate/22345.xml",
+    (
+      xdmp:permission("test-case-role-one", "read"),
+      xdmp:permission("test-case-role-one", "insert"),
+      xdmp:permission("test-case-role-one", "update")
+    )
+  )
+);
+
+(
+  xdmp:document-set-collections(
+    "/casemanagement/cases/notemplate/32345.xml",
+    "http://marklogic.com/casemanagement/cases"
+  ),
+  xdmp:document-set-permissions(
+    "/casemanagement/cases/notemplate/32345.xml",
     (
       xdmp:permission("test-case-role-one", "read"),
       xdmp:permission("test-case-role-one", "insert"),

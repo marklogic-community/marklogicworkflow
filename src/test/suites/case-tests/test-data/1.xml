@@ -45,4 +45,13 @@
 	</attachments>
 	<status>NotActive</status>
 	<parent>567892</parent>
+  <audit-trail>
+    <audit>
+      <by>Test User 1</by>
+      <when>2018-02-09T16:19:35.238332Z</when>
+      <category>Lifecycle</category>
+      <status>Created</status>
+      <description>Case Created</description>
+    </audit>
+  </audit-trail>
 </case>

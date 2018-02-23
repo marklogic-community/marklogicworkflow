@@ -3,8 +3,10 @@ xquery version "1.0-ml";
 module namespace ch="http://marklogic.com/casemanagement/controller-helper";
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
+import module namespace patch="http://marklogic.com/casemanagement/patch-lib" at "/casemanagement/models/patch-lib.xqy";
 import module namespace const = "http://marklogic.com/casemanagement/case-constants" at "/casemanagement/models/case-constants.xqy";
 import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
+import schema namespace rapi = "http://marklogic.com/rest-api" at "restapi.xsd";
 
 declare namespace c="http://marklogic.com/workflow/case";
 
@@ -62,19 +64,45 @@ declare function ch:validate(
 };
 
 declare function ch:validate-data(
-  $input-data as xs:boolean,     (: is there data? :)
-  $input-expected as xs:boolean  (: should there be data? :)
+  $input-data as element()?,     (: is there data? :)
+  $input-expected as xs:boolean, (: should there be data? :)
+  $patches-expected as xs:boolean,
+  $activityid as xs:string?
 ) as map:map { (
   xdmp:log("in ch:validate-data", "debug"),
+  xdmp:log(
+    fn:concat(
+      "data: ", if (fn:exists($input-data)) then "true" else "false",
+      " expected: ", if ($input-expected) then "true" else "false",
+      " patches: ", if ($patches-expected) then "true" else "false",
+      " $activityid=", $activityid
+    ), "debug"),
   map:new((
     if (
-      (($input-expected) and ($input-data))
+      (($input-expected) and (fn:exists($input-data)))
         or fn:not($input-expected) (: and fn:not($input-data)) - ignore input data if not expected :)
     )
-    then (
-      map:entry("status-code", 200),
-      map:entry("response-message", "OK")
-    )
+    then
+      if ($patches-expected)
+      then
+        let $error-list := json:array()
+        let $converted := patch:convert-xml-patch($activityid, $input-data, $error-list)
+          return
+            if (json:array-size($error-list))
+            then (
+              map:entry("status-code", 405),
+              map:entry("response-message", "Validation exception"),
+              map:entry("error-detail", fn:string-join(json:array-values($error-list, fn:true()), "; "))
+            )
+            else (
+              map:entry("status-code", 200),
+              map:entry("response-message", "OK"),
+              map:entry("patches", $converted)
+            )
+      else (
+        map:entry("status-code", 200),
+        map:entry("response-message", "OK")
+      )
     else (
       map:entry("status-code", 405),
       map:entry("response-message", "Validation exception"),
@@ -87,12 +115,16 @@ declare function ch:validate-activity(
   $caseid as xs:string?,
   $phaseid as xs:string?,
   $activityid as xs:string?,     (: should always be supplied - new activity will supply new id :)
-  $new-activity as xs:boolean    (: is this activity new? :)
+  $new-activity as xs:boolean,   (: is this activity new? :)
+  $patches as element(rapi:patch)?
 ) as map:map {
   map:new((
     map:entry("caseId", $caseid),
     map:entry("phaseId", $phaseid),
     map:entry("activityId", $activityid),
+    if (fn:not(fn:empty($patches)))
+    then map:entry("patches", $patches)
+    else (),
     xdmp:log("in ch:validate-activity", "debug"),
     (: supplied activityid ? :)
     if (fn:empty($activityid))
@@ -134,7 +166,7 @@ declare function ch:validate-activity(
           else (
             map:entry("status-code", 400),
             map:entry("response-message", "Invalid ID supplied"),
-            map:entry("error-detail", fn:concat("caseId ", $caseid, " not found"))
+            map:entry("error-detail", fn:concat("activityId ", $activityid, " not found"))
           )
   ))
 };
@@ -169,6 +201,7 @@ declare function ch:validation(
    :)
   let $action := $const:validation/c:action[@name = $action-name]
   let $_ := xdmp:log(fn:concat("validation action name:", $action-name, " action:", xdmp:quote($action)) , "debug" )
+  let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params), " input-data:", xdmp:quote($input-data)) , "debug" )
   let $new-case :=
     if (fn:exists($action/c:case/c:case-exists))
     then
@@ -180,6 +213,10 @@ declare function ch:validation(
     if ("true" = xs:string($action/c:data/c:data-expected))
     then fn:true()
     else fn:false()
+  let $patches-expected :=
+    if ("true" = xs:string($action/c:data/c:patches-expected))
+    then fn:true()
+    else fn:false()
   let $caseid :=
     if (map:contains($params, "caseId"))
     then map:get($params, "caseId")
@@ -188,11 +225,20 @@ declare function ch:validation(
       then clib:get-new-id($input-data)
       else ()
 
+  let $_ := xdmp:log(fn:concat("new-case:", xdmp:quote($new-case),
+    " input-expected:", xdmp:quote($input-expected)
+    , " patches-expected:", xdmp:quote($patches-expected)) , "debug" )
+
+  let $activityid :=
+    if (map:contains($params, "activityId"))
+    then map:get($params, "activityId")
+    else ()
   let $validation-map :=
     if (($caseid) or (fn:exists($action/c:case/c:case-exists)))
     then ch:validate($caseid, $new-case, fn:exists($input-data), $input-expected)
-    else ch:validate-data(fn:exists($input-data), $input-expected)
+    else ch:validate-data($input-data, $input-expected, $patches-expected, $activityid)
   return (: validation for caseactivity :)
+    (xdmp:log(fn:concat("validation-map:", xdmp:quote($validation-map)), "debug"),
     if ( (200 = map:get($validation-map, "status-code")) and (fn:exists($action/c:activity)))
     then
       let $new-activity :=
@@ -207,13 +253,13 @@ declare function ch:validation(
           then clib:get-new-id(())
           else ()
       let $activityid :=
-        if (map:contains($params, "activityId"))
-        then map:get($params, "activityId")
+        if ($activityid)
+        then $activityid
         else
           if ($new-activity)
           then clib:get-new-id($input-data)
           else ()
-        let $validation-map := ch:validate-activity($caseid, $phaseid, $activityid, $new-activity)
+        let $validation-map := ch:validate-activity($caseid, $phaseid, $activityid, $new-activity, map:get($validation-map, "patches"))
       return
         if (map:contains($validation-map, "status-code"))
         then $validation-map
@@ -238,6 +284,7 @@ declare function ch:validation(
             map:entry("response-message", "Internal error"),
             map:entry("error-detail", "Unable to process")
           ))
+    )
 };
 
 (:
@@ -250,99 +297,10 @@ declare function ch:case-create($id, $case-template-name as xs:string, $data as 
   let $_ := clib:create-case-document($id, $uri, $data, $permissions)
   return $id
 };
-(:
-declare function ch:case-create($case-template-name as xs:string,$data as element()*,$attachments as element()*,$parent as xs:string?) as xs:string {
-  let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
-  let $uri := "/casemanagement/cases/"||$case-template-name||"/"||$id || ".xml"
-  let $doc := <c:case id="{$id}">
-    <c:data>{$data}</c:data>
-    <c:attachments>{$attachments}</c:attachments>
-    <c:audit-trail>{m:audit-create($id,"Created","Lifecycle","Case Created",($data,$attachments))}</c:audit-trail>
-    <c:metrics></c:metrics>
 
-    <c:status>Open</c:status>
-    <c:locked>{fn:false()}</c:locked>
-
-    <c:case-template-name>{$case-template-name}</c:case-template-name>
-    {if (fn:not(fn:empty($parent))) then <c:parent>{$parent}</c:parent> else ()}
-  </c:case>
-  let $_ := ch:createCaseDocument($uri,$doc)
-  return $id
-};
-:)
-
-
-
-(:
-declare private function ch:check-update-in-sequence($case as element(c:case),$updateTag as xs:string) as xs:boolean {
-  $updateTag = $case/@c:update-tag
-};
-
-declare private function ch:update-tag($case as element(c:case)) {
-  if (fn:not(fn:empty($case/@c:update-tag))) then
-    xdmp:node-replace($case/@c:update-tag,attribute c:update-tag {
-      sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
-    })
-  else
-    xdmp:node-insert-child($case,attribute c:update-tag {
-      sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
-    })
-};
-
-declare function ch:case-update($case-id as xs:string,$updateTag as xs:string,$dataUpdates as element()*,
-  $attachmentUpdates as element()*) as xs:boolean {
-:)
 declare function ch:case-update($case-id as xs:string, $data as element(c:case), $permissions as xs:string*, $parent as xs:string?) as xs:boolean {
   clib:update-case-document($case-id, $data, $permissions)
-  (:
-  let $_secure := xdmp:security-assert($cdefs:privCaseUser, "execute")
-
-  ( : TODO don't just blanket replace all data and attachments, replace one by one : )
-  ( : if data or attachment nodes are blank, leave them as they are - do not replace them with nothing : )
-  ( : TODO fail if already closed : )
-  let $case := ch:case-get($case-id,fn:true())
-  return
-    if (m:check-update-in-sequence($case,$updateTag)) then
-      let $_ := (
-        ch:update-tag($case),
-        if (fn:not(fn:empty($dataUpdates))) then
-          xdmp:node-replace($case/c:data,<c:data>{$dataUpdates}</c:data>)
-        else (),
-        if (fn:not(fn:empty($attachmentUpdates))) then
-          xdmp:node-replace($case/c:attachments,<c:attachments>{$attachmentUpdates}</c:attachments>)
-        else (),
-          xdmp:node-insert-child($case/c:audit-trail,
-            ch:audit-create($case-id,"Open","Lifecycle","Case Updated",($dataUpdates,$attachmentUpdates)) )
-      )
-      return fn:true()
-    else
-      return fn:false() :)
 };
-
-(:
- : Default is to not lock for update (read only)
- : Returns true is locked, or if read succeeds without a need for a lock (i.e. lock wasn't requested)
- : )
-declare function ch:case-get($case-id as xs:string, $lock-for-update as xs:boolean?) as element(c:case)? {
-  ( : TODO - REMOVE! deprecated by clib:get-case-document : )
-  ( :  let $_secure := xdmp:security-assert($cdefs:privCaseUser, "execute") : )
-  let $case := clib:get-case-document($case-id)
-  return
-    if ($case)
-    then $case
-    else
-      let $dir := "/casemanagement/cases/"
-      let $uri := clib:get-case-document-uri($case-id)
-      return cts:search(
-        fn:collection($const:case-collection),
-        ( : cts:and-query(( : )
-        ( :  cts:directory-query($dir, "infinity"), : )
-        cts:document-query($uri)
-        ( : )) : )
-      )/c:case[1]
-  ( : TODO add audit entry item : )
-  ( : TODO add locked audit entry item too : )
-}; :)
 
 (:
  : Succeeds and returns true if case successfully updated and closed
@@ -419,7 +377,7 @@ declare function ch:caseactivity-update(
   $activity-id as xs:string,
   $updates as element(c:activity)
 ) as xs:string {
-  let $_log := xdmp:log(fn:concat("caseactivity-update called on activity ", $activity-id))
+  let $_log := xdmp:log(fn:concat("caseactivity-update called on activity ", $activity-id, " update=", xdmp:quote($updates)))
   let $case := clib:get-case-document-from-activity($activity-id)
   let $current-activity := $case/c:case/c:phases/c:phase/c:activities/c:activity[@id=$activity-id]
   let $updated-activity := clib:update-activity($current-activity, $updates)
@@ -435,3 +393,28 @@ declare function ch:caseactivity-update(
   return $activity-id
 };
 
+declare function ch:caseactivity-patch(
+  $activity-id as xs:string,
+  $patches as element(rapi:patch)?
+) (: as xs:string :) {
+  let $_log := xdmp:log(fn:concat("caseactivity-patch called on activity ", $activity-id, " patches=", xdmp:quote($patches)))
+  let $case := clib:get-case-document-from-activity($activity-id)
+
+  let $error-list := json:array()
+  let $_ := xdmp:log(fn:concat("patches ", xdmp:quote($patches)), "debug")
+  let $is-content-patched :=
+    (
+      let $is-patched := patch:apply-patch(
+        $case, $patches, $error-list
+      )
+      return
+        if (json:array-size($error-list) gt 0)
+        then error((), "RESTAPI-SRVEXERR", (
+          405, concat("Invalid content patch for activity ", $activity-id),
+          fn:string-join(json:array-values($error-list, fn:true()), "; ")
+        ))
+        else $is-patched
+    )
+
+  return ($is-content-patched, $patches)
+};

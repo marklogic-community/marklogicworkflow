@@ -61,5 +61,14 @@ declare variable $const:validation :=
         <data-expected>true</data-expected>
       </data>
     </action>
+    <action name="patch activity">
+      <activity>
+        <activity-exists>true</activity-exists>
+      </activity>
+      <data>
+        <data-expected>true</data-expected>
+        <patches-expected>true</patches-expected>
+      </data>
+    </action>
   </actions>;
 

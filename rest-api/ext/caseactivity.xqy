@@ -143,22 +143,28 @@ function ext:post(
 (:
  : PUT - update a case activity instance, potentially changing data and status
  :
- : currently just accepts XML to update whole document.
+ : accepts XML containing sections to update and replaces them within the
+ : matching c:case/c:phases/c:phase/c:activities/c:activity element
  :
  :)
 declare
-%roxy:params("activityId=xs:string")
+%rapi:transaction-mode("update")
+%roxy:params("activityId=xs:string", "patch=xs:string")
 function ext:put(
    $context as map:map,
    $params  as map:map,
    $input   as document-node()*
 ) as document-node()? {
-
-  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
   let $_ := xdmp:log(fn:concat("context:", xdmp:quote($context)), "debug")
   let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
   let $_ := xdmp:log(fn:concat("input:", xdmp:quote($input)), "debug")
 
+  return
+    if (map:contains($params, "patch"))
+    then ext:patch($context, $params, $input)
+    else
+
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
   let $activity-doc := $input/element(c:activity)
   let $validate := ch:validation("update activity", $params, $activity-doc)
 
@@ -189,5 +195,57 @@ function ext:put(
     )
     else fn:error((),"RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($validate,"error-detail")))
 };
+
+(:
+ : PATCH - update a case activity instance, potentially changing data and status
+ :
+ : currently same as PUT
+ :
+ :)
+declare
+%rapi:transaction-mode("update")
+%roxy:params("activityId=xs:string")
+function ext:patch(
+  $context as map:map,
+  $params  as map:map,
+  $input   as document-node()*
+) as document-node()? {
+
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $_ := xdmp:log(fn:concat("context:", xdmp:quote($context)), "debug")
+  let $_ := xdmp:log(fn:concat("params:", xdmp:quote($params)), "debug")
+  let $_ := xdmp:log(fn:concat("input:", xdmp:quote($input)), "debug")
+
+  let $patch-doc := $input/element(rapi:patch)
+  let $validate := ch:validation("patch activity", $params, $patch-doc)
+
+  let $status-code := map:get($validate,"status-code")
+  let $response-message := map:get($validate,"response-message")
+
+  let $out :=
+    if (200 = $status-code)
+    then
+      let $res := ch:caseactivity-patch(map:get($validate, "activityId"), map:get($validate, "patches"))
+      return <ext:updateResponse><ext:outcome>SUCCESS</ext:outcome><ext:patchOutcome>{$res}</ext:patchOutcome></ext:updateResponse>
+    else ()
+  return
+    if (200 = $status-code)
+    then (
+      map:put($context, "output-types", $preftype),
+      xdmp:set-response-code($status-code, $response-message),
+      document {
+        if ("application/xml" = $preftype) then
+          $out
+        else
+          let $config := json:config("custom")
+          let $cx := map:put($config, "text-value", "label" )
+          let $cx := map:put($config , "camel-case", fn:true() )
+          return
+            json:transform-to-json($out, $config)
+      }
+    )
+    else fn:error((),"RESTAPI-SRVEXERR", ($status-code, $response-message, map:get($validate,"error-detail")))
+};
+
 
 
