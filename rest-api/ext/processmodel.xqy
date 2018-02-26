@@ -75,7 +75,6 @@ function ext:put(
 
   return
   (
-    map:put($context, "output-types", "application/json"),
     xdmp:set-response-code(200, "OK"),
     document {
       (: 1. Take the process model document and convert to a CPF pipeline document :)
@@ -83,8 +82,11 @@ function ext:put(
       (: 3. Optionally enable :)
 
         if ("application/xml" = $preftype) then
+          let $_ := map:put($context, "output-types", "application/xml")                  
+          return
           $out
         else
+          let $_ := map:put($context, "output-types", "application/json")        
           let $config := json:config("custom")
           let $cx := map:put($config, "text-value", "label" )
           let $cx := map:put($config , "camel-case", fn:true() )
