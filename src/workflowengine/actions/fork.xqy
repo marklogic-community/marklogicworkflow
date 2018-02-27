@@ -12,11 +12,9 @@ declare variable $cpf:options as element() external;
 
 (
   xdmp:log(fn:concat("Fork called cpf:document-uri: ", $cpf:document-uri, " cpf:options: ", xdmp:quote($cpf:options) )),
-  (: Just call wfu:fork with $cpf:options/wf:branches spec :)
+  (: Just call wfu:fork with $cpf:options/wf:branch-definitions spec :)
   try {
-    if (fn:exists($cpf:options/wf:branches))
-    then wfu:fork($cpf:document-uri,$cpf:options/wf:branches)
-    else wfu:fork($cpf:document-uri,$cpf:options/wf:branch-definitions)
+    wfu:fork($cpf:document-uri,$cpf:options/wf:branch-definitions)
   } catch ($e) {
     wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
   }

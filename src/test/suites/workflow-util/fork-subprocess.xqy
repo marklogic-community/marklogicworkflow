@@ -5,7 +5,7 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace prop = "http://marklogic.com/xdmp/property";
 
-let $processUri := "/workflow/processes/fork-simple__1__0/5daff6c3-aba5-4c02-bf38-6cf1bcb8d44c-2018-01-09T16:23:48.244058Z.xml"
+let $processUri := "/workflow/processes/fork-simple__1__0/4daff6c3-aba5-4c02-bf38-6cf1bcb8d44c-2018-01-09T16:23:48.244058Z.xml"
 let $branch-defs := <wf:branch-definitions xmlns:wf="http://marklogic.com/workflow">
   <wf:branch-definition>
     <wf:pipeline>fork-simple__1__0</wf:pipeline>
@@ -19,9 +19,27 @@ let $branch-defs := <wf:branch-definitions xmlns:wf="http://marklogic.com/workfl
   <wf:rendezvous-method>ALL</wf:rendezvous-method>
 </wf:branch-definitions>
 
-let $branch-list := wfu:branch-list($processUri, "whatthefork", $branch-defs)
+let $forkid := "whatthefork"
+let $branch-list := wfu:branch-list($processUri, $forkid, $branch-defs)
 return (
-  test:assert-exists($branch-list)
+  test:assert-equal(2, fn:count($branch-list)),
+  test:assert-equal(2, fn:count($branch-list[wf:pipeline="fork-simple__1__0"])),
+  test:assert-equal(2, fn:count($branch-list[wf:status="INPROGRESS"])),
+  test:assert-exists($branch-list[wf:branch="fork-simple__1__0/Task_1"]),
+  test:assert-exists($branch-list[wf:branch="fork-simple__1__0/Task_2"]),
+  let $branches :=
+    wfu:branches( $forkid, ($branch-list), xs:string($branch-defs/wf:rendezvous-method) )
+  return (
+    test:assert-equal(1, fn:count($branches)),
+    test:assert-exists($branches[wf:fork="whatthefork"]),
+    test:assert-exists($branches[wf:rendezvous-method="ALL"]),
+    test:assert-exists($branches[wf:status="INPROGRESS"]),
+      test:assert-equal(2, fn:count($branches/wf:branch-status[wf:pipeline="fork-simple__1__0"])),
+      test:assert-equal(2, fn:count($branches/wf:branch-status[wf:status="INPROGRESS"])),
+    test:assert-exists($branches/wf:branch-status[wf:branch="fork-simple__1__0/Task_1"]),
+    test:assert-exists($branches/wf:branch-status[wf:branch="fork-simple__1__0/Task_2"]),
+    $branches
+  )
 )
 
 ;
