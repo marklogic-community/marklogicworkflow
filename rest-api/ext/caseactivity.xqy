@@ -199,8 +199,6 @@ function ext:put(
 (:
  : PATCH - update a case activity instance, potentially changing data and status
  :
- : currently same as PUT
- :
  :)
 declare
 %rapi:transaction-mode("update")
