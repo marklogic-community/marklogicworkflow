@@ -8,6 +8,8 @@ To install via roxy, within the roxy directory, edit the properties file for the
 
 Note that if left as is, the [Roxy test harness](https://github.com/marklogic-community/roxy/wiki/Unit-Testing) will also be set up at http://localhost:8042/test/
 
+See the [Roxy deployer](https://github.com/marklogic-community/roxy/wiki/Deployer) page for more details
+
 ### Configure MIME types
 
 Default filenames for SCXML and BPMN2 models are .scxml and .bpmn respectively. These aren't recognised by MarkLogic

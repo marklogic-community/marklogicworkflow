@@ -367,7 +367,7 @@ declare function ch:caseactivity-create(
         } ),
       xdmp:node-insert-child(
         $case/c:case/c:audit-trail,
-        clib:audit-create("Open", "Lifecycle", fn:concat("Case Activity ", $activity-id, " Inserted"))
+        clib:audit-create("Open", "Lifecycle", fn:concat("Case Phase ", $phase-id, " and Activity ", $activity-id, " Inserted"))
       )
     )
   return $activity-id
