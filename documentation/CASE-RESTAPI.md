@@ -3,9 +3,9 @@
 ## Phase 1
 
 - **GET case**
- - Get a case instance (optional - summary only)
- - whole case XML as it is.
- - filter out audit info, only provide last-updated and created-date.
+  - Get a case instance (optional - summary only)
+  - whole case XML as it is.
+  - filter out audit info, only provide last-updated and created-date.
 - **POST case**
   - create a new case instance, case instance XML can be sent from the client
   - generate UID for case.
@@ -15,13 +15,13 @@
   - Update an existing case - C (including update tag support)
   - TODO update tests with update-tag support (and add a test for old tag)
 - **GET caseactivity**
- - Return a single case activity  
+  - Return a single case activity  
 - **POST caseactivity**
- - Add a ad-hoc case activity to a given case, caseId, phaseId
+  - Add a ad-hoc case activity to a given case, caseId, phaseId
 - **PUT caseactivity**
- - Update the elements within a activity, adds or updates elements that have been provided, never delete any element. *For delete use PATCH.*
+  - Update the elements within a activity, adds or updates elements that have been provided, never delete any element. *For delete use PATCH.*
 - **PATCH caseactivity**
- - patch - insert, replace, delete elements in an activity **(note this can only be accessed by PUT using the parameter rs:patch=true or X-HTTP-Method-Override: PATCH)**
+  - patch - insert, replace, delete elements in an activity **(note this can only be accessed by PUT using the parameter rs:patch=true or X-HTTP-Method-Override: PATCH)**
 ```
 $ curl --anyauth --user user:password -X PUT -d @./patch.xml \
     -i -H "Content-type: application/xml" \
