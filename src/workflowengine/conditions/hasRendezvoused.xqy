@@ -14,6 +14,7 @@ declare variable $cpf:options as element() external;
 
 
 let $activeFork := xdmp:document-properties($cpf:document-uri)/prop:properties/wf:branches[./wf:status = "INPROGRESS"]
+let $_ := xdmp:trace("ml-workflow","Active fork in hadRendezvoused : "||xdmp:quote($activeFork))
 
 (: Check RV method :)
 let $outcome :=
@@ -25,6 +26,8 @@ let $outcome :=
 
 return (
    xdmp:log( fn:concat("MarkLogic Workflow hasRendezvoused condition result=", fn:string($outcome), " for ", $cpf:document-uri) ),
+   (:xdmp:node-delete(xdmp:document-properties($cpf:document-uri)/prop:properties/wf:currentStep),:)
+   (:xdmp:node-replace($activeFork/wf:status/text(),text{$wfu:COMPLETE-STATUS}),:)
    $outcome
 )
 

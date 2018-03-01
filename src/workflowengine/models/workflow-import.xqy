@@ -581,6 +581,13 @@ declare function m:b2pipeline($rootName as xs:string, $parentStep as xs:string?,
         )
         ,
         () (: rules :)
+      ),
+      p:status-transition("property-updated","If properties fragment is updated, re-process state",() (: success :), $failureState,500,
+        p:action("/workflowengine/actions/recheckState.xqy",
+          "Re-process state - entry conditions may have changed",() (: options :)
+        )
+        ,
+        () (: rules :)
       )
     ) (: status transitions :)
     ,
@@ -810,7 +817,7 @@ declare function m:b2endEvent($rootName as xs:string,$parentStep as xs:string?,$
   return
     (
       p:state-transition(xs:anyURI("http://marklogic.com/states/"||$pname||"/"||xs:string($state/@id)),
-        "",xs:anyURI("http://marklogic.com/states/"||$pname||"_end"),
+        "",xs:anyURI("http://marklogic.com/states/"||$pname||"__end"),
         $failureState,(),
         p:action("/workflowengine/actions/endEvent.xqy","BPMN2 End Event: "||xs:string($state/@name),
             ()
@@ -1132,7 +1139,7 @@ declare function m:b2gatewayConvergingParent($gatewayType as xs:string,$stepMap 
               ,
               p:action("/workflowengine/actions/genericComplete.xqy","BPMN2 Parallel Gateway Rendezvous: "||xs:string($state/@name),
                 <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
-                  <wf:state>{xs:string(m:b2getNextSteps($process,$state)[1]/@id)}</wf:state>
+                  <wf:state>{xs:anyURI("http://marklogic.com/states/"||xs:string($parentFrame/pname)||"/"||xs:string(m:b2getNextSteps($process,$state)[1]/@id))}</wf:state>
                 </p:options>
               ) (: p action :)
               ,"Check if child processes are complete on entry"

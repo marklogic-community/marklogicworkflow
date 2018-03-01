@@ -30,14 +30,14 @@ try {
   let $st := fn:current-dateTime()
   return
   (
-    (: set final Workflow properties :)
+    xdmp:trace("ml-workflow","In endEvent.xqy"),
     xdmp:document-add-properties($cpf:document-uri,
       (
         <wf:end>{fn:current-dateTime()}</wf:end>
       )
     )
     ,
-    xdmp:node-replace(xdmp:document-properties($cpf:document-uri)/prop:properties/wf:status,<wf:status>COMPLETE</wf:status>)
+    xdmp:node-replace(xdmp:document-properties($cpf:document-uri)/prop:properties/wf:status,<wf:status>{$wfu:COMPLETE-STATUS}</wf:status>)
     ,
     wfu:complete( $cpf:document-uri, $cpf:transition, (), $st )
   )
