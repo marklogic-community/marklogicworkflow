@@ -40,7 +40,7 @@ declare function m:create(
     {if (fn:not(fn:empty($branchid))) then <wf:branchid>{$branchid}</wf:branchid> else ()}
   </wf:process>,
   xdmp:default-permissions(),
-  (xdmp:default-collections(),"http://marklogic.com/workflow/PROCESSES")
+  (xdmp:default-collections(),"http://marklogic.com/workflow/processes")
   )
   return $id
 };
@@ -725,4 +725,25 @@ declare function m:evaluateXml($processUri as xs:string,$namespaces as element(w
   let $_ := xdmp:log($result)
   let $_ := xdmp:log("wfu:evaluateXml: Complete. Returning...")
   return $result
+};
+
+(:
+  Tested using
+
+  for $object in (document{element root{}},document{object-node{"a":"1"}},document{text{"hello"}},element root{},object-node{"a":"1"},text{"hello"},document{()})
+  return
+  mime-type($object)
+
+:)
+declare function get-mime-type($node as node()){
+  let $node := 
+  typeswitch($node)
+    case document-node() return $node/(object-node()|element()|text()|binary())
+    default return $node
+  return
+  typeswitch($node)
+    case object-node() return "application/json"
+    case element() return "application/xml"
+    case text() return "text/html"
+    default return "application/octet-stream"
 };

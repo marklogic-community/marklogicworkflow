@@ -21,12 +21,15 @@ function ext:get(
   $params  as map:map
 ) as document-node()*
 {
-  let $preftype := "application/xml" (: if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json" :)
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json" 
 
   let $out := wfi:get-model-by-name(map:get($params,"publishedId"))
   return
   (
-    map:put($context, "output-types", "text/xml"), (: TODO mime type from file name itself :)
+    let $mime-type := wfu:get-mime-type($out)
+    let $_ := xdmp:trace("ml-workflow","processmodel-get : mime-type = "||$mime-type)
+    return
+    map:put($context, "output-types", $mime-type), (: TODO mime type from file name itself :)
     xdmp:set-response-code(200, "OK"),
 
     document {
@@ -125,7 +128,7 @@ function ext:post(
 
   return
   (
-    map:put($context, "output-types", "application/json"),
+    map:put($context, "output-types", $preftype),
     xdmp:set-response-code(200, "OK"),
     document {
 
