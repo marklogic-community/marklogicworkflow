@@ -7,15 +7,11 @@ import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test
 declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
-let $process := wrt:processmodel-create ($const:json-options, "015-restapi-tests.bpmn")
-(: not working with XML ? :)
-return ( (:
+let $process := wrt:processmodel-create ($const:xml-options, "015-restapi-tests.bpmn")
+return ( 
   test:assert-equal('200', xs:string($process[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($process[2]/ext:createResponse/ext:outcome)),
-  test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/ext:createResponse/ext:modelId)) :)
-  test:assert-equal('200', xs:string($process[1]/http:code)),
-  test:assert-equal('SUCCESS', xs:string($process[2]/createResponse/outcome)),
-  test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/createResponse/modelId))
+  test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/ext:createResponse/ext:modelId)) 
 );
 (:
   <ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -44,15 +40,11 @@ import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/t
 declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
-(: not working with XML ? :)
-let $result := wrt:test-03-processmodel-update($const:json-options)
-return ( (:
+let $result := wrt:test-03-processmodel-update($const:xml-options)
+return ( 
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:createResponse/ext:outcome)),
-  test:assert-equal('015-restapi-tests__1__2', xs:string($result[2]/ext:createResponse/ext:modelId)) :)
-  test:assert-equal('200', xs:string($result[1]/http:code)),
-  test:assert-equal('SUCCESS', xs:string($result[2]/createResponse/outcome)),
-  test:assert-equal('015-restapi-tests__1__2', xs:string($result[2]/createResponse/modelId))
+  test:assert-equal('015-restapi-tests__1__2', xs:string($result[2]/ext:createResponse/ext:modelId)) 
 );
 (:
   <ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -69,14 +61,11 @@ declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
 (: not working with XML ? :)
-let $result := wrt:processmodel-publish($const:json-options, "015-restapi-tests__1__2")
-return ( (:
+let $result := wrt:processmodel-publish($const:xml-options, "015-restapi-tests__1__2")
+return ( 
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:updateResponse/ext:outcome)),
-  test:assert-exists(xs:string($result[2]/ext:updateResponse/ext:domainId)) :)
-  test:assert-equal('200', xs:string($result[1]/http:code)),
-  test:assert-equal('SUCCESS', xs:string($result[2]/updateResponse/outcome)),
-  test:assert-exists(xs:string($result[2]/updateResponse/domainId))
+  test:assert-exists(xs:string($result[2]/ext:updateResponse/ext:domainId)) 
 );
 (:
   <ext:updateResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -124,6 +113,8 @@ return (
     <ext:document/>
   </ext:readResponse>
 :)
+
+
 
 (: 08-processinbox-read :)
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
