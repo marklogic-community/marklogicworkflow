@@ -24,7 +24,7 @@ declare namespace bpmn2 = "http://www.omg.org/spec/BPMN/20100524/MODEL";
 let $result := wrt:test-02-processmodel-read($const:json-options)
 return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
-  test:assert-equal('http://marklogic.com/workflow', xs:string($result[2]/bpmn2:definitions/bpmn2:import/@namespace))
+  test:assert-equal('http://marklogic.com/workflow', xs:string($result[2]/definitions/import/namespace))
 );
 
 (: 03-processmodel-update :)

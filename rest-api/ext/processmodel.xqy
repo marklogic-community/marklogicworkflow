@@ -27,9 +27,10 @@ function ext:get(
   return
   (
     let $mime-type := wfu:get-mime-type($out)
-    let $_ := xdmp:trace("ml-workflow","processmodel-get : mime-type = "||$mime-type)
+    let $_ := xdmp:trace("ml-workflow","processmodel-get : model mime-type = "||$mime-type)
+    let $_ := xdmp:trace("ml-workflow","processmodel-get : requested type = "||$preftype)
     return
-    map:put($context, "output-types", $mime-type), (: TODO mime type from file name itself :)
+    map:put($context, "output-types", $preftype), (: TODO mime type from file name itself :)
     xdmp:set-response-code(200, "OK"),
 
     document {
