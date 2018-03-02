@@ -16,7 +16,7 @@ return ( (:
   test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/ext:createResponse/ext:modelId)) :)
   test:assert-equal('200', xs:string($process[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($process[2]/createResponse/outcome)),
-  test:assert-equal('fork-simple__1__0/Task_1', xs:string($process[2]/createResponse/modelId))
+  test:assert-equal('fork-simple__1__0', xs:string($process[2]/createResponse/modelId))
 );
 
 (:
@@ -210,7 +210,7 @@ return (
   test:assert-exists($result[2]/ext:readResponse/ext:document),
   let $properties := $result[2]/ext:readResponse/ext:properties
   return (
-    test:assert-equal('RUNNING', xs:string($properties/prop:properties/wf:status)), (: actually, we should have completed everything at this stage :)
+    test:assert-equal('COMPLETE', xs:string($properties/prop:properties/wf:status)), (: actually, we should have completed everything at this stage :)
     test:assert-equal('INPROGRESS', xs:string($properties/prop:properties/wf:branches/wf:status)),
     test:assert-equal(2, fn:count($properties/prop:properties/wf:branches/wf:branch-status/wf:status[. = 'COMPLETE']))
   )

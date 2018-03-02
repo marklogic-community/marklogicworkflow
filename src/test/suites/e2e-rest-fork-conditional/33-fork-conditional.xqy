@@ -16,7 +16,7 @@ return ( (:
   test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/ext:createResponse/ext:modelId)) :)
   test:assert-equal('200', xs:string($process[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($process[2]/createResponse/outcome)),
-  test:assert-equal('fork-conditional__1__0/Task_2', xs:string($process[2]/createResponse/modelId))
+  test:assert-equal('fork-conditional__1__0', xs:string($process[2]/createResponse/modelId))
 );
 
 (:
