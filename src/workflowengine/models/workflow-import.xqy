@@ -47,7 +47,8 @@ declare function m:install-and-convert($doc as node(),$filename as xs:string,$ma
           ()
       return $resp
     )
-  return $pnames[1] (: first is root process :)
+  let $_ := xdmp:trace("ml-workflow","Pipeline names : "||fn:string-join($pnames,","))
+  return $pnames[fn:count(fn:tokenize(.,"/"))= 1] (: get pname with no children :)
 };
 
 declare function m:enable($localPipelineId as xs:string) as xs:unsignedLong {

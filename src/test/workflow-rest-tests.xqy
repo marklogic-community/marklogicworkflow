@@ -3,6 +3,11 @@ module namespace wrt = "http://marklogic.com/workflow/rest-tests";
 
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
 
+declare namespace process = "http://marklogic.com/rest-api/resource/process";
+declare namespace wf = "http://marklogic.com/workflow";
+declare namespace http = "xdmp:http";
+
+
 declare function wrt:test-09-11-12-xml-payload ($pid)
 {
   <ext:updateRequest xmlns:ext="http://marklogic.com/rest-api/resource/process" xmlns:wf="http://marklogic.com/workflow">
@@ -252,4 +257,17 @@ declare function wrt:test-92-processengine-delete ($options)
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/resources/processengine")
   return xdmp:http-delete($uri, $options)
+};
+
+declare function wrt:call-complete-on-pid($options as element(http:options),$pid as xs:string){
+  let $payload := 
+  element process:updateRequest{
+    element process:processId{$pid},
+    /wf:process[@id = $pid]/(wf:data|wf:attachments)
+  }
+  let $uri := fn:concat(
+      "http://", $const:RESTHOST, ':', $const:RESTPORT,
+      "/v1/resources/process?rs:processid=",
+      fn:encode-for-uri($pid), "&amp;rs:complete=true")    
+  return xdmp:http-post($uri, $options, $payload)[2]
 };

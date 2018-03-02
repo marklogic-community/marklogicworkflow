@@ -16,7 +16,8 @@ declare variable $cpf:options as element() external;
 try {
   let $_ := wfu:fork($cpf:document-uri,$cpf:options/wf:branch-definitions)
   return
-  cpf:success( $cpf:document-uri, $cpf:transition, () )
+  (:cpf:success( $cpf:document-uri, $cpf:transition, () ):)
+  wfu:complete($cpf:document-uri, $cpf:transition,(),fn:current-dateTime())
 } catch ($e) {
   wfu:failure( $cpf:document-uri, $cpf:transition, $e, () )
 }
