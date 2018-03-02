@@ -38,8 +38,10 @@ try {
       let $startTime := xs:dateTime($props/wf:currentStep/wf:startTime)
       return wfu:complete( $cpf:document-uri, $cpf:transition, xs:anyURI($next), $startTime )
     else (
+
       xdmp:trace("ml-workflow","Restart - checking transition ..."),
       xdmp:trace("ml-workflow","Current props : "||xdmp:quote(xdmp:document-properties($cpf:document-uri)/prop:properties)),
+      xdmp:log(fn:concat("cpf:check-transition(",$cpf:document-uri,",",xdmp:quote($cpf:transition),")"), "debug"),
       if (cpf:check-transition($cpf:document-uri,$cpf:transition)) then
         (
           cpf:document-set-last-updated( $cpf:document-uri, fn:current-dateTime() )

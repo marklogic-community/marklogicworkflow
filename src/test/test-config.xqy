@@ -22,7 +22,7 @@ declare variable $c:USER := "@ml.user";
 declare variable $c:PASSWORD := "@ml.password";
 declare variable $c:RESTHOST := "localhost";
 declare variable $c:RESTPORT := "@ml.test-port";
-declare variable $LOCAL-TEST-DATA-DIR := "/raw/data/";
+declare variable $LOCAL-TEST-DATA-DIR := "/raw/bpmn/";
 
 declare function local-uri-for-test-file($test-file-name as xs:string){
 	$LOCAL-TEST-DATA-DIR||$test-file-name	

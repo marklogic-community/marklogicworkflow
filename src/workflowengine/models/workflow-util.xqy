@@ -24,7 +24,11 @@ declare function m:create(
     $forkid as xs:string?,
     $branchid as xs:string?
 ) as xs:string {
-  let $_ := xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments)),"debug")
+  let $_ :=
+    if (fn:not(fn:empty($parent)))
+    then xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments),
+      " parent: ", $parent, " forkid: ", $forkid, " branchid: ", $branchid),"debug")
+    else xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments)),"debug")
   let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
   let $uri := "/workflow/processes/"||$pipelineName||"/"||$id || ".xml"
   let $_ :=
@@ -376,7 +380,6 @@ declare function m:complete($processUri as xs:string,$transition as node(),$stat
   let $_ := xdmp:log($transition)
   let $target-state := $transition/p:on-success/text()
 
-
   (: check if we're in a subprocess, AND we are completing the last step (_end), and update just our RV status on parent :)
   (: Performance improvement - only update parent if status has changed :)
   let $audit-detail :=
@@ -386,7 +389,7 @@ declare function m:complete($processUri as xs:string,$transition as node(),$stat
       xdmp:trace("ml-workflow","about to call m:updateStatusInParent")
 
     )      
-    else ()
+  else ()
 
   (: clean up BPMN2 activity step properties :)
   let $cs := xdmp:document-properties($processUri)/prop:properties/wf:currentStep
@@ -463,7 +466,7 @@ declare function m:failure($processUri as xs:string,$transition as node(),$failu
   cpf:failure($processUri,$transition,$failureReason,())
 };
 
-declare function m:audit($processUri as xs:string,$state as xs:string,$eventCategory as xs:string,$description as xs:string,$detail as node()*) as empty-sequence() {
+declare function m:audit($processUri as xs:string, $state as xs:string, $eventCategory as xs:string, $description as xs:string, $detail as node()*) as empty-sequence() {
   (: Perform append operation on process document's audit element :)
   xdmp:node-insert-child(fn:doc($processUri)/wf:process/wf:audit-trail,
     m:audit-create($processUri,$state,$eventCategory,$description,$detail)
@@ -533,7 +536,7 @@ declare function m:branch-status($branchid as xs:string, $pipeline as xs:string,
  :
  : Contention in status updates avoided for processes that repeatedly fork by using the forkid which is unique per fork.
  :)
-declare function m:branches($forkid as xs:string,$branches as element(wf:branch-status)*,$rvmethod as xs:string) as element(wf:branches) {
+declare function m:branches($forkid as xs:string, $branches as element(wf:branch-status)*, $rvmethod as xs:string) as element(wf:branches) {
   <wf:branches>
     <wf:fork>{$forkid}</wf:fork>
     <wf:rendezvous-method>{$rvmethod}</wf:rendezvous-method>
@@ -542,10 +545,51 @@ declare function m:branches($forkid as xs:string,$branches as element(wf:branch-
   </wf:branches>
 };
 
-declare function m:fork($processUri as xs:string,$branch-defs as element(wf:branch-definitions)) as empty-sequence() {
+declare function m:branch-list($processUri as xs:string, $forkid as xs:string, $branch-defs as element(wf:branch-definitions)) as element(wf:branch-status)* {
+  let $resultMap := map:map()
+  let $_ := map:put($resultMap,"atLeastOneBranch",fn:false())
+  let $mainBranches :=
+    for $bd in $branch-defs/wf:branch-definition
+    return
+    (: if inclusiveGateway then check fork condition on EACH branch, and only create sub process for true branches :)
+      let $doBranch :=
+        if ($branch-defs/wf:forkMethod = "CONDITIONAL") then
+          if ($bd/wf:default = "true") then
+            fn:false()
+          else
+            let $ns := (<wf:namespace short="wf" long="http://marklogic.com/workflow" />)
+            return
+              if (fn:true() = m:evaluate($processUri,$ns,$bd/wf:condition/text())) then
+                (fn:true(),map:put($resultMap,"atLeastOneBranch",fn:true()) )
+              else
+                fn:false()
+        else
+          fn:true() (: always true if not conditional :)
+      return
+        if ($doBranch) then
+          let $bs := m:branch-status(xs:string($bd/wf:branch), xs:string($bd/wf:pipeline), () )
+          let $doc := m:createSubProcess($processUri, $forkid, $bs) (: THIS IS WHAT CREATES THE FORKED SUB PROCESSES :) (: WFU MODULE :)
+          return $bs
+        else
+          ()
+  let $defaultBranch :=
+    if ($branch-defs/wf:forkMethod = "CONDITIONAL" and fn:false() = map:get($resultMap,"atLeastOneBranch")) then
+    (: process default branch now - treat as parallel for simplicity, even though its only ever one route :)
+    (: This is for inclusive gateways only :)
+      for $bd in $branch-defs/wf:branch-definition[./wf:default = "true"][1]
+      return
+        let $bs := m:branch-status(xs:string($bd/wf:branch), xs:string($bd/wf:pipeline), () )
+        let $doc := m:createSubProcess($processUri,$forkid,$bs) (: THIS IS WHAT CREATES THE FORKED SUB PROCESSES :) (: WFU MODULE :)
+        return $bs
+    else ()
+  return ($mainBranches, $defaultBranch) (: TODO if both of these are empty, throw workflow exception, as per formal spec :)
+};
+
+declare function m:fork($processUri as xs:string, $branch-defs as element(wf:branch-definitions)) as empty-sequence() {
   (: Create document instance for each branch (under its current process name's version folder) :)
   (: map over parent URI and (optional) loop count :)
   let $forkid := xs:string(fn:current-dateTime()) || sem:uuid-string()
+  let $_log := xdmp:log(fn:concat("fork id:", $forkid))
   let $branches :=
     m:branches($forkid,(
       let $resultMap := map:map()
@@ -608,6 +652,7 @@ declare function m:updateStatusInParent($childProcessUri as xs:string,$childStat
   (: Check if parent URI property exists :)
   let $parentProcessUri := xs:string(fn:doc($childProcessUri)/wf:process/wf:parent)
   let $forkid := xs:string(fn:doc($childProcessUri)/wf:process/wf:forkid)
+  let $_ := xdmp:log(fn:concat("got forkid:", $forkid))
   let $branchid := xs:string(fn:doc($childProcessUri)/wf:process/wf:branchid)
   let $node-for-replacement := xdmp:document-properties($parentProcessUri)/prop:properties/wf:branches[./wf:fork = $forkid]/wf:branch-status[./wf:branch = $branchid]/wf:status
   let $_ := xdmp:trace("ml-workflow","m:updateStatusInParent")
@@ -616,10 +661,22 @@ declare function m:updateStatusInParent($childProcessUri as xs:string,$childStat
   let $_ := xdmp:trace("ml-workflow","Node for replacement : "||$node-for-replacement)
   return
     if (fn:not(fn:empty($parentProcessUri))) then
-      let $update := xdmp:node-replace(
-        xdmp:document-properties($parentProcessUri)/prop:properties/wf:branches[./wf:fork = $forkid]/wf:branch-status[./wf:branch = $branchid]/wf:status
-        ,
-        <wf:status>{$childStatus}</wf:status>
+      let $update := (
+        xdmp:node-replace(
+          xdmp:document-properties($parentProcessUri)/prop:properties/wf:branches[./wf:fork = $forkid]/wf:branch-status[./wf:branch = $branchid]/wf:status,
+          <wf:status>{$childStatus}</wf:status>) (:
+        xdmp:node-replace(
+          xdmp:document-properties($parentProcessUri)/prop:properties/cpf:state,
+          <cpf:state>http://marklogic.com/states/fork-simple__1__0/ParallelGateway_1__rv</cpf:state>),
+        xdmp:spawn-function(
+          function() {
+            let $_pause := xdmp:sleep(5000)
+            return m:audit($parentProcessUri, $transitionString, "ProcessEngine", "Completed step", ())
+          },
+          <options xmlns="xdmp:eval">
+            <transaction-mode>update-auto-commit</transaction-mode>
+          </options>
+        ) :)
       )
       return
         <wf:synchronisation-details>
@@ -630,7 +687,8 @@ declare function m:updateStatusInParent($childProcessUri as xs:string,$childStat
           <wf:branchid>{$branchid}</wf:branchid>
           <wf:sent-status>{$childStatus}</wf:sent-status>
         </wf:synchronisation-details>
-    else ()
+    else
+      xdmp:log("No parentProcessUri !")
   (: Update parent branch for this child instance :)
   (: DO NOT Check if parent complete - done in hasRendezvoused condition -
        (don't forget there will be 1 incomplete child - this process instance! ACID!) :)

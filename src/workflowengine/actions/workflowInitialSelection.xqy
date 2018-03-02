@@ -15,6 +15,7 @@ try {
   let $_ := xdmp:log("MarkLogic Workflow initial selection action called for: "||$cpf:document-uri)
 
   (: determine next state by URI of the process document :)
+
   let $middleName := fn:string-join(fn:tokenize(fn:substring-after($cpf:document-uri,"/workflow/processes/"),"/")[1 to fn:last() -1],"/")
   let $_ := xdmp:log("Document is for process: " || $middleName)
   let $stateOverride := xs:anyURI("http://marklogic.com/states/" || $middleName || "__start")
