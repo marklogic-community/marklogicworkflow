@@ -68,6 +68,7 @@ function ext:put(
         $res
       else
         let $config := json:config("custom")
+        let $cx := map:put($config, "array-element-names",(xs:QName("wf:audit"),xs:QName("wf:metric")))
         let $cx := map:put($config, "text-value", "label" )
         let $cx := map:put($config , "camel-case", fn:true() )
         return
@@ -118,6 +119,7 @@ function ext:get(
         $out
       else
         let $config := json:config("custom")
+        let $cx := map:put($config, "array-element-names",(xs:QName("wf:audit"),xs:QName("wf:metric")))                
         let $cx := map:put($config, "text-value", "label" )
         let $cx := map:put($config , "camel-case", fn:true() )
         return
@@ -255,6 +257,7 @@ function ext:post(
         $out
       else
         let $config := json:config("custom")
+        let $cx := map:put($config, "array-element-names",(xs:QName("wf:audit"),xs:QName("wf:metric")))        
         let $cx := map:put($config, "text-value", "label" )
         let $cx := map:put($config , "camel-case", fn:true() )
         return
