@@ -36,9 +36,29 @@ def find_arg(args = [])
   nil
 end
 
+def next_arg(match)
+  ARGV.each do |arg|
+    # Exclude any argument passed from command line.
+    if arg.match(match)
+
+      # Remove group from arguments list
+      index = ARGV.index(arg)
+      ARGV.slice!(index)
+
+      # Bail out on first valid arg
+      return arg
+    end
+  end
+  nil
+end
+
 def load_prop_from_args(props)
+  indexes = []
   ARGV.each do |a|
     if a.match(/(^--)(ml\..*)(=)(.*)/)
+      # make sure to add them in reverse order (by using unshift instead of push)
+      indexes.unshift ARGV.index(a)
+
       matches = a.match(/(^--)(ml\..*)(=)(.*)/).to_a
       ml_key = matches[2]
       ml_val = matches[4]
@@ -48,6 +68,9 @@ def load_prop_from_args(props)
         logger.warn "Property #{ml_key} does not exist. It will be skipped."
       end
     end
+  end
+  indexes.each do |index|
+    ARGV.slice!(index)
   end
   props
 end

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wf:process id="5daff6c3-aba5-4c02-bf38-6cf1bcb8d44c-2018-01-09T16:23:48.244058Z" title="fork-simple__1__0" name="fork-simple" major="1" minor="0" xmlns:wf="http://marklogic.com/workflow">
+  <wf:data>
+    <choiceA>B</choiceA>
+    <choiceB>C</choiceB>
+    <newassignee>admin</newassignee>
+  </wf:data>
+  <wf:attachments>
+    <wf:attachment name="Menace" uri="/some/squid.xml">
+    </wf:attachment>
+    <wf:attachment name="Document" uri="/initial/sampledoc.xml">
+    </wf:attachment>
+  </wf:attachments>
+  <wf:audit-trail>
+    <wf:audit>
+      <wf:when>2018-01-09T16:23:49.715305Z</wf:when>
+      <wf:category>ProcessEngine</wf:category>
+      <wf:state>http://marklogic.com/states/initial</wf:state>
+      <wf:description>Completed step</wf:description>
+      <wf:detail>
+      </wf:detail>
+    </wf:audit>
+    <wf:audit>
+      <wf:when>2018-01-09T16:23:50.155466Z</wf:when>
+      <wf:category>ProcessEngine</wf:category>
+      <wf:state>http://marklogic.com/states/fork-simple__1__0/StartEvent_1</wf:state>
+      <wf:description>Completed step</wf:description>
+      <wf:detail>
+      </wf:detail>
+    </wf:audit>
+  </wf:audit-trail>
+  <wf:metrics>
+    <wf:metric>
+      <wf:state>http://marklogic.com/states/initial</wf:state>
+      <wf:start>2018-01-09T16:23:49.715305Z</wf:start>
+      <wf:finish>2018-01-09T16:23:49.715305Z</wf:finish>
+      <wf:duration>PT0S</wf:duration>
+      <wf:success>true</wf:success>
+    </wf:metric>
+    <wf:metric>
+      <wf:state>http://marklogic.com/states/fork-simple__1__0/StartEvent_1</wf:state>
+      <wf:start>2018-01-09T16:23:50.155466Z</wf:start>
+      <wf:finish>2018-01-09T16:23:50.155466Z</wf:finish>
+      <wf:duration>PT0S</wf:duration>
+      <wf:success>true</wf:success>
+    </wf:metric>
+  </wf:metrics>
+  <wf:process-definition-name>fork-simple__1__0</wf:process-definition-name>
+</wf:process>

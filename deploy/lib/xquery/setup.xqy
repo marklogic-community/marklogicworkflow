@@ -19,6 +19,7 @@ import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic
 import module namespace sec="http://marklogic.com/xdmp/security" at "/MarkLogic/security.xqy";
 import module namespace pki = "http://marklogic.com/xdmp/pki" at "/MarkLogic/pki.xqy";
 import module namespace functx="http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
+import module namespace search = "http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 
 declare namespace setup = "http://marklogic.com/roxy/setup";
 declare namespace xdmp="http://marklogic.com/xdmp";
@@ -71,6 +72,11 @@ declare variable $delete-map := map:map();
 declare variable $replicating-map-file := "/roxy/status/cleanup/replicating-map.xml";
 declare variable $replicating-map-file-internal := "/roxy/status/cleanup/replicating-map-internal.xml";
 declare variable $replicating-map := map:map();
+
+(: Several functions take an optional invalid-values parameter. Use this as the
+ : default value when it's not provided.
+ :)
+declare variable $default-invalid-values := "reject";
 
 declare variable $group-settings :=
   <settings>
@@ -369,6 +375,8 @@ declare function setup:get-rollback-config()
 {
   element configuration
   {
+    attribute rollback { fn:true() },
+
     map:get($roll-back, "task-server"),
 
     element gr:http-servers
@@ -415,6 +423,119 @@ declare function setup:get-rollback-config()
   }
 };
 
+declare variable $cts:element-reference := fn:function-lookup(xs:QName("cts:element-reference"), 2);
+declare variable $cts:parse             := fn:function-lookup(xs:QName("cts:parse"), 2);
+
+declare variable $if-parser := ();
+
+declare function setup:get-if-parser($properties as map:map) {
+  if ($if-parser) then
+    $if-parser
+  else
+    let $parser := function($query) {
+      (:
+      if (fn:exists($cts:parse)) then
+      if (fn:number(substring-before(xdmp:version(), ".")) ge 8) then
+      :)
+      (: [GJo] There are some issue with cts:parse, like it choking on "rest-ext.dir EQ something"
+               Bug filed. Using search:parse for now.
+      :)
+      if (fn:false()) then
+        let $bindings := map:new((
+          for $property in map:keys($properties)
+          let $name := fn:replace($property, "^ml[._\-]", "")
+          return map:entry($name, $cts:element-reference(xs:QName($property), ("type=int", "unchecked")))
+        ))
+        return ($cts:parse($query, $bindings), $bindings)
+      else
+        let $options := <options xmlns="http://marklogic.com/appservices/search">{
+          for $property in map:keys($properties)
+          let $name := fn:replace($property, "^ml[._\-]", "")
+          return <constraint name="{$name}">
+            <range type="xs:string" collation="http://marklogic.com/collation/">
+              <element ns="" name="{$property}"/>
+            </range>
+          </constraint>
+        }</options>
+        return (cts:query(search:parse(fn:replace($query, " EQ ", " : "), $options)), $options)
+    }
+    let $_ := xdmp:set($if-parser, $parser)
+    return $parser
+};
+
+declare function setup:eval-query($query as cts:query, $properties as map:map) {
+    typeswitch ($query)
+    case cts:and-query return fn:not(
+      (cts:and-query-queries($query) ! setup:eval-query(., $properties)) = fn:false()
+    )
+    case cts:or-query return (
+      (cts:or-query-queries($query) ! setup:eval-query(., $properties)) = fn:true()
+    )
+    case cts:not-query return fn:not(
+      cts:not-query-query($query) ! setup:eval-query(., $properties)
+    )
+    case cts:element-value-query return (
+      let $property := fn:string(cts:element-value-query-element-name($query))
+      let $operator := '='
+      let $values := cts:element-value-query-text($query)
+      return map:get($properties, $property) = $values
+    )
+    case cts:element-word-query return (
+      let $property := fn:string(cts:element-word-query-element-name($query))
+      let $operator := '='
+      let $values := cts:element-word-query-text($query)
+      return map:get($properties, $property) = $values
+    )
+    case cts:element-range-query return (
+      let $property := fn:string(cts:element-range-query-element-name($query))
+      let $operator := cts:element-range-query-operator($query)
+      let $values := cts:element-range-query-value($query)
+      return
+        if ($operator = ('=', '!=', '>', '>=', '<', '<=')) then
+          xdmp:value("map:get($properties, $property) " || $operator || " $values")
+        else
+          fn:error(xs:QName("UNSUPPORTED"), "Unsupported operator " || $operator)
+    )
+    case cts:word-query return (
+      fn:error(xs:QName("SYNTAX"), "Syntax error near " || cts:word-query-text($query))
+    )
+    default return (
+      fn:error(xs:QName("UNSUPPORTED"), "Cannot parse " || fn:upper-case(fn:replace(fn:string(xdmp:type($query)), "-query$", "")))
+    )
+};
+
+declare function setup:process-conditionals($nodes, $properties) {
+  for $node in $nodes
+  return
+    typeswitch ($node)
+    case element() return
+      let $if-valid :=
+        if (fn:exists($node/@if)) then
+          let $parser := setup:get-if-parser($properties)
+          let $expression := string($node/@if)
+          return try {
+            let $query := $parser($expression)[1]
+            return try {
+              setup:eval-query($query, $properties)
+            } catch ($e) {
+              fn:error(xs:QName("IF-PARSE-ERROR"),
+                "Unable to evauluate the expression '" || $expression || "': " || $e/error:format-string/data())
+            }
+          } catch ($e) {
+            fn:error(xs:QName("IF-PARSE-ERROR"),
+              "Unable to parse the expression '" || $expression || "': " || $e/error:format-string/data())
+          }
+        else
+          fn:true()
+      where $if-valid
+      return element { fn:node-name($node) } {
+        $node/@*,
+        setup:process-conditionals($node/node(), $properties)
+      }
+    case comment() return ()
+    default return $node
+};
+
 declare function setup:suppress-comments($nodes) {
   for $node in $nodes
   return
@@ -429,18 +550,21 @@ declare function setup:suppress-comments($nodes) {
 };
 
 (: for backwards-compatibility :)
-declare function setup:rewrite-config($import-configs as element(configuration)+) as element(configuration)
+declare function setup:rewrite-config($import-configs as element(configuration)+, $properties as map:map) as element(configuration)
 {
-  setup:rewrite-config($import-configs, ())
+  setup:rewrite-config($import-configs, $properties, ())
 };
 
-declare function setup:rewrite-config($import-configs as element(configuration)+, $silent as xs:boolean?) as element(configuration)
+declare function setup:rewrite-config($import-configs as element(configuration)+, $properties as map:map, $silent as xs:boolean?) as element(configuration)
 {
+  let $import-configs := setup:process-conditionals($import-configs, $properties)
   let $config :=
     element { fn:node-name($import-configs[1]) } {
       $import-configs/@*,
 
-      <groups xmlns="http://marklogic.com/xdmp/group" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://marklogic.com/xdmp/group group.xsd">{
+      <groups xmlns="http://marklogic.com/xdmp/group">{
+        $import-configs/gr:groups/@*,
+
         let $default-group := ($import-configs/@default-group, "Default")[1]
         for $group in fn:distinct-values(
           ($import-configs/gr:groups/gr:group/gr:group-name, $import-configs/(gr:http-servers/gr:http-server, gr:xdbc-servers/gr:xdbc-server,
@@ -455,6 +579,7 @@ declare function setup:rewrite-config($import-configs as element(configuration)+
         where fn:exists($servers | $databases | $group-config)
         return
           <group>
+            { $group-config/@* }
             <group-name>{$group}</group-name>
             {
               if ($http-servers) then
@@ -539,7 +664,7 @@ declare private function setup:parse-options( $options as xs:string ) as map:map
   return $optionsMap
 };
 
-declare function setup:do-setup($import-config as element(configuration)+, $options as xs:string) as item()*
+declare function setup:do-setup($import-config as element(configuration)+, $options as xs:string, $properties as map:map) as item()*
 {
   let $optionsMap := setup:parse-options( $options )
   let $do-internals := map:contains( $optionsMap, "internals" )
@@ -547,30 +672,44 @@ declare function setup:do-setup($import-config as element(configuration)+, $opti
   return
   try
   {
-    let $import-config := setup:rewrite-config($import-config)
+    let $import-config := setup:rewrite-config($import-config, $properties)
     return (
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "ssl")) then setup:create-ssl-certificate-templates($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "privileges")) then setup:create-privileges($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "roles")) then setup:create-roles($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "users")) then setup:create-users($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "users") or map:contains($optionsMap, "roles")) then setup:associate-users-with-roles($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "external-security")) then setup:create-external-security($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "external-security")) then setup:apply-external-security-settings($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "credentials")) then setup:create-credentials($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "mimetypes")) then setup:create-mimetypes($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "groups")) then setup:create-groups($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "groups")) then setup:configure-groups($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "hosts")) then setup:configure-hosts($import-config) else (),
+      if (fn:not($do-internals)) then (
+        (: Security related :)
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "ssl")) then setup:create-ssl-certificate-templates($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "privileges")) then setup:create-privileges($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "roles")) then setup:create-roles($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "users")) then setup:create-users($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "users") or map:contains($optionsMap, "roles")) then setup:associate-users-with-roles($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "external-security")) then setup:create-external-security($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "external-security")) then setup:apply-external-security-settings($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "credentials")) then setup:create-credentials($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "mimetypes")) then setup:create-mimetypes($import-config) else (),
+
+        (: Groups, hosts :)
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "groups")) then setup:create-groups($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "groups")) then setup:configure-groups($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "hosts")) then setup:configure-hosts($import-config) else ()
+      ) else (),
+
+      (: Database related :)
       if(map:contains($optionsMap, "all") or map:contains($optionsMap, "forests")) then setup:create-forests($import-config, $do-internals) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "databases")) then setup:create-databases($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "databases")) then setup:attach-forests($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "amps")) then setup:create-amps($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "databases")) then setup:apply-database-settings($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "databases")) then setup:configure-databases($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "indexes")) then setup:configure-indexes($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "appservers")) then setup:create-appservers($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "appservers")) then setup:apply-appservers-settings($import-config) else (),
-      if(map:contains($optionsMap, "all") or map:contains($optionsMap, "tasks")) then setup:create-scheduled-tasks($import-config) else (),
+
+      if(fn:not($do-internals)) then (
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "databases")) then setup:create-databases($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "databases")) then setup:attach-forests($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "amps")) then setup:create-amps($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "databases")) then setup:apply-database-settings($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "databases")) then setup:configure-databases($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "indexes")) then setup:configure-indexes($import-config) else (),
+
+        (: App-servers :)
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "appservers")) then setup:create-appservers($import-config) else (),
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "appservers")) then setup:apply-appservers-settings($import-config) else (),
+
+        (: Tasks :)
+        if(map:contains($optionsMap, "all") or map:contains($optionsMap, "tasks")) then setup:create-scheduled-tasks($import-config) else ()
+      ) else (),
       if ($restart-needed) then
         "note: restart required"
       else ()
@@ -587,12 +726,12 @@ declare function setup:do-setup($import-config as element(configuration)+, $opti
         configuring external authentication.&#10;&#10;' )
     else (),
     xdmp:log($ex),
-    setup:do-wipe(setup:get-rollback-config(), ""),
+    setup:do-wipe(setup:get-rollback-config(), $options, $properties),
     fn:concat($ex/err:format-string/text(), '&#10;See MarkLogic Server error log for more details.')
   }
 };
 
-declare function setup:do-wipe($import-config as element(configuration)+, $options as xs:string) as item()*
+declare function setup:do-wipe($import-config as element(configuration)+, $options as xs:string, $properties as map:map) as item()*
 {
   let $options := if(fn:empty($options) or $options eq "") then ("all") else fn:tokenize($options, ",")
 
@@ -604,7 +743,11 @@ declare function setup:do-wipe($import-config as element(configuration)+, $optio
   return
   try
   {
-    let $import-config := setup:rewrite-config($import-config, fn:true())
+    let $import-config :=
+      if ($import-config/@rollback = "true") then
+        $import-config
+      else
+        setup:rewrite-config($import-config, $properties, fn:true())
     return (
 
       (: remove scheduled tasks :)
@@ -1019,7 +1162,7 @@ declare function setup:do-wipe($import-config as element(configuration)+, $optio
   Attempt to remove replicas that are to be decommissioned due to scaling out of the cluster.
   Replicas are only removed after their new replacements have gone to sync replication.
 :)
-declare function setup:do-clean-replicas($import-config as element(configuration)+, $options as xs:string) as item()*
+declare function setup:do-clean-replicas($import-config as element(configuration)+, $options as xs:string, $properties as map:map) as item()*
 {
   let $optionsMap := setup:parse-options( $options )
   let $do-internals := map:contains( $optionsMap, "internals" )
@@ -1029,6 +1172,7 @@ declare function setup:do-clean-replicas($import-config as element(configuration
   return
     try {
       if (map:count( $delete-map ) ) then
+        let $import-config := setup:rewrite-config($import-config, $properties)
         (: Loop over the replicas we are waiting for and check state :)
         let $reps-waiting :=
           for $rep in map:keys( $replicating-map )
@@ -1076,7 +1220,7 @@ declare function setup:do-clean-replicas($import-config as element(configuration
             let $_ := xdmp:log( "Updating configuration." )
             let $_ := admin:save-configuration( map:get( $updated-config, "admin-config" ) )
 
-            let $_ := setup:do-clean-replicas-state( $import-config, $options )
+            let $_ := setup:do-clean-replicas-state( $options )
 
             let $_ := xdmp:log( fn:string-join( ( "Clean replicas complete:", $cleaned ), "&#x0a;" ) )
             return( fn:string-join( ( "Clean replicas complete:", $cleaned ), "&#x0a;" ) )
@@ -1100,7 +1244,7 @@ declare function setup:do-clean-replicas($import-config as element(configuration
 (:
   Cleanup scale-out replica state files.
 :)
-declare function setup:do-clean-replicas-state($import-config as element(configuration)+, $options as xs:string) as item()*
+declare function setup:do-clean-replicas-state($options as xs:string) as item()*
 {
   let $optionsMap := setup:parse-options( $options )
   let $do-internals := map:contains( $optionsMap, "internals" )
@@ -1170,9 +1314,9 @@ declare function setup:do-restart($group-name as xs:string?) as item()*
         "Restarting hosts to make configuration changes take effect"),
 
       if ($group-id) then
-        fn:concat("Group ", $group-name, " restarted")
+        fn:concat("Invoked group ", $group-name, " restart")
       else
-        fn:concat("Cluster restarted")
+        fn:concat("Invoked cluster restart")
     )
   }
   catch ($ex)
@@ -1299,20 +1443,8 @@ declare function setup:save-cleanup-state( $import-config as element(configurati
     else
       $replicating-map-file
 
-  let $user-roles :=
-    xdmp:eval(
-      'import module namespace sec="http://marklogic.com/xdmp/security" at "/MarkLogic/security.xqy";' ||
-      'sec:get-role-names( xdmp:get-current-roles() )',
-      (),
-      <options xmlns="xdmp:eval"><database>{xdmp:security-database()}</database></options>
-    )
   let $perms :=
-    if ("admin" = $user-roles ) then (
-      xdmp:permission( "admin", "read" ),
-      xdmp:permission( "admin", "update" )
-    )
-    else
-      xdmp:default-permissions()
+    xdmp:default-permissions()
 
   (: Write the delete maps and the replicating maps for use when delete old replicas is done :)
   return (
@@ -2258,7 +2390,7 @@ declare function setup:validated-range-element-indexes(
             $index-config/db:localname/fn:string(.),
             fn:string($index-config/db:collation[../db:scalar-type = 'string']),
             ($index-config/db:range-value-positions/xs:boolean(.), false())[1],
-            ($index-config/db:invalid-values, "reject")[1]
+            ($index-config/db:invalid-values, $default-invalid-values)[1]
           )
         else
           xdmp:apply(
@@ -2320,7 +2452,7 @@ declare function setup:validated-range-element-attribute-indexes(
             $index-config/db:localname/fn:string(.),
             fn:string($index-config/db:collation[../db:scalar-type = 'string']),
             ($index-config/db:range-value-positions/xs:boolean(.), false())[1],
-            ($index-config/db:invalid-values, "reject")[1]
+            ($index-config/db:invalid-values, $default-invalid-values)[1]
           )
         else
           xdmp:apply(
@@ -2449,7 +2581,7 @@ declare function setup:add-range-path-indexes(
                $index/db:path-expression,
                $index/db:collation,
                $index/db:range-value-positions,
-               $index/db:invalid-values
+               ($index/db:invalid-values, $default-invalid-values)[1]
              )
          )"
       )
@@ -2478,6 +2610,7 @@ declare function setup:validate-range-path-indexes(
       declare namespace db="http://marklogic.com/xdmp/database";
       declare variable $database external;
       declare variable $x external;
+      declare variable $default-invalid-values external;
 
       admin:database-range-path-index(
        $database,
@@ -2485,9 +2618,10 @@ declare function setup:validate-range-path-indexes(
        $x/db:path-expression,
        fn:string($x/db:collation[../db:scalar-type = "string"]),
        $x/db:range-value-positions,
-       $x/db:invalid-values)',
+       ($x/db:invalid-values, $default-invalid-values)[1])',
       (xs:QName("database"), $database,
-       xs:QName("x"), $expected))
+       xs:QName("x"), $expected,
+       xs:QName("default-invalid-values"), $default-invalid-values))
   return
     if ($existing[fn:deep-equal(., $expected)]) then ()
     else
@@ -2689,7 +2823,7 @@ declare function setup:add-range-field-indexes-helper(
             $index/db:field-name,
             ($index/db:collation/fn:string(), "")[1], (: ML6 requires xs:string; later requires xs:string? :)
             $index/db:range-value-positions,
-            $index/db:invalid-values
+            ($index/db:invalid-values, $default-invalid-values)[1]
           )
         else
           admin:database-range-field-index(
@@ -2738,7 +2872,7 @@ declare function setup:add-geospatial-element-indexes(
           $index/db:coordinate-system,
           $index/db:range-value-positions,
           ($index/db:point-format, "point")[1],
-          ($index/db:invalid-values, "ignore")[1]
+          ($index/db:invalid-values, $default-invalid-values)[1]
         )
       else
         admin:database-geospatial-element-index(
@@ -2792,7 +2926,7 @@ declare function setup:add-geospatial-element-attribute-pair-indexes(
           $index/db:longitude-localname,
           $index/db:coordinate-system,
           $index/db:range-value-positions,
-          ($index/db:invalid-values, "ignore")[1]
+          ($index/db:invalid-values, $default-invalid-values)[1]
         )
       else
         admin:database-geospatial-element-attribute-pair-index(
@@ -2849,7 +2983,7 @@ declare function setup:add-geospatial-element-pair-indexes(
           $index/db:longitude-localname,
           $index/db:coordinate-system,
           $index/db:range-value-positions,
-          ($index/db:invalid-values, "ignore")[1]
+          ($index/db:invalid-values, $default-invalid-values)[1]
         )
       else
         admin:database-geospatial-element-pair-index(
@@ -2905,7 +3039,7 @@ declare function setup:add-geospatial-element-child-indexes(
           $index/db:coordinate-system,
           $index/db:range-value-positions,
           ($index/db:point-format, "point")[1],
-          ($index/db:invalid-values, "ignore")[1]
+          ($index/db:invalid-values, $default-invalid-values)[1]
         )
       else
         admin:database-geospatial-element-child-index(
@@ -4467,15 +4601,18 @@ declare function setup:get-scheduled-task(
       $admin-config,
       $group-id)
   let $modules-db :=
-    if ($task/gr:task-modules/@name eq "filesystem") then
-      0
-    else
+    if (admin:database-exists($admin-config, $task/gr:task-modules/@name)) then
       admin:database-get-id($admin-config, $task/gr:task-modules/@name)
+    else
+      0
   return
     $tasks[gr:task-path = $task/gr:task-path and
            gr:task-root = $task/gr:task-root and
            gr:task-type = $task/gr:task-type and
-           gr:task-database = admin:database-get-id($admin-config, $task/gr:task-database/@name) and
+           (
+             fn:not(admin:database-exists($admin-config, $task/gr:task-database/@name))
+             or gr:task-database = admin:database-get-id($admin-config, $task/gr:task-database/@name)
+           ) and
            gr:task-modules = $modules-db and
            gr:task-user = xdmp:user($task/gr:task-user/@name)]
           [if ($task/gr:task-period) then gr:task-period = $task/gr:task-period else fn:true()]
@@ -4742,6 +4879,9 @@ declare function setup:validate-external-security(
 declare function setup:create-roles(
   $import-config as element(configuration))
 {
+  (: get the existing role names from the default security DB :)
+  let $existing-role-names := setup:get-existing-role-names()
+
   (: Create all missing roles :)
   for $role in $import-config/sec:roles/sec:role
   let $role-name as xs:string := $role/sec:role-name
@@ -4754,7 +4894,7 @@ declare function setup:create-roles(
     </options>
   return
     (: if the role exists, then don't create it :)
-    if (setup:get-roles(())/sec:role[sec:role-name = $role-name]) then ()
+    if ($existing-role-names[. = $role-name]) then ()
     else
     (
       xdmp:eval(
@@ -4911,6 +5051,9 @@ declare function setup:create-roles(
 declare function setup:validate-roles(
   $import-config as element(configuration))
 {
+  (: get the existing role names from the default security DB :)
+  let $existing-roles := setup:get-roles(())
+
   for $role in $import-config/sec:roles/sec:role
   let $role-name as xs:string := $role/sec:role-name
   let $description as xs:string? := $role/sec:description
@@ -4921,7 +5064,7 @@ declare function setup:validate-roles(
   let $privileges as element(sec:privilege)* := $role/sec:privileges/sec:privilege
   let $amps as element(sec:amp)* := $role/sec:amps/*
   let $external-names as xs:string* := $role/sec:external-names/sec:external-name
-  let $match := setup:get-roles(())/sec:role[sec:role-name = $role-name]
+  let $match := $existing-roles/sec:role[sec:role-name = $role-name]
   return
     if ($match) then
       if ($match/sec:role-name != $role-name or
@@ -4964,6 +5107,10 @@ declare function setup:associate-users-with-roles($import-config as element(conf
 
 declare function setup:create-users($import-config as element(configuration))
 {
+  (: get the existing user names from the default security DB :)
+  let $existing-user-names := setup:get-existing-user-names()
+
+  (: Create all missing users :)
   for $user in $import-config/sec:users/sec:user
   let $user-name as xs:string := $user/sec:user-name
   let $description as xs:string? := $user/sec:description
@@ -4978,7 +5125,7 @@ declare function setup:create-users($import-config as element(configuration))
       <isolation>different-transaction</isolation>
     </options>
   return
-    if (setup:get-users(())/sec:user[sec:user-name = $user-name]) then
+    if ($existing-user-names[. = $user-name]) then
     (
       xdmp:eval(
         'import module namespace sec="http://marklogic.com/xdmp/security" at "/MarkLogic/security.xqy";
@@ -5088,6 +5235,9 @@ declare function setup:create-users($import-config as element(configuration))
 
 declare function setup:validate-users($import-config as element(configuration))
 {
+  (: get the existing users from the default security DB :)
+  let $existing-users := setup:get-users(())
+
   for $user in $import-config/sec:users/sec:user
   let $user-name as xs:string := $user/sec:user-name
   let $description as xs:string? := $user/sec:description
@@ -5096,7 +5246,7 @@ declare function setup:validate-users($import-config as element(configuration))
   let $permissions as element(sec:permission)* := $user/sec:permissions/*
   let $collections as xs:string* := $user/sec:collections/*
   let $external-names as xs:string* := $user/sec:external-names/sec:external-name
-  let $match := setup:get-users(())/sec:user[sec:user-name = $user-name]
+  let $match := $existing-users/sec:user[sec:user-name = $user-name]
   return
     if ($match) then
       if ($match/sec:description != $description or
@@ -5451,6 +5601,19 @@ declare function setup:get-privilege-by-name($name as xs:string) as element(sec:
     </options>)
 };
 
+(: Gets the user names from the default security database :)
+declare function setup:get-existing-user-names() as element(sec:user-name)* {
+  let $user-names :=
+    xdmp:eval(
+      'import module namespace sec="http://marklogic.com/xdmp/security" at "/MarkLogic/security.xqy";
+       /sec:user',
+       (),
+       <options xmlns="xdmp:eval">
+        <database>{$default-security}</database>
+       </options>)/sec:user-name
+  return $user-names
+};
+
 declare function setup:get-users-by-name($names as xs:string*) as element(sec:users)? {
   let $ids :=
     for $name in $names
@@ -5528,6 +5691,19 @@ declare function setup:get-user-id($user-name as xs:string) as xs:unsignedLong? 
      <options xmlns="xdmp:eval">
        <database>{$default-security}</database>
      </options>)
+};
+
+(: Gets the role names from the default security database :)
+declare function setup:get-existing-role-names() as element(sec:role-name)* {
+  let $role-names :=
+    xdmp:eval(
+      'import module namespace sec="http://marklogic.com/xdmp/security" at "/MarkLogic/security.xqy";
+        /sec:role',
+      (),
+      <options xmlns="xdmp:eval">
+        <database>{$default-security}</database>
+      </options>)/sec:role-name
+  return $role-names
 };
 
 declare function setup:get-roles-by-name($roles as xs:string*) as element(sec:roles)? {
@@ -6010,11 +6186,11 @@ declare function setup:validation-fail($message)
   fn:error(xs:QName("VALIDATION-FAIL"), $message)
 };
 
-declare function setup:validate-install($import-config as element(configuration))
+declare function setup:validate-install($import-config as element(configuration), $properties as map:map)
 {
   try
   {
-    let $import-config := setup:rewrite-config($import-config)
+    let $import-config := setup:rewrite-config($import-config, $properties)
     return (
       setup:validate-external-security($import-config),
       setup:validate-privileges($import-config),

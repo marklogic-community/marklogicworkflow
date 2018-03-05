@@ -22,5 +22,13 @@ declare variable $c:USER := "@ml.user";
 declare variable $c:PASSWORD := "@ml.password";
 declare variable $c:RESTHOST := "localhost";
 declare variable $c:RESTPORT := "@ml.test-port";
+declare variable $LOCAL-TEST-DATA-DIR := "/raw/bpmn/";
+declare variable $SLEEP-FOR-ASYNC := 5; (: Sleep period required, in seconds, for async tasks :)
 
+declare function local-uri-for-test-file($test-file-name as xs:string){
+	$LOCAL-TEST-DATA-DIR||$test-file-name	
+};
 
+declare function test-sleep(){
+	xdmp:sleep($SLEEP-FOR-ASYNC * 1000)
+};
