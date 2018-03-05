@@ -32,7 +32,10 @@ declare function uh:remove-user($username as xs:string){
          import module namespace sec = 'http://marklogic.com/xdmp/security' at '/MarkLogic/security.xqy';
          declare variable $username as xs:string external;
 
-         sec:remove-user($username)
+         if(sec:user-exists($username)) then
+          sec:remove-user($username)
+         else          
+          ()
        ",
        (xs:QName("username"), $username),
         <options xmlns="xdmp:eval">

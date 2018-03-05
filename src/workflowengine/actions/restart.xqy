@@ -17,12 +17,15 @@ declare variable $cpf:options as element() external;
 
 try {
   let $_ := xdmp:log("MarkLogic Workflow restart CPF action called for: "||$cpf:document-uri)
-
+  let $_ := xdmp:trace("ml-workflow","restart transition : "||xdmp:quote($cpf:transition))
+  let $_ := xdmp:trace("ml-workflow","restart cpf:options : "||xdmp:quote($cpf:options))
   (: 1. Check for external task completion status (step-status = "COMPLETE") :)
   let $_ := xdmp:log("restart condition check for: " || $cpf:document-uri)
-  let $ready := xdmp:document-properties($cpf:document-uri)/prop:properties/wf:currentStep/wf:step-status
-  let $_ := xdmp:log($ready)
-  let $result := "COMPLETE" eq $ready
+  let $complete as xs:boolean := xdmp:document-properties($cpf:document-uri)/prop:properties/wf:currentStep/wf:step-status eq $wfu:COMPLETE-STATUS
+  let $forking as xs:boolean := xdmp:document-properties($cpf:document-uri)/prop:properties/wf:currentStep/wf:step-type = $wfu:FORK-STEP-TYPE
+  let $_ := xdmp:log("Complete : "||$complete)
+  let $_ := xdmp:log("Forking : "||$forking)  
+  let $result as xs:boolean := $complete or $forking
   let $_ := xdmp:log($result)
 
   return
@@ -35,8 +38,10 @@ try {
       let $startTime := xs:dateTime($props/wf:currentStep/wf:startTime)
       return wfu:complete( $cpf:document-uri, $cpf:transition, xs:anyURI($next), $startTime )
     else (
-      (: From set-updated-action.xqy in CPF:)
 
+      xdmp:trace("ml-workflow","Restart - checking transition ..."),
+      xdmp:trace("ml-workflow","Current props : "||xdmp:quote(xdmp:document-properties($cpf:document-uri)/prop:properties)),
+      xdmp:log(fn:concat("cpf:check-transition(",$cpf:document-uri,",",xdmp:quote($cpf:transition),")"), "debug"),
       if (cpf:check-transition($cpf:document-uri,$cpf:transition)) then
         (
           cpf:document-set-last-updated( $cpf:document-uri, fn:current-dateTime() )

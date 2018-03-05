@@ -14,7 +14,7 @@ declare variable $cpf:options as element() external;
 let $_ := xdmp:log("isComplete condition check for: " || $cpf:document-uri)
 let $ready := xdmp:document-properties($cpf:document-uri)/prop:properties/wf:currentStep/wf:step-status
 let $_ := xdmp:log($ready)
-let $result := "COMPLETE" eq $ready
+let $result := $wfu:COMPLETE-STATUS eq $ready
 let $_ := xdmp:log($result)
 return (
    xdmp:log( fn:concat("MarkLogic Workflow isComplete result=", fn:string($result), " for ", $cpf:document-uri) ),

@@ -9,7 +9,7 @@ let $_lock-fail-user := uh:create-user("test-workflow-user", "test-workflow-user
   ("workflow-role-unit-test", "rest-reader", "rest-writer") )
 
 return (
-  test:load-test-file("015-restapi-tests.bpmn", xdmp:database(), "/raw/data/015-restapi-tests.bpmn"),
+  test:load-test-file("015-restapi-tests.bpmn", xdmp:database(), "/raw/bpmn/015-restapi-tests.bpmn"),
   test:load-test-file("06-payload.xml", xdmp:database(), "/raw/data/06-payload.xml"),
   test:load-test-file("09-payload.xml", xdmp:database(), "/raw/data/09-payload.xml"),
   test:load-test-file("11-payload.xml", xdmp:database(), "/raw/data/11-payload.xml"),

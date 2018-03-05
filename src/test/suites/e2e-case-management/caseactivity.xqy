@@ -39,7 +39,7 @@ declare namespace http = "xdmp:http";
 let $response := cmrt:get-case("22345", $cmrt:user-one-options)
 return (
   test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="testphase"]/wfc:activities/wfc:activity[@id="activity1"]),
-  test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:audit-trail/wfc:audit/wfc:description[xs:string(.)="Case Activity activity1 Inserted"]),
+  test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:audit-trail/wfc:audit/wfc:description[xs:string(.)="Case Phase testphase and Activity activity1 Inserted"]),
   test:assert-not-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="testphase"]/wfc:activities/wfc:activity[@id="activity2"])
 );
 
@@ -83,7 +83,7 @@ declare namespace http = "xdmp:http";
 let $response := cmrt:get-case("22345", $cmrt:user-one-options)
 return (
   test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="testphase"]/wfc:activities/wfc:activity[@id="activity1"]),
-  test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:audit-trail/wfc:audit/wfc:description[xs:string(.)="Case Activity activity1 Inserted"]),
+  test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:audit-trail/wfc:audit/wfc:description[xs:string(.)="Case Phase testphase and Activity activity1 Inserted"]),
   test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="testphase"]/wfc:activities/wfc:activity[@id="activity2"]),
   test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:audit-trail/wfc:audit/wfc:description[xs:string(.)="Case Activity activity2 Inserted"])
 );
@@ -177,7 +177,7 @@ declare namespace http = "xdmp:http";
 
 let $response := cmrt:get-case("22345", $cmrt:user-one-options)
 return (
-  test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:audit-trail/wfc:audit/wfc:description[xs:string(.)="Case Activity activity1 Inserted"]),
+  test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:audit-trail/wfc:audit/wfc:description[xs:string(.)="Case Phase testphase and Activity activity1 Inserted"]),
   test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="testphase"]/wfc:activities/wfc:activity[@id="activity2"]),
   test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:audit-trail/wfc:audit/wfc:description[xs:string(.)="Case Activity activity2 Inserted"]),
   test:assert-exists($response[2]/ext:readResponse/wfc:case/wfc:phases/wfc:phase[@id="testphase"]/wfc:activities/wfc:activity[@id="activity2"]),
