@@ -97,9 +97,16 @@ declare function m:get($processId as xs:string) as element(wf:process)? {
  :)
 declare function m:delete($processId as xs:string) as empty-sequence() {
   let $process-uri := m:getProcessUri($processId)
+  let $children as xs:string* := cts:search(/,cts:element-value-query(xs:QName("wf:parent"),$process-uri))/wf:process/@id
   return
+  (    
+    (: Delete parent :)
     if(fn:doc-available($process-uri)) then xdmp:document-delete($process-uri)
     else ()
+    ,
+    (: Delete children :)
+    $children ! m:delete(.)
+  )    
 };
 
 (:

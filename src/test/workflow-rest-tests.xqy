@@ -280,3 +280,12 @@ declare function wrt:call-complete-on-pid($options as element(http:options),$pid
       fn:encode-for-uri($pid), "&amp;rs:complete=true")    
   return xdmp:http-post($uri, $options, $payload)[2]
 };
+
+declare function wrt:process-delete($options as element(http:options),$pid as xs:string){
+  let $uri := fn:concat(
+      "http://", $const:RESTHOST, ':', $const:RESTPORT,
+      "/v1/resources/process?rs:processid=",
+      fn:encode-for-uri($pid)
+  )    
+  return xdmp:http-delete($uri, $options)[2]
+};
