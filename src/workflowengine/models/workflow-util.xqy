@@ -5,6 +5,8 @@ module namespace m="http://marklogic.com/workflow-util";
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
 import module namespace sem = "http://marklogic.com/semantics" at "/MarkLogic/semantics.xqy";
 import module namespace ss = "http://marklogic.com/search/subscribe" at "/workflowengine/models/lib-search-subscribe.xqy";
+import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";
+
 
 declare namespace prop = "http://marklogic.com/xdmp/property";
 declare namespace wf="http://marklogic.com/workflow";
@@ -48,7 +50,7 @@ declare function m:create(
   )
   return $id
 };
-
+  
 (:
  : Convenience function to take a few parameters and set up the above call to m:create (removes this logic from multiple functions)
  :)
@@ -812,3 +814,18 @@ declare function get-mime-type($node as node()){
     case text() return "text/html"
     default return "application/octet-stream"
 };
+
+declare function m:removeSubscription($subscription-name as xs:string) as empty-sequence(){
+  let $domain-name := xdmp:invoke-function(
+    function(){
+      /alert:config[alert:config-uri = "/config/alerts/"||$subscription-name]/alert:cpf-domains/alert:cpf-domain/fn:string()
+    }
+    ,<options xmlns="xdmp:eval"><database>{xdmp:database()}</database><isolation>different-transaction</isolation></options>
+    )
+  let $_ := ss:check-remove-config($subscription-name)
+  let $_ := xdmp:trace("ml-workflow","Domain = "||$domain-name)
+  return
+  ss:delete-domain($domain-name)
+    
+
+};  

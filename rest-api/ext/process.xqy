@@ -282,7 +282,7 @@ function ext:delete(
   return
     (
       map:put($context, "output-types", $preftype),
-      xdmp:set-response-code(200, "OK"),
+      map:put($context,"output-status",(200, "OK")),
       document {()}
     )
 };
