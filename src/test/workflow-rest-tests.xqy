@@ -191,19 +191,40 @@ declare function wrt:test-15-17-process-update ($options, $pid)
 (: functions specific to email tests... :)
 declare function wrt:test-25-processsubscription-create ($options)
 {
+  let $payload := fn:doc("/raw/data/25-payload.xml")
+  return 
+  wrt:test-processsubscription-create($options,$payload)
+};
+
+declare function wrt:test-processsubscription-create ($options,$payload)
+{
   let $uri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/resources/processsubscription")
-  let $file := fn:doc("/raw/data/25-payload.xml")
-  return xdmp:http-put($uri, $options, $file)
+  return xdmp:http-put($uri, $options, $payload)
+};
+
+declare function wrt:test-processsubscription-read ($options,$subscription-name as xs:string)
+{
+  let $uri := fn:concat(
+    "http://", $const:RESTHOST, ':', $const:RESTPORT,
+    "/v1/resources/processsubscription?rs:name="||$subscription-name)
+  return xdmp:http-get($uri, $options)
 };
 
 declare function wrt:test-26-processsubscription-read ($options)
 {
+  let $subscription-name := "email-sub-test"
+  return
+  wrt:test-processsubscription-read($options,$subscription-name)
+};
+
+declare function wrt:test-processsubscription-delete ($options,$subscription-name as xs:string)
+{
   let $uri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
-    "/v1/resources/processsubscription?rs:name=email-sub-test")
-  return xdmp:http-get($uri, $options)
+    "/v1/resources/processsubscription?rs:name="||$subscription-name)
+  return xdmp:http-delete($uri, $options)
 };
 
 declare function wrt:test-27-document-create ($options)
@@ -279,4 +300,13 @@ declare function wrt:call-complete-on-pid($options as element(http:options),$pid
       "/v1/resources/process?rs:processid=",
       fn:encode-for-uri($pid), "&amp;rs:complete=true")    
   return xdmp:http-post($uri, $options, $payload)[2]
+};
+
+declare function wrt:process-delete($options as element(http:options),$pid as xs:string){
+  let $uri := fn:concat(
+      "http://", $const:RESTHOST, ':', $const:RESTPORT,
+      "/v1/resources/process?rs:processid=",
+      fn:encode-for-uri($pid)
+  )    
+  return xdmp:http-delete($uri, $options)[2]
 };

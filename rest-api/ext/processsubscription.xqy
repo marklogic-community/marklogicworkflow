@@ -88,17 +88,22 @@ function ext:get(
 
   let $_ := xdmp:log($params)
   let $_ := xdmp:log($context)
-
+  let $subscription-name := map:get($params,"name") 
   let $out :=
-    if (fn:empty(map:get($params,"name"))) then
+    if (fn:empty($subscription-name)) then
       <ext:readResponse><ext:outcome>FAILURE</ext:outcome><ext:details>name parameter is required</ext:details></ext:readResponse>
     else
-      <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
+      let $subscription := wfu:getSubscription($subscription-name)
+      return
+      if(fn:empty($subscription)) then
+        <ext:readResponse><ext:outcome>NOT FOUND</ext:outcome></ext:readResponse>
+      else        
+      <ext:readResponse>
+        <ext:outcome>SUCCESS</ext:outcome>
         <ext:subscription>
-          {wfu:getSubscription(map:get($params,"name"))}
+          {$subscription}
         </ext:subscription>
       </ext:readResponse>
-
   return
   (
     xdmp:set-response-code(200, "OK"),
@@ -114,3 +119,27 @@ function ext:get(
     }
   )
 };
+
+
+declare
+%roxy:params("")
+function ext:delete(
+  $context as map:map,
+  $params  as map:map
+) as document-node()? {
+
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+
+  let $subscription-name := map:get($params,"name")
+  let $_ := xdmp:log("REST Subscription name: " || $subscription-name)
+  let $_ := wfu:removeSubscription($subscription-name)
+
+  return
+    (
+      map:put($context,"output-types", $preftype),
+      map:put($context,"output-status",(204, "NOT FOUND")),
+      document {()}
+    )
+
+};
+

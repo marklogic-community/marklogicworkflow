@@ -270,9 +270,8 @@ declare
 %roxy:params("")
 function ext:delete(
   $context as map:map,
-  $params  as map:map,
-  $input   as document-node()*
-) as document-node()* {
+  $params  as map:map
+) as document-node()? {
 
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
 
@@ -283,7 +282,7 @@ function ext:delete(
   return
     (
       map:put($context, "output-types", $preftype),
-      xdmp:set-response-code(200, "OK"),
+      map:put($context,"output-status",(200, "OK")),
       document {()}
     )
 };
