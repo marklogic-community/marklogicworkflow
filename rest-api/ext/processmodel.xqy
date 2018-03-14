@@ -22,17 +22,12 @@ function ext:get(
 ) as document-node()*
 {
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json" 
-
+  let $_ := xdmp:trace("ml-workflow","processmodel-get : requested type = "||$preftype)
+  let $_ := map:put($context, "output-types", $preftype) (: TODO mime type from file name itself :)
   let $out := wfi:get-model-by-name(map:get($params,"publishedId"))
   return
   (
-    let $mime-type := wfu:get-mime-type($out)
-    let $_ := xdmp:trace("ml-workflow","processmodel-get : model mime-type = "||$mime-type)
-    let $_ := xdmp:trace("ml-workflow","processmodel-get : requested type = "||$preftype)
-    return
-    map:put($context, "output-types", $preftype), (: TODO mime type from file name itself :)
     xdmp:set-response-code(200, "OK"),
-
     document {
 
             if ("application/xml" = $preftype) then
@@ -63,6 +58,7 @@ function ext:put(
 ) as document-node()?
 {
   let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $_ := map:put($context, "output-types", $preftype) (: TODO mime type from file name itself :)
 
   let $_ := xdmp:log("processmodel: PUT: name: " || map:get($params,"name") || ", major: " || map:get($params,"major") || ", minor: " || map:get($params,"minor"))
   let $_ := xdmp:log($params)
@@ -86,11 +82,8 @@ function ext:put(
       (: 3. Optionally enable :)
 
         if ("application/xml" = $preftype) then
-          let $_ := map:put($context, "output-types", "application/xml")                  
-          return
           $out
         else
-          let $_ := map:put($context, "output-types", "application/json")        
           let $config := json:config("custom")
           let $cx := map:put($config, "text-value", "label" )
           let $cx := map:put($config , "camel-case", fn:true() )
