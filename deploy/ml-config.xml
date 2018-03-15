@@ -103,6 +103,7 @@
           <default-user name="${default-user}"/>
           <url-rewriter>${url-rewriter}</url-rewriter>
           <error-handler>${error-handler}</error-handler>
+          <collation>http://marklogic.com/collation/codepoint</collation>
           @ml.rewrite-resolves-globally
           <!-- for external security use:
 
@@ -239,18 +240,13 @@
       </fields>
 -->
       <range-element-indexes>
-        <!--
-        Sample for:
-          <name xmlns="http://marklogic.com/ns/sample">bob<name>
-
         <range-element-index>
           <scalar-type>string</scalar-type>
-          <namespace-uri>http://marklogic.com/ns/sample</namespace-uri>
-          <localname>name</localname>
+          <namespace-uri>http://marklogic.com/workflow</namespace-uri>
+          <localname>process-model-name</localname>
           <collation>http://marklogic.com/collation/codepoint</collation>
           <range-value-positions>false</range-value-positions>
         </range-element-index>
--->
       </range-element-indexes>
       <range-element-attribute-indexes>
         <range-element-attribute-index>
@@ -259,7 +255,7 @@
           <parent-localname>process</parent-localname>
           <namespace-uri/>
           <localname>id</localname>
-          <collation>http://marklogic.com/collation/</collation>
+          <collation>http://marklogic.com/collation/codepoint</collation>
           <range-value-positions>false</range-value-positions>
           <invalid-values>ignore</invalid-values>
         </range-element-attribute-index>
@@ -269,10 +265,11 @@
           <parent-localname>attachment</parent-localname>
           <namespace-uri/>
           <localname>uri</localname>
-          <collation>http://marklogic.com/collation/</collation>
+          <collation>http://marklogic.com/collation/codepoint</collation>
           <range-value-positions>false</range-value-positions>
           <invalid-values>ignore</invalid-values>
         </range-element-attribute-index>
+
 <!--
         Sample for:
           <person name="bob" xmlns="http://marklogic.com/ns/sample"/>
