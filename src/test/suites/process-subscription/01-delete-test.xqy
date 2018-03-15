@@ -12,14 +12,14 @@
 :)
 import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
-import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
+import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
 import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
 
 declare namespace model = "http://marklogic.com/rest-api/resource/processmodel";
 
-declare variable $MODEL-INPUT-FILE-NAME := wth:file-name-for-model($test-constants:TEST-02-MODEL-NAME);
+declare variable $MODEL-INPUT-FILE-NAME := wth:file-name-for-model($test-constants:TEST-MODEL-NAME);
 
 declare option xdmp:mapping "false";
 
@@ -27,7 +27,7 @@ let $model-response := wrt:processmodel-create ($const:xml-options, $MODEL-INPUT
 return
 (
   test:assert-equal(xs:string($model-response/model:createResponse/model:outcome/text()),"SUCCESS"),
-  test:assert-equal(xs:string($model-response/model:createResponse/model:modelId/text()),wth:expected-model-id($test-constants:TEST-02-MODEL-NAME))
+  test:assert-equal(xs:string($model-response/model:createResponse/model:modelId/text()),wth:expected-model-id($test-constants:TEST-MODEL-NAME))
 )  
 ;
 
@@ -41,7 +41,7 @@ declare namespace ext="http://marklogic.com/rest-api/resource/processsubscriptio
 
 let $test-payload := 
 <ext:createRequest xmlns:ext="http://marklogic.com/rest-api/resource/processsubscription">
-  <ext:processName>{wth:expected-model-id($test-constants:TEST-02-MODEL-NAME)}</ext:processName>
+  <ext:processName>{wth:expected-model-id($test-constants:TEST-MODEL-NAME)}</ext:processName>
   <ext:name>{$test-constants:SUBSCRIPTION-NAME}</ext:name>  
   <ext:domain>
    <ext:name>{$test-constants:DOMAIN-NAME}</ext:name>

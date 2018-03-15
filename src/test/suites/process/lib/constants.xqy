@@ -4,6 +4,6 @@ import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" a
 
 declare option xdmp:mapping "false";
 
-declare variable $TEST-02-MODEL-NAME  := "InclusiveGatewayTest-02";
-declare variable $TEST-MODEL-NAMES := ($TEST-02-MODEL-NAME);
+declare variable $TEST-MODEL-NAME  := "test-model";
+declare variable $TEST-MODEL-NAMES := ($TEST-MODEL-NAME);
 declare variable $TEST-FILES := $TEST-MODEL-NAMES ! wth:file-name-for-model(.);
