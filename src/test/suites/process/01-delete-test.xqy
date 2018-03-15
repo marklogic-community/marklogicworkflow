@@ -14,13 +14,13 @@ xdmp:trace("ml-workflow","in delete-test.xqy")
 import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
 import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
-
+import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
 
 declare namespace model = "http://marklogic.com/rest-api/resource/processmodel";
 
-declare variable $MODEL-INPUT-FILE-NAME := test-constants:file-name-for-model($test-constants:TEST-02-MODEL-NAME);
+declare variable $MODEL-INPUT-FILE-NAME := wth:file-name-for-model($test-constants:TEST-02-MODEL-NAME);
 
 declare option xdmp:mapping "false";
 
@@ -28,7 +28,7 @@ let $model-response := wrt:processmodel-create ($const:xml-options, $MODEL-INPUT
 return
 (
   test:assert-equal(xs:string($model-response/model:createResponse/model:outcome/text()),"SUCCESS"),
-  test:assert-equal(xs:string($model-response/model:createResponse/model:modelId/text()),test-constants:expected-model-id($test-constants:TEST-02-MODEL-NAME))
+  test:assert-equal(xs:string($model-response/model:createResponse/model:modelId/text()),wth:expected-model-id($test-constants:TEST-02-MODEL-NAME))
 )  
 ;
 (:
@@ -38,10 +38,11 @@ import module namespace const="http://marklogic.com/roxy/workflow-constants" at 
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
 import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 
-declare variable $PROCESS-MODEL-NAME := test-constants:expected-model-id($test-constants:TEST-02-MODEL-NAME);
+declare variable $PROCESS-MODEL-NAME := wth:expected-model-id($test-constants:TEST-02-MODEL-NAME);
 
 let $payload := element ext:createRequest{element ext:processName{$PROCESS-MODEL-NAME},element ext:data{element value1{"A"},element value2{"B"}},element ext:attachments{}}
 let $process-response := wrt:process-create($const:xml-options, $payload)[2]
@@ -50,7 +51,7 @@ return
 (
   test:assert-equal(xs:string($process-response/ext:createResponse/ext:outcome/text()),"SUCCESS"),
   test:assert-exists($pid),
-  test-constants:save-pid($pid,$test-constants:TEST-02-MODEL-NAME)
+  wth:save-pid($pid,$test-constants:TEST-02-MODEL-NAME)
 )
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
@@ -74,8 +75,9 @@ import module namespace test-constants = "http://marklogic.com/workflow/test-con
 (:import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";:)
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 
-let $test-pid := fn:doc(test-constants:test-pid-uri($test-constants:TEST-02-MODEL-NAME))/test-constants:pid/text()
+let $test-pid := fn:doc(wth:test-pid-uri($test-constants:TEST-02-MODEL-NAME))/wth:pid/text()
 return
 wrt:process-delete($const:xml-options,$test-pid)[0]
 
