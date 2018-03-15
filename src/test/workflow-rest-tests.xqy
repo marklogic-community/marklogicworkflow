@@ -52,6 +52,18 @@ declare function wrt:processmodel-create ($options, $filename)
   return xdmp:http-put($uri, $options, $file)
 };
 
+declare function wrt:processmodel-create ($options as element(), $filename as xs:string, $major-version as xs:int,$minor-version as xs:int)
+{
+  let $uri := fn:concat(
+    "http://", $const:RESTHOST, ':', $const:RESTPORT,
+    "/v1/resources/processmodel?rs:name=", $filename,
+    "&amp;rs:major=",$major-version,"&amp;rs:minor=",$minor-version,
+    "&amp;rs:enable=true")
+  let $fullpath := fn:concat("/raw/bpmn/", $filename)
+  let $file := fn:doc($fullpath)
+  return xdmp:http-put($uri, $options, $file)
+};
+
 declare function wrt:processmodel-publish ($options, $modelid)
 {
   let $uri := fn:concat(
@@ -100,11 +112,12 @@ declare function wrt:test-02-processmodel-read ($options)
 
 declare function wrt:test-03-processmodel-update ($options)
 {
-  let $uri := fn:concat(
+  wrt:processmodel-create($options,"015-restapi-tests.bpmn",1,2)
+  (:let $uri := fn:concat(015-restapi-tests.bpmn
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
     "/v1/resources/processmodel?rs:name=015-restapi-tests.bpmn&amp;rs:major=1&amp;rs:minor=2")
   let $file := fn:doc("/raw/bpmn/015-restapi-tests.bpmn")
-  return xdmp:http-put($uri, $options, $file)
+  return xdmp:http-put($uri, $options, $file):)
 };
 
 declare function wrt:test-08-processinbox-read ($options)

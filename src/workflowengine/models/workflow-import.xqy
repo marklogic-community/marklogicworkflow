@@ -11,6 +11,8 @@ declare namespace wf="http://marklogic.com/workflow";
 declare namespace sc="http://www.w3.org/2005/07/scxml";
 declare namespace b2="http://www.omg.org/spec/BPMN/20100524/MODEL";
 
+declare variable $PROCESS-MODEL-METADATA-DIR := "/workflow/model-metadata/";
+
 (: TODO replace following outgoing routes with call to m:b2getNextSteps() :)
 
 (: REST API OR XQUERY PUBLIC API FUNCTIONS :)
@@ -360,7 +362,7 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
             <isolation>different-transaction</isolation>
           </options>
         ) (: TODO handle failure gracefully :)
-
+  let $_ := insert-process-model-metadata($shortname,$major,$minor)        
   return
     $pmap
 
@@ -1417,4 +1419,29 @@ declare function m:b2getNextSteps($process as element(b2:process),$state as elem
       $txt
   let $sf := $process/b2:sequenceFlow[./@id = $rc]
   return $process/element()[./@id = xs:string($sf/@targetRef)]
+};
+
+(:
+  KT Need to store metadata about the process model - we can't currently easily look for models with the same base name 
+  without parsing the process model long name
+:)
+declare function insert-process-model-metadata($model-name as xs:string,$major-version as xs:string,$minor-version as xs:string){
+    let $process-model-full-name := process-model-full-name($model-name,$major-version,$minor-version)
+    let $uri := fn:concat($PROCESS-MODEL-METADATA-DIR,$process-model-full-name,".xml")
+    let $content := 
+    element wf:process-model-metadata{
+      element wf:process-model-full-name{$process-model-full-name},
+      element wf:process-model-name{$model-name},
+      element wf:major-version{$major-version},
+      element wf:minor-version{$minor-version}
+    }
+    return
+    xdmp:document-insert($uri,$content)
+};
+
+(:
+  Process model full name - i.e. including version tokens
+:)
+declare function process-model-full-name($model-name as xs:string,$major-version as xs:string,$minor-version as xs:string) as xs:string{
+  fn:concat($model-name,"__",$major-version,"__",$minor-version)
 };
