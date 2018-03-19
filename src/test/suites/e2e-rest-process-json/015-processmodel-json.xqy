@@ -264,6 +264,79 @@ return (
   test:assert-exists($result[2]/readResponse/document)
 );
 
+
+(: processinbox-read to check that admin is the dynamically assigned user - no equivalent in shtests :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace http = "xdmp:http";
+
+let $_testlog := xdmp:log("E2E XML TEST: dynamically assigned user processinbox-read")
+let $_pause := xdmp:sleep(10000)
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:test-08-processinbox-read($const:json-options)
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]/readResponse/outcome)) (: ,
+  These should pass too once corrected from XML to JSON...
+  test:assert-exists($result[2]/ext:readResponse/wf:inbox/wf:task[@processid=$pid]),
+  let $task := $result[2]/ext:readResponse/wf:inbox/wf:task[@processid=$pid]
+  return (
+    test:assert-exists($task/wf:process-data/wf:process/wf:data),
+    test:assert-exists($task/wf:process-data/wf:process/wf:attachments),
+    test:assert-exists($task/wf:process-data/wf:process/wf:audit-trail),
+    test:assert-exists($task/wf:process-data/wf:process/wf:metrics),
+    test:assert-exists($task/wf:process-data/wf:process/wf:process-definition-name),
+    let $properties := $task/wf:process-properties/prop:properties
+    return (
+      test:assert-equal('done', xs:string($properties/cpf:processing-status)),
+      test:assert-equal('user', xs:string($properties/wf:currentStep/wf:type)),
+      test:assert-equal('admin', xs:string($properties/wf:currentStep/wf:assignee)),
+      test:assert-equal('userTask', xs:string($properties/wf:currentStep/wf:step-type)),
+      test:assert-equal('ENTERED', xs:string($properties/wf:currentStep/wf:step-status))
+    )
+  ) :)
+);
+
+(: Here's where we add steps for Assigned Role - no equivalent in shtests :)
+
+(: process-update :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace http = "xdmp:http";
+let $_testlog := xdmp:log("E2E XML TEST: Assigned Role process-update")
+let $_pause := xdmp:sleep(5000)
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:test-15-17-process-update($const:json-options, $pid)
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]//outcome))
+);
+
+(: processroleinbox-read :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace http = "xdmp:http";
+
+let $_testlog := xdmp:log("E2E XML TEST: Assigned Role process-read")
+let $_pause := xdmp:sleep(5000)
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:test-processroleinbox-read($const:json-options, 'AssignedRole')
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]/readResponse/outcome)),
+  test:assert-equal($pid, xs:string($result[2]/readResponse/queue/task/processid)),
+  let $properties := $result[2]/readResponse/queue/task/processProperties
+  return (
+    test:assert-equal('role', xs:string($properties/properties/currentStep/type)),
+    test:assert-equal('AssignedRole', xs:string($properties/properties/currentStep/role))
+  )
+);
+
+
+
 (: 17-process-update - should follow "with attachments" path :)
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";

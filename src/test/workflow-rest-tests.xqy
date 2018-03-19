@@ -115,6 +115,15 @@ declare function wrt:test-08-processinbox-read ($options)
   return xdmp:http-get($uri, $options)
 };
 
+declare function wrt:test-processroleinbox-read ($options, $role)
+{
+  let $uri := fn:concat(
+    "http://", $const:RESTHOST, ':', $const:RESTPORT,
+    "/v1/resources/processroleinbox?rs:role=", $role)
+  return xdmp:http-get($uri, $options)
+};
+
+
 declare function wrt:test-09-process-update ($options, $pid)
 {
   let $_ := xdmp:log(fn:concat("options=", xdmp:quote($options)))
@@ -290,7 +299,7 @@ declare function wrt:test-92-processengine-delete ($options)
 };
 
 declare function wrt:call-complete-on-pid($options as element(http:options),$pid as xs:string){
-  let $payload := 
+  let $payload :=
   element process:updateRequest{
     element process:processId{$pid},
     /wf:process[@id = $pid]/(wf:data|wf:attachments)
@@ -298,7 +307,7 @@ declare function wrt:call-complete-on-pid($options as element(http:options),$pid
   let $uri := fn:concat(
       "http://", $const:RESTHOST, ':', $const:RESTPORT,
       "/v1/resources/process?rs:processid=",
-      fn:encode-for-uri($pid), "&amp;rs:complete=true")    
+      fn:encode-for-uri($pid), "&amp;rs:complete=true")
   return xdmp:http-post($uri, $options, $payload)[2]
 };
 

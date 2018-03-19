@@ -10,10 +10,10 @@ declare namespace http = "xdmp:http";
 
 let $process := wrt:processmodel-create ($const:xml-options, "015-restapi-tests.bpmn")
 let $_testlog := xdmp:log("E2E XML TEST: 01-processmodel-create")
-return ( 
+return (
   test:assert-equal('200', xs:string($process[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($process[2]/ext:createResponse/ext:outcome)),
-  test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/ext:createResponse/ext:modelId)) 
+  test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/ext:createResponse/ext:modelId))
 );
 (:
   <ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -46,10 +46,10 @@ declare namespace http = "xdmp:http";
 
 let $result := wrt:test-03-processmodel-update($const:xml-options)
 let $_testlog := xdmp:log("E2E XML TEST: 03-processmodel-update")
-return ( 
+return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:createResponse/ext:outcome)),
-  test:assert-equal('015-restapi-tests__1__2', xs:string($result[2]/ext:createResponse/ext:modelId)) 
+  test:assert-equal('015-restapi-tests__1__2', xs:string($result[2]/ext:createResponse/ext:modelId))
 );
 (:
   <ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -68,10 +68,10 @@ declare namespace http = "xdmp:http";
 let $_testlog := xdmp:log("E2E XML TEST: 04-processmodel-publish")
 (: not working with XML ? :)
 let $result := wrt:processmodel-publish($const:xml-options, "015-restapi-tests__1__2")
-return ( 
+return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:updateResponse/ext:outcome)),
-  test:assert-exists(xs:string($result[2]/ext:updateResponse/ext:domainId)) 
+  test:assert-exists(xs:string($result[2]/ext:updateResponse/ext:domainId))
 );
 (:
   <ext:updateResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -293,6 +293,85 @@ return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)),
   test:assert-exists($result[2]/ext:readResponse/ext:document)
+);
+
+
+(: processinbox-read to check that admin is the dynamically assigned user - no equivalent in shtests :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace cpf = "http://marklogic.com/cpf";
+declare namespace ext = "http://marklogic.com/rest-api/resource/processinbox";
+declare namespace http = "xdmp:http";
+declare namespace prop = "http://marklogic.com/xdmp/property";
+declare namespace wf="http://marklogic.com/workflow";
+
+let $_testlog := xdmp:log("E2E XML TEST: dynamically assigned user processinbox-read")
+let $_pause := xdmp:sleep(10000)
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:test-08-processinbox-read($const:xml-options)
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)) (: ,
+  These should pass too...
+  test:assert-exists($result[2]/ext:readResponse/wf:inbox/wf:task[@processid=$pid]),
+  let $task := $result[2]/ext:readResponse/wf:inbox/wf:task[@processid=$pid]
+  return (
+    test:assert-exists($task/wf:process-data/wf:process/wf:data),
+    test:assert-exists($task/wf:process-data/wf:process/wf:attachments),
+    test:assert-exists($task/wf:process-data/wf:process/wf:audit-trail),
+    test:assert-exists($task/wf:process-data/wf:process/wf:metrics),
+    test:assert-exists($task/wf:process-data/wf:process/wf:process-definition-name),
+    let $properties := $task/wf:process-properties/prop:properties
+    return (
+      test:assert-equal('done', xs:string($properties/cpf:processing-status)),
+      test:assert-equal('user', xs:string($properties/wf:currentStep/wf:type)),
+      test:assert-equal('admin', xs:string($properties/wf:currentStep/wf:assignee)),
+      test:assert-equal('userTask', xs:string($properties/wf:currentStep/wf:step-type)),
+      test:assert-equal('ENTERED', xs:string($properties/wf:currentStep/wf:step-status))
+    )
+  ) :)
+);
+
+(: Here's where we add steps for Assigned Role - no equivalent in shtests :)
+
+(: process-update :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace ext = "http://marklogic.com/rest-api/resource/process";
+declare namespace http = "xdmp:http";
+let $_testlog := xdmp:log("E2E XML TEST: Assigned Role process-update")
+let $_pause := xdmp:sleep(5000)
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:test-15-17-process-update($const:xml-options, $pid)
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]//ext:outcome))
+);
+
+(: processroleinbox-read :)
+import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+declare namespace ext = "http://marklogic.com/rest-api/resource/processroleinbox";
+declare namespace http = "xdmp:http";
+declare namespace prop = "http://marklogic.com/xdmp/property";
+declare namespace wf="http://marklogic.com/workflow";
+
+let $_testlog := xdmp:log("E2E XML TEST: Assigned Role process-read")
+let $_pause := xdmp:sleep(5000)
+let $pid := xs:string(doc("/test/processId.xml")/test/processId)
+let $result := wrt:test-processroleinbox-read($const:xml-options, 'AssignedRole')
+return (
+  test:assert-equal('200', xs:string($result[1]/http:code)),
+  test:assert-equal('SUCCESS', xs:string($result[2]/ext:readResponse/ext:outcome)),
+  test:assert-equal($pid, xs:string($result[2]/ext:readResponse/wf:queue/wf:task/@processid)),
+  let $properties := $result[2]/ext:readResponse/wf:queue/wf:task/wf:process-properties
+  return (
+    test:assert-equal('role', xs:string($properties/prop:properties/wf:currentStep/wf:type)),
+    test:assert-equal('AssignedRole', xs:string($properties/prop:properties/wf:currentStep/wf:role))
+  )
 );
 
 (: 17-process-update - should follow "with attachments" path :)
