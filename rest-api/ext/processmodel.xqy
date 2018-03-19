@@ -7,11 +7,13 @@ import module namespace wfi="http://marklogic.com/workflow-import" at "/workflow
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 import module namespace http-codes = "http://marklogic.com/workflow/http-codes" at "/lib/http-codes.xqy";
 import module namespace http-util = "http://marklogic.com/workflow/http-util" at "/lib/http-util.xqy";
+import module namespace string-util = "http://marklogic.com/workflow/string-util" at "/lib/string-util.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace rapi= "http://marklogic.com/rest-api";
 declare namespace roxy = "http://marklogic.com/roxy";
 
+declare option xdmp:output "omit-xml-declaration = yes";
 (:
  : Get the process model by exact name
  :  ?publishedId=name
@@ -136,8 +138,9 @@ function ext:post(
 :)
 declare private function convert-to-json($response as node()?) as object-node()?{
   let $config := json:config("custom")
-  let $cx := map:put($config, "text-value", "label" )
-  let $cx := map:put($config , "camel-case", fn:true() )
+  let $cx := map:put($config, "text-value", "label")
+  let $cx := map:put($config ,"camel-case", fn:true())
+  let $cx := map:put($config,"array-element-names",xs:QName("wf:process-model"))
   return
   json:transform-to-json($response, $config)
 };  
@@ -173,7 +176,7 @@ declare function xml-to-html($object as element()){
     return
     element html{
       element body{
-        element h3{format-string(fn:local-name($object))}
+        element h3{string-util:dash-format-string(fn:local-name($object))}
         ,
         for $element in $object/*
         let $name-element := $element/*[fn:matches(fn:local-name(.),"name")]
@@ -191,12 +194,3 @@ declare function xml-to-html($object as element()){
     default return $object
 };
 
-declare function capitalize($string as xs:string){
-  fn:upper-case(fn:substring($string,1,1))||fn:lower-case(fn:substring($string,2,fn:string-length($string)))
-};
-
-declare function format-string($string as xs:string){
-  let $strings := (fn:tokenize($string,"-") ! capitalize(.))
-  return
-  fn:string-join($strings," ")
-};
