@@ -1,4 +1,4 @@
-module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway";
+module namespace test-constants = "http://marklogic.com/workflow/test-constants/process-model";
 
 import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 

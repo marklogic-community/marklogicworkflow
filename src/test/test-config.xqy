@@ -32,3 +32,7 @@ declare function local-uri-for-test-file($test-file-name as xs:string){
 declare function test-sleep(){
 	xdmp:sleep($SLEEP-FOR-ASYNC * 1000)
 };
+
+declare function remove-test-assets(){
+	cts:uris((),(),cts:directory-query($LOCAL-TEST-DATA-DIR)) ! xdmp:document-delete(.)
+};

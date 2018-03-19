@@ -401,9 +401,9 @@ declare function ss:create-domain($domainname as xs:string,$domaintype as xs:str
       try {
         if (fn:not(fn:empty(
           xdmp:eval(
-           'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external; dom:get($m:processmodeluri)'
+           'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:process-model-uri as xs:string external; dom:get($m:process-model-uri)'
            ,
-            (xs:QName("my:processmodeluri"),$domainname),
+            (xs:QName("my:process-model-uri"),$domainname),
             <options xmlns="xdmp:eval">
               <database>{xdmp:triggers-database()}</database>
               <isolation>different-transaction</isolation>
@@ -413,11 +413,11 @@ declare function ss:create-domain($domainname as xs:string,$domaintype as xs:str
           let $_ := xdmp:log(" GOT DOMAIN TO REMOVE")
           return
             xdmp:eval(
-              'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;'
+              'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:process-model-uri as xs:string external;'
               ||
-              'dom:remove($m:processmodeluri)'
+              'dom:remove($m:process-model-uri)'
               ,
-              (xs:QName("my:processmodeluri"),$domainname),
+              (xs:QName("my:process-model-uri"),$domainname),
               <options xmlns="xdmp:eval">
                 <database>{xdmp:triggers-database()}</database>
                 <isolation>different-transaction</isolation>
@@ -472,9 +472,9 @@ declare function ss:delete-domain($domainname as xs:string) {
       try {
         if (fn:not(fn:empty(
           xdmp:eval(
-           'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external; dom:get($m:processmodeluri)'
+           'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:process-model-uri as xs:string external; dom:get($m:process-model-uri)'
            ,
-            (xs:QName("my:processmodeluri"),$domainname),
+            (xs:QName("my:process-model-uri"),$domainname),
             <options xmlns="xdmp:eval">
               <database>{xdmp:triggers-database()}</database>
               <isolation>different-transaction</isolation>
@@ -484,11 +484,11 @@ declare function ss:delete-domain($domainname as xs:string) {
           let $_ := xdmp:log(" GOT DOMAIN TO REMOVE")
           return
             xdmp:eval(
-              'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:processmodeluri as xs:string external;'
+              'xquery version "1.0-ml";declare namespace m="http://marklogic.com/alerts"; import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";declare variable $m:process-model-uri as xs:string external;'
               ||
-              'dom:remove($m:processmodeluri)'
+              'dom:remove($m:process-model-uri)'
               ,
-              (xs:QName("my:processmodeluri"),$domainname),
+              (xs:QName("my:process-model-uri"),$domainname),
               <options xmlns="xdmp:eval">
                 <database>{xdmp:triggers-database()}</database>
                 <isolation>different-transaction</isolation>

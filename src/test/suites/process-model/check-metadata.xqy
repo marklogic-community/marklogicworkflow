@@ -1,11 +1,16 @@
 (:
 	Checks on process model metadata
 :)
+(: As this test is about process model metadata, make sure we don't have any unwanted model metadata being used :)
+declare namespace wf="http://marklogic.com/workflow";
+
+/wf:process-model-metadata ! xdmp:document-delete(fn:base-uri(.))
+;
 (:
   Create process model and check it has been created correctly
 :)
 import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
-import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-model/lib/constants.xqy";
+import module namespace test-constants = "http://marklogic.com/workflow/test-constants/process-model" at "/test/suites/process-model/lib/constants.xqy";
 import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
@@ -27,13 +32,12 @@ return
   Check metadata
 :)
 
-import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-model/lib/constants.xqy";
+import module namespace test-constants = "http://marklogic.com/workflow/test-constants/process-model" at "/test/suites/process-model/lib/constants.xqy";
 import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
 import module namespace wfi="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
-
 
 let $metadata := /wf:process-model-metadata[wf:process-model-name = $test-constants:TEST-MODEL-NAME]
 return
@@ -48,7 +52,7 @@ return
   Now do an update
 :)
 import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
-import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-model/lib/constants.xqy";
+import module namespace test-constants = "http://marklogic.com/workflow/test-constants/process-model" at "/test/suites/process-model/lib/constants.xqy";
 import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace wfi="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";
@@ -73,7 +77,7 @@ return
   Check metadata
 :)
 
-import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-model/lib/constants.xqy";
+import module namespace test-constants = "http://marklogic.com/workflow/test-constants/process-model" at "/test/suites/process-model/lib/constants.xqy";
 import module namespace wth = "http://marklogic.com/roxy/workflow-test-helper" at "/test/workflow-test-helper.xqy";
 import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
 import module namespace wfi="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";

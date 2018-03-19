@@ -6,6 +6,7 @@ import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cp
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
 import module namespace stack="http://marklogic.com/stack" at "/workflowengine/models/lib-stack.xqy";
 import module namespace ss = "http://marklogic.com/alerts/alerts" at "/workflowengine/models/lib-alerts.xqy";
+import module namespace wfc = "http://marklogic.com/workflow/constants" at "/lib/workflow-constants.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace sc="http://www.w3.org/2005/07/scxml";
@@ -51,7 +52,7 @@ declare function m:install-and-convert($doc as node(),$filename as xs:string,$ma
           let $pipelineId := m:get-pipeline-id($resp)
           let $_ := xdmp:log("Yes! Installing domain now for pipeline with installed id: " || xs:string($pipelineId))
           return
-            m:domain( (: $processmodeluri,$major,$minor, :) $resp,$pipelineId) (: Keep uri, major, minor here in case :)
+            m:domain( (: $process-model-uri,$major,$minor, :) $resp,$pipelineId) (: Keep uri, major, minor here in case :)
             (: xdmp:log("In wfi:convert-to-cpf: domain: " || $dom) :)
         else
           xdmp:log("Not installing domain for pipeline")
@@ -66,9 +67,14 @@ declare function m:enable($localPipelineId as xs:string) as xs:unsignedLong* {
   return m:domain($pname, m:get-pipeline-id($pname)) (: Keep uri, major, minor here in case :)
 };
 
-declare function m:get-model-by-name($name as xs:string) as node() {
-  let $uri := "/workflow/models/" || $name
-  return fn:doc($uri)
+declare function process-model-uri($model-full-name as xs:string) as xs:string{
+  /wf:process-model-metadata[wf:process-model-full-name = $model-full-name]/wf:process-model-uri/text()  
+};
+
+declare function m:get-model-by-name($model-full-name as xs:string) as node() {
+  let $uri := process-model-uri($model-full-name)
+  return 
+  fn:doc($uri)
 };
 
 declare function m:getPipelineFamily($pname as xs:string) as xs:string* {
@@ -174,7 +180,7 @@ declare function m:ensureWorkflowPipelinesInstalled() as empty-sequence() {
 };
 
 
-declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as xs:string* {
+declare function m:convert-to-cpf($process-model-uri as xs:string,$major as xs:string,$minor as xs:string) as xs:string* {
   (: Find document :)
   let $_ := xdmp:log("In wfi:convert-to-cpf")
 
@@ -184,12 +190,12 @@ declare function m:convert-to-cpf($processmodeluri as xs:string,$major as xs:str
     xdmp:eval('
       xquery version "1.0-ml";
       import module namespace m="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";
-      declare variable $m:processmodeluri as xs:string external;
+      declare variable $m:process-model-uri as xs:string external;
       declare variable $m:major as xs:string external;
       declare variable $m:minor as xs:string external;
-      m:create($m:processmodeluri,$m:major,$m:minor)
+      m:create($m:process-model-uri,$m:major,$m:minor)
     ',
-      (xs:QName("m:processmodeluri"),$processmodeluri,xs:QName("m:major"),$major,xs:QName("m:minor"),$minor),
+      (xs:QName("m:process-model-uri"),$process-model-uri,xs:QName("m:major"),$major,xs:QName("m:minor"),$minor),
       <options xmlns="xdmp:eval">
         <isolation>different-transaction</isolation>
       </options>
@@ -290,31 +296,20 @@ declare function m:index-of-string
 
 (: INTERNAL PRIVATE FUNCTIONS :)
 
-declare function m:create($processmodeluri as xs:string,$major as xs:string,$minor as xs:string) as map:map {
+declare function m:create($process-model-uri as xs:string,$major as xs:string,$minor as xs:string) as map:map {
   let $_ := xdmp:log("In wfi:create")
 
-  let $root := fn:doc($processmodeluri)/element()
+  let $root := fn:doc($process-model-uri)/element()
 
   let $_ := xdmp:log("local name: "||fn:local-name($root)||" namespace: "||fn:namespace-uri($root))
-  (:
-  let $pname := $processmodeluri||"__"||$major||"__"||$minor
-  let $_ := xdmp:log("pname: " || $pname)
-  :)
 
-
-  let $max := m:index-of-string($processmodeluri,"/")[last()]
-
-  let $start := fn:substring($processmodeluri,$max + 1)
+  let $max := m:index-of-string($process-model-uri,"/")[last()]
+  let $start := fn:substring($process-model-uri,$max + 1)
 
   let $shortname := fn:substring-before($start,".")
-
-
-
-  let $name := $shortname || "__" || $major || "__" || $minor (: VERY IMPORTANT :)
-
+  let $name := process-model-full-name($shortname,$major,$minor)
 
   let $_ := xdmp:log("In wfi:create: name: " || $name)
-
   let $_ := xdmp:log("wfi:create : Now DELETING pipeline(s)")
 
 
@@ -362,7 +357,7 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
             <isolation>different-transaction</isolation>
           </options>
         ) (: TODO handle failure gracefully :)
-  let $_ := insert-process-model-metadata($shortname,$major,$minor)        
+  let $_ := insert-process-model-metadata($shortname,$major,$minor,$process-model-uri)        
   return
     $pmap
 
@@ -394,10 +389,10 @@ declare function m:get-pipeline-id($pname as xs:string) as xs:unsignedLong {
       xquery version "1.0-ml";
       declare namespace m="http://marklogic.com/workflow";
       import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
-      declare variable $m:processmodeluri as xs:string external;
-      xs:unsignedLong(p:get($m:processmodeluri)/p:pipeline-id)
+      declare variable $m:process-model-uri as xs:string external;
+      xs:unsignedLong(p:get($m:process-model-uri)/p:pipeline-id)
     ',
-      (xs:QName("wf:processmodeluri"),$pname),
+      (xs:QName("wf:process-model-uri"),$pname),
       <options xmlns="xdmp:eval">
         <database>{xdmp:triggers-database()}</database>
         <isolation>different-transaction</isolation>
@@ -462,11 +457,11 @@ declare function m:install($puri as xs:string) as xs:unsignedLong {
 };
 
 
-declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$minor as xs:string, :) $pname as xs:string,$pid as xs:unsignedLong) as xs:unsignedLong {
+declare function m:domain((: $process-model-uri as xs:string,$major as xs:string,$minor as xs:string, :) $pname as xs:string,$pid as xs:unsignedLong) as xs:unsignedLong {
 
   let $_ := xdmp:log("In wfi:domain")
 
-  (: let $pname := $processmodeluri||"__"||$major||"__"||$minor :)
+  (: let $pname := $process-model-uri||"__"||$major||"__"||$minor :)
   (: TODO Add all OOTB CPF pipelines to this domain too :)
 
   let $mdb := xdmp:modules-database()
@@ -480,10 +475,10 @@ declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$
         xquery version "1.0-ml";
         declare namespace m="http://marklogic.com/workflow";
         import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
-        declare variable $m:processmodeluri as xs:string external;
-        dom:get($m:processmodeluri)
+        declare variable $m:process-model-uri as xs:string external;
+        dom:get($m:process-model-uri)
       ',
-        (xs:QName("wf:processmodeluri"),$pname),
+        (xs:QName("wf:process-model-uri"),$pname),
         <options xmlns="xdmp:eval">
           <database>{xdmp:triggers-database()}</database>
           <isolation>different-transaction</isolation>
@@ -497,10 +492,10 @@ declare function m:domain((: $processmodeluri as xs:string,$major as xs:string,$
         xquery version "1.0-ml";
         declare namespace m="http://marklogic.com/workflow";
         import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
-        declare variable $m:processmodeluri as xs:string external;
-        dom:remove($m:processmodeluri)
+        declare variable $m:process-model-uri as xs:string external;
+        dom:remove($m:process-model-uri)
       ',
-        (xs:QName("wf:processmodeluri"),$pname),
+        (xs:QName("wf:process-model-uri"),$pname),
         <options xmlns="xdmp:eval">
           <database>{xdmp:triggers-database()}</database>
           <isolation>different-transaction</isolation>
@@ -571,7 +566,7 @@ declare function m:scxml-to-cpf($pipelineName as xs:string, $doc as element(sc:s
   (: NB major and minor version not needed because this forms part of the process model document URI :)
 
   (: remove start and extension to get pname - /processengine/models/NAME/MAJOR/MINOR/model.xml :)
-  (: let $pname := $processmodeluri||"__"||$major||"__"||$minor :)
+  (: let $pname := $process-model-uri||"__"||$major||"__"||$minor :)
 
   let $failureAction := p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),())
   let $failureState := xs:anyURI("http://marklogic.com/states/error")
@@ -666,7 +661,7 @@ declare function m:bpmn2-to-cpf($pname as xs:string, $doc as element(b2:definiti
   (: NB major and minor version not needed because this forms part of the process model document URI :)
 
   (: remove start and extension to get pname - /processengine/models/NAME/MAJOR/MINOR/model.xml :)
-  (: let $pname := $processmodeluri||"__"||$major||"__"||$minor :)
+  (: let $pname := $process-model-uri||"__"||$major||"__"||$minor :)
 
   let $failureAction := p:action("/MarkLogic/cpf/actions/failure-action.xqy",(),())
   let $failureState := xs:anyURI("http://marklogic.com/states/error")
@@ -1425,13 +1420,14 @@ declare function m:b2getNextSteps($process as element(b2:process),$state as elem
   KT Need to store metadata about the process model - we can't currently easily look for models with the same base name 
   without parsing the process model long name
 :)
-declare function insert-process-model-metadata($model-name as xs:string,$major-version as xs:string,$minor-version as xs:string){
+declare function insert-process-model-metadata($model-name as xs:string,$major-version as xs:string,$minor-version as xs:string,$process-model-uri){
     let $process-model-full-name := process-model-full-name($model-name,$major-version,$minor-version)
     let $uri := fn:concat($PROCESS-MODEL-METADATA-DIR,$process-model-full-name,".xml")
     let $content := 
     element wf:process-model-metadata{
       element wf:process-model-full-name{$process-model-full-name},
       element wf:process-model-name{$model-name},
+      element wf:process-model-uri{$process-model-uri},
       element wf:major-version{$major-version},
       element wf:minor-version{$minor-version}
     }
@@ -1441,7 +1437,18 @@ declare function insert-process-model-metadata($model-name as xs:string,$major-v
 
 (:
   Process model full name - i.e. including version tokens
+  Get rid of prefix / suffix content if any received
 :)
 declare function process-model-full-name($model-name as xs:string,$major-version as xs:string,$minor-version as xs:string) as xs:string{
   fn:concat($model-name,"__",$major-version,"__",$minor-version)
 };
+
+declare function process-model-uri($filename as xs:string,$major-version as xs:string,$minor-version as xs:string) as xs:string{
+  let $max := m:index-of-string($filename,"/")[last()]
+  let $start := fn:substring($filename,$max + 1)
+  let $shortname := fn:substring-before($start,".")
+  let $suffix := fn:substring-after($start,".")
+  return
+  fn:concat($wfc:MODELS-DIRECTORY,process-model-full-name($shortname,$major-version,$minor-version),".",$suffix)
+
+};  
