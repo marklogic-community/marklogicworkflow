@@ -1,7 +1,7 @@
 (:
-  This test checks that for an inclusive gateway with two downstream routes, only one of which is activated, 
+  This test checks that for an inclusive gateway with two downstream routes, only one of which is activated,
   rendezvousing is conditional only on the activated task being completed.
-:)  
+:)
 (:
   Create process model for Inclusive Gateway Test 01, and check it has been created correctly
 :)
@@ -23,7 +23,7 @@ return
 (
   test:assert-equal(xs:string($model-response/model:createResponse/model:outcome/text()),"SUCCESS"),
   test:assert-equal(xs:string($model-response/model:createResponse/model:modelId/text()),test-constants:expected-model-id($test-constants:TEST-01-MODEL-NAME))
-)  
+)
 ;
 (:
   Create process for Inclusive Gateway Test 01. Check success. Check pid exists and save.
@@ -48,7 +48,7 @@ return
 )
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
-xdmp:sleep(2000)
+xdmp:sleep(5000)
 ;
 (:
   Check process has entered the first gateway ( and effectively stopped there )
@@ -66,9 +66,12 @@ let $process-state := wrt:process-read($const:xml-options,$test-pid)[2]/ext:read
 let $current-state := ($process-state/ext:document/wf:process/wf:audit-trail/wf:audit)[fn:last()]/wf:state/text()
 return
 (
-test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
-test:assert-equal("InclusiveGateway_1",fn:tokenize($current-state,"/")[fn:last()])
+  test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
+  test:assert-equal("InclusiveGateway_1",fn:tokenize($current-state,"/")[fn:last()])
 )
+;
+(: Need to sleep to ensure asynchronous behaviour has completed :)
+xdmp:sleep(10000)
 ;
 
 (: test inbox lists wf:user processinbox-read :)
@@ -82,8 +85,8 @@ declare namespace http = "xdmp:http";
 declare namespace prop = "http://marklogic.com/xdmp/property";
 declare namespace wf="http://marklogic.com/workflow";
 
-let $_pause := xdmp:sleep(10000)
 let $test-pid := fn:doc(test-constants:test-pid-uri($test-constants:TEST-01-MODEL-NAME))/test-constants:pid/text()
+let $test-pid := fn:substring-before($test-pid, "+") (: some platforms not handling timezone well :)
 let $child-pid := /wf:process[fn:matches(wf:parent,$test-pid)]/@id/fn:string()
 let $result := wrt:test-08-processinbox-read($const:xml-options)
 return (
@@ -120,10 +123,11 @@ declare namespace wf = "http://marklogic.com/workflow";
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 
 let $test-pid := fn:doc(test-constants:test-pid-uri($test-constants:TEST-01-MODEL-NAME))/test-constants:pid/text()
+let $test-pid := fn:substring-before($test-pid, "+") (: some platforms not handling timezone well :)
 let $child-pid := /wf:process[fn:matches(wf:parent,$test-pid)]/@id/fn:string()
 let $update-response := wrt:call-complete-on-pid($const:xml-options,$child-pid)/ext:updateResponse
 return
-test:assert-equal(xs:string($update-response/ext:outcome/text()),"SUCCESS")
+  test:assert-equal(xs:string($update-response/ext:outcome/text()),"SUCCESS")
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
 xdmp:sleep(2000)
