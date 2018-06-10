@@ -22,7 +22,7 @@ return
 (
   test:assert-equal(xs:string($model-response/model:createResponse/model:outcome/text()),"SUCCESS"),
   test:assert-equal(xs:string($model-response/model:createResponse/model:modelId/text()),test-constants:expected-model-id($test-constants:TEST-02-MODEL-NAME))
-)  
+)
 ;
 (:
   Create process for Inclusive Gateway Test 02. Check success. Check pid exists and save.
@@ -47,9 +47,7 @@ return
 )
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
-import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
-
-test-config:test-sleep()
+xdmp:sleep(10000)
 ;
 (:
   Check process has entered the first gateway ( and effectively stopped there )
@@ -67,10 +65,9 @@ let $process-state := wrt:process-read($const:xml-options,$test-pid)[2]/ext:read
 let $current-state := ($process-state/ext:document/wf:process/wf:audit-trail/wf:audit)[fn:last()]/wf:state/text()
 return
 (
-test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
-test:assert-equal("InclusiveGateway_1",fn:tokenize($current-state,"/")[fn:last()])
-)
-;
+  test:assert-equal("SUCCESS", xs:string($process-state/ext:outcome/text())),
+  test:assert-equal("InclusiveGateway_1", fn:tokenize($current-state,"/")[fn:last()])
+);
 (:
   Fork has not rendezvoused because there are user tasks requiring completion. We complete the first one.
 :)
@@ -83,10 +80,11 @@ declare namespace wf = "http://marklogic.com/workflow";
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 
 let $test-pid := fn:doc(test-constants:test-pid-uri($test-constants:TEST-02-MODEL-NAME))/test-constants:pid/text()
+let $test-pid := fn:substring-before($test-pid, "+") (: some platforms not handling timezone well :)
 let $child-pid := (/wf:process[fn:matches(wf:parent,$test-pid)]/@id/fn:string())[1]
 let $update-response := wrt:call-complete-on-pid($const:xml-options,$child-pid)/ext:updateResponse
 return
-test:assert-equal(xs:string($update-response/ext:outcome/text()),"SUCCESS")
+  test:assert-equal(xs:string($update-response/ext:outcome/text()),"SUCCESS")
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
 import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
@@ -110,8 +108,8 @@ let $penultimate-state := ($process-state/ext:document/wf:process/wf:audit-trail
 let $current-state := ($process-state/ext:document/wf:process/wf:audit-trail/wf:audit)[fn:last()]/wf:state/text()
 return
 (
-test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
-test:assert-equal("InclusiveGateway_1",fn:tokenize($current-state,"/")[fn:last()])
+  test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
+  test:assert-equal("InclusiveGateway_1",fn:tokenize($current-state,"/")[fn:last()])
 )
 ;
 (:
@@ -126,10 +124,11 @@ declare namespace wf = "http://marklogic.com/workflow";
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 
 let $test-pid := fn:doc(test-constants:test-pid-uri($test-constants:TEST-02-MODEL-NAME))/test-constants:pid/text()
+let $test-pid := fn:substring-before($test-pid, "+") (: some platforms not handling timezone well :)
 let $child-pid := (/wf:process[fn:matches(wf:parent,$test-pid)]/@id/fn:string())[2]
 let $update-response := wrt:call-complete-on-pid($const:xml-options,$child-pid)/ext:updateResponse
 return
-test:assert-equal(xs:string($update-response/ext:outcome/text()),"SUCCESS")
+  test:assert-equal(xs:string($update-response/ext:outcome/text()),"SUCCESS")
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
 import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
@@ -153,8 +152,8 @@ let $penultimate-state := ($process-state/ext:document/wf:process/wf:audit-trail
 let $current-state := ($process-state/ext:document/wf:process/wf:audit-trail/wf:audit)[fn:last()]/wf:state/text()
 return
 (
-test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
-test:assert-equal("EndEvent_1",fn:tokenize($current-state,"/")[fn:last()]),
-test:assert-equal("InclusiveGateway_1__rv",fn:tokenize($penultimate-state,"/")[fn:last()])
+  test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
+  test:assert-equal("EndEvent_1",fn:tokenize($current-state,"/")[fn:last()]),
+  test:assert-equal("InclusiveGateway_1__rv",fn:tokenize($penultimate-state,"/")[fn:last()])
 )
 ;

@@ -1070,7 +1070,7 @@ declare function m:b2userTask($rootName as xs:string,$parentStep as xs:string?,$
                 <p:options xmlns:p="http:marklogic.com/cpf/pipelines">
                   <wf:type>{$type}</wf:type>
                   {
-                    if (fn:not(fn:empty($user))) then <wf:assignee>{$user}</wf:assignee> else ()
+                    if (fn:not(fn:empty($user))) then <wf:user>{$user}</wf:user> else ()
                   }
                   {
                     if (fn:not(fn:empty($queue))) then <wf:queue>{$queue}</wf:queue> else ()

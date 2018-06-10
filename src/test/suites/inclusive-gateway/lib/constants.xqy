@@ -23,6 +23,6 @@ declare function test-pid-uri($model-name as xs:string) as xs:string{
 declare function save-pid($pid,$model-name){
 	let $pid-content := element test-constants:pid{$pid}
 	return
-	xdmp:document-insert(test-pid-uri($model-name),$pid-content)
+	  xdmp:document-insert(test-pid-uri($model-name),$pid-content)
 };
 

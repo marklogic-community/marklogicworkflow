@@ -203,7 +203,7 @@ declare function m:inbox($username as xs:string?) as element(wf:inbox) {
         (: TODO add cpf-active check, wf:status running check, wf:locked-user blank :)
         cts:properties-query(
           cts:element-query(xs:QName("wf:currentStep"),
-            cts:element-value-query(xs:QName("wf:assignee"),($username,xdmp:get-current-user())[1])
+            cts:element-value-query( ( xs:QName("wf:user"), xs:QName("wf:assignee")),($username,xdmp:get-current-user())[1])
           )
         )
       ),("unfiltered") (: TODO ordering, prioritisation support, and so on :)

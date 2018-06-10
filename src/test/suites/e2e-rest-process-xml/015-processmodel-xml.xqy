@@ -10,10 +10,10 @@ declare namespace http = "xdmp:http";
 
 let $process := wrt:processmodel-create ($const:xml-options, "015-restapi-tests.bpmn")
 let $_testlog := xdmp:log("E2E XML TEST: 01-processmodel-create")
-return ( 
+return (
   test:assert-equal('200', xs:string($process[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($process[2]/ext:createResponse/ext:outcome)),
-  test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/ext:createResponse/ext:modelId)) 
+  test:assert-equal('015-restapi-tests__1__0', xs:string($process[2]/ext:createResponse/ext:modelId))
 );
 (:
   <ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -46,10 +46,10 @@ declare namespace http = "xdmp:http";
 
 let $result := wrt:test-03-processmodel-update($const:xml-options)
 let $_testlog := xdmp:log("E2E XML TEST: 03-processmodel-update")
-return ( 
+return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:createResponse/ext:outcome)),
-  test:assert-equal('015-restapi-tests__1__2', xs:string($result[2]/ext:createResponse/ext:modelId)) 
+  test:assert-equal('015-restapi-tests__1__2', xs:string($result[2]/ext:createResponse/ext:modelId))
 );
 (:
   <ext:createResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -68,10 +68,10 @@ declare namespace http = "xdmp:http";
 let $_testlog := xdmp:log("E2E XML TEST: 04-processmodel-publish")
 (: not working with XML ? :)
 let $result := wrt:processmodel-publish($const:xml-options, "015-restapi-tests__1__2")
-return ( 
+return (
   test:assert-equal('200', xs:string($result[1]/http:code)),
   test:assert-equal('SUCCESS', xs:string($result[2]/ext:updateResponse/ext:outcome)),
-  test:assert-exists(xs:string($result[2]/ext:updateResponse/ext:domainId)) 
+  test:assert-exists(xs:string($result[2]/ext:updateResponse/ext:domainId))
 );
 (:
   <ext:updateResponse xmlns:ext="http://marklogic.com/rest-api/resource/processmodel">
@@ -153,7 +153,7 @@ return (
     return (
       test:assert-equal('done', xs:string($properties/cpf:processing-status)),
       test:assert-equal('user', xs:string($properties/wf:currentStep/wf:type)),
-      test:assert-equal('admin', xs:string($properties/wf:currentStep/wf:assignee)),
+      test:assert-equal('admin', xs:string($properties/wf:currentStep/wf:user)),
       test:assert-equal('userTask', xs:string($properties/wf:currentStep/wf:step-type)),
       test:assert-equal('ENTERED', xs:string($properties/wf:currentStep/wf:step-status))
     )

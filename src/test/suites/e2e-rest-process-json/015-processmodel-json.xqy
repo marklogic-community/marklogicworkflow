@@ -123,7 +123,7 @@ return (
     return (
       test:assert-equal('done', xs:string($properties/processingStatus)),
       test:assert-equal('user', xs:string($properties/currentStep/type)),
-      test:assert-equal('admin', xs:string($properties/currentStep/assignee)),
+      test:assert-equal('admin', xs:string($properties/currentStep/user)),
       test:assert-equal('userTask', xs:string($properties/currentStep/stepType)),
       test:assert-equal('ENTERED', xs:string($properties/currentStep/stepStatus))
     )
