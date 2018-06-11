@@ -2,13 +2,13 @@ xquery version "1.0-ml";
 
 module namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 
-import module namespace wfi="http://marklogic.com/workflow-import" at "/app/models/workflow-import.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
+import module namespace wfi="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
-
+declare namespace rapi= "http://marklogic.com/rest-api";
 declare namespace roxy = "http://marklogic.com/roxy";
-
 
 (:
  : Get the process model by exact name
@@ -21,12 +21,16 @@ function ext:get(
   $params  as map:map
 ) as document-node()*
 {
-  let $preftype := "application/xml" (: if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json" :)
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json" 
 
   let $out := wfi:get-model-by-name(map:get($params,"publishedId"))
   return
   (
-    map:put($context, "output-types", "text/xml"), (: TODO mime type from file name itself :)
+    let $mime-type := wfu:get-mime-type($out)
+    let $_ := xdmp:trace("ml-workflow","processmodel-get : model mime-type = "||$mime-type)
+    let $_ := xdmp:trace("ml-workflow","processmodel-get : requested type = "||$preftype)
+    return
+    map:put($context, "output-types", $preftype), (: TODO mime type from file name itself :)
     xdmp:set-response-code(200, "OK"),
 
     document {
@@ -34,7 +38,11 @@ function ext:get(
             if ("application/xml" = $preftype) then
               $out
             else
-              "{TODO:'TODO'}"
+              let $config := json:config("custom")
+              let $cx := map:put($config, "text-value", "label" )
+              let $cx := map:put($config , "camel-case", fn:true() )
+              return
+                json:transform-to-json($out, $config)
 
     }
   )
@@ -47,6 +55,7 @@ function ext:get(
  :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:put(
     $context as map:map,
     $params  as map:map,
@@ -63,13 +72,13 @@ function ext:put(
   let $enable := if (map:get($params,"enable") = "true") then fn:true() else fn:false()
   let $_ := xdmp:log("Enabled? : " || xs:string($enable))
 
+  let $input := xdmp:unquote(xdmp:quote($input))
   let $modelid := wfi:install-and-convert($input,map:get($params,"name"),(map:get($params,"major"),"1")[1],(map:get($params,"minor"),"0")[1], $enable )
 
   let $out := <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:modelId>{$modelid}</ext:modelId></ext:createResponse>
 
   return
   (
-    map:put($context, "output-types", "application/json"),
     xdmp:set-response-code(200, "OK"),
     document {
       (: 1. Take the process model document and convert to a CPF pipeline document :)
@@ -77,9 +86,16 @@ function ext:put(
       (: 3. Optionally enable :)
 
         if ("application/xml" = $preftype) then
+          let $_ := map:put($context, "output-types", "application/xml")                  
+          return
           $out
         else
-          "{TODO:'TODO'}"
+          let $_ := map:put($context, "output-types", "application/json")        
+          let $config := json:config("custom")
+          let $cx := map:put($config, "text-value", "label" )
+          let $cx := map:put($config , "camel-case", fn:true() )
+          return
+            json:transform-to-json($out, $config)
     }
 
   )
@@ -94,6 +110,7 @@ function ext:put(
  :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:post(
     $context as map:map,
     $params  as map:map,
@@ -112,14 +129,18 @@ function ext:post(
 
   return
   (
-    map:put($context, "output-types", "application/json"),
+    map:put($context, "output-types", $preftype),
     xdmp:set-response-code(200, "OK"),
     document {
 
         if ("application/xml" = $preftype) then
           $out
         else
-          "{TODO:'TODO'}"
+          let $config := json:config("custom")
+          let $cx := map:put($config, "text-value", "label" )
+          let $cx := map:put($config , "camel-case", fn:true() )
+          return
+            json:transform-to-json($out, $config)
     }
 
   )
@@ -148,7 +169,11 @@ declare function ext:delete(
             if ("application/xml" = $preftype) then
               $out
             else
-              "{TODO:'TODO'}"
+              let $config := json:config("custom")
+              let $cx := map:put($config, "text-value", "label" )
+              let $cx := map:put($config , "camel-case", fn:true() )
+              return
+                json:transform-to-json($out, $config)
 
 
    })

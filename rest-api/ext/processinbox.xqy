@@ -3,11 +3,12 @@ xquery version "1.0-ml";
 module namespace ext = "http://marklogic.com/rest-api/resource/processinbox";
 
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
-import module namespace json6 = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
+import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
+declare namespace rapi= "http://marklogic.com/rest-api";
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
 
@@ -17,7 +18,7 @@ declare namespace wf="http://marklogic.com/workflow";
  : Returns the full process document
  :)
 declare
-%roxy:params("inbox=xs:string")
+%roxy:params("user=xs:string")
 function ext:get(
   $context as map:map,
   $params  as map:map
@@ -30,7 +31,7 @@ function ext:get(
 
   let $out :=
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
-        {wfu:inbox( () )}
+        {wfu:inbox( map:get($params,"user") )}
       </ext:readResponse>
 
   return
@@ -40,7 +41,11 @@ function ext:get(
       if ("application/xml" = $preftype) then
         $out
       else
-        "{TODO:'TODO'}"
+        let $config := json:config("custom")
+        let $cx := map:put($config, "text-value", "label" )
+        let $cx := map:put($config , "camel-case", fn:true() )
+        return
+          json:transform-to-json($out, $config)
     }
   )
 };

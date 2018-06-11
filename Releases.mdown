@@ -1,0 +1,93 @@
+## Release v2.0 2018-06-11
+
+Main additions:
+* Fork/return
+* Locking
+* Deployment via Roxy
+
+
+    Fixed #67
+    Fixed #68
+    Fixes #57 #56 #55 #47 #46 #45 #49 #50 #51 #53 #52
+    Releasing MarkLogic Workflow Eclipse Plugin fix. Fixes #64.
+    Merge pull request #72 from adamfowleruk/feature-64
+    Fixes #64 Really, honestly, it does
+    Fixes #63 - tests remain to be ran
+    Fixes #63 process asset management REST API
+    Merge pull request #73 from adamfowleruk/feature-63
+    Merge pull request #74 from adamfowleruk/feature-61
+    Merge pull request #75 from adamfowleruk/feature-64
+    initial files
+    "Upsert" data and attachments information.
+    Merge pull request #76 from steliann/steliann-patch-1
+    Fixes #4 - Fork and Rendezvous
+    Refactored states so Workflow only ever has a single initial state
+    Merge pull request #78 from adamfowleruk/feature-4
+    Fixes #80 - tested fork within fork example working with 12 pipelines
+    Merge pull request #81 from adamfowleruk/feature-80
+    alternative roxy approach
+    additional bug fixes needed
+    Merge pull request #106 from kghmanuel/feature-103-alt
+    Merge branch 'master' into develop - to include user locking of queue work items #100
+    prevent locking
+    fix for invalid coercion ; document roxy installation ; make roxy executable
+    A refactoring related change in the BPMN library caused the imports to fail.
+    Merge pull request #110 from kghmanuel/102_fix_bpmn_plugin
+    Updated contacts and urls
+    Merge pull request #108 from kghmanuel/79-processsubscription-svc-extime
+    feature #111 - start to convert tests from shell to roxy
+    first batch of XML tests added
+    tests complete in JSON - some incorrect though
+    fixes for tests ; debug logging
+    converted email and fork tests to roxy
+    All tests have been created  - Locking locked task tests need investigation
+    process-create works with JSON
+    renamed tests to better reflect action
+    #111 Convert shell tests to Roxy framework complete
+    Merge pull request #116 from marklogic-community/feature-111
+    #113 move /src/app/models to /src/workflowengine/models
+    document the change to tests
+    Merge pull request #117 from marklogic-community/feature-113
+    #115 - performance improvements and bugfixes from feedback
+    #115 - performance improvements and bugfixes from feedback
+    Merge pull request #119 from marklogic-community/feature-115
+    update roxy to current version
+    split fork tests
+    split fork tests into own suites ; load bpmn into own raw directory
+    #118 Additional rest api tests
+    118 - tidy code; update tests; fix fork, returns still not working
+    #118 - more forking changes ; extra tests
+    #118 - more testing
+    #118 - setup should be done on both tests
+    #121 - bugfix: lib-search-subscribe contains incorrect path
+    Merge pull request #122 from marklogic-community/feature-121
+    #123 - bugfix: tests failing in ML9
+    Merge pull request #124 from marklogic-community/feature-123
+    updates for ML9 - mostly new roxy version
+    Toggle output type depending on accept type
+    #118 - simplify test bpmn; remove fork with wf:branches (this looks like an earlier typo)
+    Getting forking working
+    REST Parameter should have rs: prefix
+    Basis for inclusive gateway test
+    Better initial settings for shell scripts
+    better shell script defaults
+    Sorting out mime types and a typo correction
+    Ensure that tests are using the XML option in the XML test suite
+    JSON tests now producing JSON - revise accordingly
+    Unit tests for inclusive gateways plus support
+    Merged 118 + 126
+    Correctly named process now returned. Forking now working, so end state is COMPLETE
+    New Inclusive Gateway test
+    Inclusive gateway test where we have two active branches
+    Merge pull request #131 from marklogic-community/feature-126-merging
+    Merge fixes from branch 'develop' into develop-9.0
+    Take care when json arrays required
+    Merge branch 'develop' into develop-9.0
+    Process delete plus testing
+    ProcessSubscription delete and test
+    Merge branch 'develop' into develop-9.0 - fixes for #54 and process deletion
+    Modeler Tested with Latest version of Eclipse (oxygen 4.7.2)
+    Merge branch 'develop' into develop-9.0 (#102)
+    Included search for wf:user on Inbox and added test for dynamicUser and inbox
+    Alter import to pick up user rather than assignee; additional tests and fixes for tests
+    Merge pull request #135 from marklogic-community/feature-133

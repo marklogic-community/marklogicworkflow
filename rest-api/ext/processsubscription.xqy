@@ -4,11 +4,11 @@ xquery version "1.0-ml";
 module namespace ext = "http://marklogic.com/rest-api/resource/processsubscription";
 
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
-import module namespace json6 = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
-
+import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
+declare namespace rapi= "http://marklogic.com/rest-api";
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
 
@@ -31,6 +31,7 @@ declare namespace wf="http://marklogic.com/workflow";
   :)
 declare
 %roxy:params("")
+%rapi:transaction-mode("update")
 function ext:put(
    $context as map:map,
    $params  as map:map,
@@ -63,7 +64,11 @@ function ext:put(
       if ("application/xml" = $preftype) then
         $out
       else
-        "{TODO:'TODO'}"
+        let $config := json:config("custom")
+        let $cx := map:put($config, "text-value", "label" )
+        let $cx := map:put($config , "camel-case", fn:true() )
+        return
+          json:transform-to-json($out, $config)
     }
   )
 };
@@ -83,17 +88,22 @@ function ext:get(
 
   let $_ := xdmp:log($params)
   let $_ := xdmp:log($context)
-
+  let $subscription-name := map:get($params,"name") 
   let $out :=
-    if (fn:empty(map:get($params,"name"))) then
+    if (fn:empty($subscription-name)) then
       <ext:readResponse><ext:outcome>FAILURE</ext:outcome><ext:details>name parameter is required</ext:details></ext:readResponse>
     else
-      <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
+      let $subscription := wfu:getSubscription($subscription-name)
+      return
+      if(fn:empty($subscription)) then
+        <ext:readResponse><ext:outcome>NOT FOUND</ext:outcome></ext:readResponse>
+      else        
+      <ext:readResponse>
+        <ext:outcome>SUCCESS</ext:outcome>
         <ext:subscription>
-          {wfu:getSubscription(map:get($params,"name"))}
+          {$subscription}
         </ext:subscription>
       </ext:readResponse>
-
   return
   (
     xdmp:set-response-code(200, "OK"),
@@ -101,7 +111,35 @@ function ext:get(
       if ("application/xml" = $preftype) then
         $out
       else
-        "{TODO:'TODO'}"
+        let $config := json:config("custom")
+        let $cx := map:put($config, "text-value", "label" )
+        let $cx := map:put($config , "camel-case", fn:true() )
+        return
+          json:transform-to-json($out, $config)
     }
   )
 };
+
+
+declare
+%roxy:params("")
+function ext:delete(
+  $context as map:map,
+  $params  as map:map
+) as document-node()? {
+
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+
+  let $subscription-name := map:get($params,"name")
+  let $_ := xdmp:log("REST Subscription name: " || $subscription-name)
+  let $_ := wfu:removeSubscription($subscription-name)
+
+  return
+    (
+      map:put($context,"output-types", $preftype),
+      map:put($context,"output-status",(204, "NOT FOUND")),
+      document {()}
+    )
+
+};
+

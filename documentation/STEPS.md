@@ -54,7 +54,16 @@ c) To configure a User Task assigned to anyone with access to a named work queue
 
 Note: Although it is called a Queue, work can be completed in any order.
 
-## Exclusive Gateway
+## Gateways
+
+Gateways are supported as below. The fork and rendezvous semantics are as follows:-
+
+| Gateway | Fork method | Rendezvous Method |
+| Exclusive | CONDITIONAL (First true, or default route) | NONE (Only ever one route) |
+| Parallel | NONE (All routes) | ALL |
+| Inclusive | CONDITIONAL (All true, or default route) | ALL |
+
+### Exclusive Gateway
 
 The ability to select a single execution route based on a list of choices and evaluated criteria. A decision point.
 
@@ -74,8 +83,60 @@ Finally, configure your route criteria
 - Click on the exclusive gateway
 - Click on Properties -> Gateway
 - For each route, enter an XQuery expression that evaluates to true (equals fn:true())
+- You may specify a default route to be executed always, if no other route evaluates to true
 
 See *XQuery Expressions* later in this document for details on expressions, and examples.
+
+### Parallel Gateway
+
+Allows multiple simultaneous routes to be processed at the same time.
+
+Internally, creates workflow sub-process documents and requires multiple CPF pipeline configurations - created by the importer.
+
+First, create a parallel gateway:-
+- Drop a Parallel Gateway on to the process diagram
+- Click on Properties -> Gateway
+- Set Gateway direction to 'Diverging'
+
+Then create your routes:-
+- Mouse over your gateway
+- Click and drag the connector icon (arrow) to another step. Name this connector (route).
+- Give each route a meaningful name
+
+Finally, Synchronise all parallel flows back to another Parallel Gateway (Rendezvous):-
+- Drop an Parallel Gateway on to the process diagram
+- Click on Properties -> Gateway
+- Set gateway direction to 'Converging'
+- Connect all route flows to this second parallel gateway
+
+### Inclusive Gateway
+
+Like a Parallel Gateway as it allows execution of multiple routes simultaneously, but it checks the conditions on those
+routes and allows a default route to be specified, just like an Exclusive Gateway.
+
+First, create an Inclusive Gateway:-
+- Drop an Inclusive Gateway on to the process diagram
+- Click on Properties -> Gateway
+- Set Gateway Direction to 'Diverging'
+
+Then, create your routes:-
+- Mouse over your gateway
+- Click and drag the connector icon (arrow) to another step. Name this connector (route).
+- Give each route a meaningful name
+
+Then, configure your route criteria
+- Click on the inclusive gateway
+- Click on Properties -> Gateway
+- For each route, enter an XQuery expression that evaluates to true (equals fn:true())
+- You may specify a default route to be executed always, if no other route evaluates to true
+
+See *XQuery Expressions* later in this document for details on expressions, and examples.
+
+Finally, Synchronise all parallel flows back to another Inclusive Gateway (Rendezvous):-
+- Drop an Inclusive Gateway on to the process diagram
+- Click on Properties -> Gateway
+- Set gateway direction to 'Converging'
+- Connect all route flows to this second inclusive gateway
 
 ## Send Task
 

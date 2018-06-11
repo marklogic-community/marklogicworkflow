@@ -1,5 +1,3 @@
-
-
 (: process.xqy - Start a new, or modify an existing, MarkLogic Workflow process
  :
  :)
@@ -8,16 +6,14 @@ xquery version "1.0-ml";
 module namespace ext = "http://marklogic.com/rest-api/resource/process";
 
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
-import module namespace json6 = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
-
+import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
-import module namespace wfa="http://marklogic.com/workflow-actions" at "/app/models/workflow-actions.xqy";
-
-declare namespace roxy = "http://marklogic.com/roxy";
-declare namespace wf="http://marklogic.com/workflow";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
+import module namespace wfa="http://marklogic.com/workflow-actions" at "/workflowengine/models/workflow-actions.xqy";
 
 declare namespace rapi = "http://marklogic.com/rest-api";
+declare namespace roxy = "http://marklogic.com/roxy";
+declare namespace wf="http://marklogic.com/workflow";
 
 (:
  : To add parameters to the functions, specify them in the params annotations.
@@ -57,7 +53,7 @@ function ext:put(
   let $_ := xdmp:log($input)
 
   let $res := wfu:create($input/ext:createRequest/ext:processName/text(),
-    $input/ext:createRequest/ext:data/element(),$input/ext:createRequest/ext:attachments/wf:attachment)
+    $input/ext:createRequest/ext:data/element(),$input/ext:createRequest/ext:attachments/wf:attachment,(),(),())
 
   let $out := <ext:createResponse><ext:outcome>SUCCESS</ext:outcome><ext:processId>{$res}</ext:processId></ext:createResponse>
 
@@ -71,7 +67,12 @@ function ext:put(
       else if ("text/plain" = $preftype) then
         $res
       else
-        "{TODO:'TODO'}"
+        let $config := json:config("custom")
+        let $cx := map:put($config, "array-element-names",(xs:QName("wf:audit"),xs:QName("wf:metric")))
+        let $cx := map:put($config, "text-value", "label" )
+        let $cx := map:put($config , "camel-case", fn:true() )
+        return
+          json:transform-to-json($out, $config)
     }
   )
 };
@@ -117,7 +118,12 @@ function ext:get(
       if ("application/xml" = $preftype) then
         $out
       else
-        "{TODO:'TODO'}"
+        let $config := json:config("custom")
+        let $cx := map:put($config, "array-element-names",(xs:QName("wf:audit"),xs:QName("wf:metric")))                
+        let $cx := map:put($config, "text-value", "label" )
+        let $cx := map:put($config , "camel-case", fn:true() )
+        return
+          json:transform-to-json($out, $config)
     }
   )
 };
@@ -142,30 +148,32 @@ function ext:post(
    $params  as map:map,
    $input   as document-node()*
 ) as document-node()* {
+  let $_ := xdmp:log(fn:concat("REST EXT params=", xdmp:quote($params)), "debug")
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $_ := xdmp:log(fn:concat("REST EXT preftype: " , $preftype), "debug")
 
- let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $part := (map:get($params,"part"),"document")[1]
+  let $_ := xdmp:log(fn:concat("REST EXT part: ", $part), "debug")
 
- let $part := (map:get($params,"part"),"document")[1]
+  let $_ := xdmp:log(fn:concat("REST EXT input: ", $input), "debug")
+  let $pid := map:get($params,"processid") (: this is stripping the '+' symbol if sent unencoded :)
+  (:let $proc := wfu:get($pid):)
+  let $_ := xdmp:log(fn:concat("REST EXT ProcessId: ", $pid), "debug")
+  let $props := wfu:getProperties($pid)
 
- let $_ := xdmp:log($input)
- let $pid := map:get($params,"processid")
- (:let $proc := wfu:get($pid):)
- let $_ := xdmp:log("REST EXT ProcessId: " || $pid)
- let $props := wfu:getProperties($pid)
- (:
- let $_ := xdmp:log("CURRENT STEP INFO")
- let $_ := xdmp:log($props/wf:currentStep)
- :)
- let $res :=
+  let $_ := xdmp:log("CURRENT STEP INFO", "debug")
+  let $_ := xdmp:log($props (: /wf:currentStep :) , "debug")
+
+  let $res :=
    if ("true" = map:get($params,"complete")) then
      (: sanity check that the specified process' status is on a user task :)
      if ("userTask" = $props/wf:currentStep/wf:step-type) then
        (: OK :)
-       (: TODO map any extra parameters / changes of data in to process document's data area :)
 
        (: call wfu complete on it :)
        let $_ := xdmp:log("Calling wfa:complete-userTask")
-       let $feedback := wfa:complete-userTask($pid,$input/wf:data/node(),$input/wf:attachments/node())
+       let $feedback := wfa:complete-userTask($pid, $input/wf:data/node(), $input/wf:attachments/node())
+       (: let $feedback := wfa:complete-userTask($pid,$input/ext:updateRequest/wf:data/node(),$input/ext:updateRequest/wf:attachments/node()) :)
        (: Could return errors with data or attachments :)
        return
          if (fn:not(fn:empty($feedback))) then
@@ -180,6 +188,7 @@ function ext:post(
 
      if ("true" = map:get($params,"lock")) then
        (: Lock the work item, and return its details as if get had been called. If already locked, instead return an error :)
+       let $_ := xdmp:log("REST EXT call to lock work item", "debug")
        let $feedback := wfu:lock($pid)
        let $update :=
          if (fn:empty($feedback)) then
@@ -233,7 +242,8 @@ function ext:post(
             else
               $update
         else
-          () (: Just default to updating the data, but doing nothing around locking :)
+          (: Just default to updating the data, but doing nothing around locking :)
+          wfa:update-userTask($pid,$input/ext:updateRequest/wf:data/node(),$input/ext:updateRequest/wf:attachments/node())
 
 
  let $out := ($res,<ext:updateResponse><ext:outcome>SUCCESS</ext:outcome></ext:updateResponse>)[1]
@@ -246,7 +256,34 @@ function ext:post(
       if ("application/xml" = $preftype) then
         $out
       else
-        "{TODO:'TODO'}"
+        let $config := json:config("custom")
+        let $cx := map:put($config, "array-element-names",(xs:QName("wf:audit"),xs:QName("wf:metric")))        
+        let $cx := map:put($config, "text-value", "label" )
+        let $cx := map:put($config , "camel-case", fn:true() )
+        return
+          json:transform-to-json($out, $config)
     }
   )
 };
+
+declare
+%roxy:params("")
+function ext:delete(
+  $context as map:map,
+  $params  as map:map
+) as document-node()? {
+
+  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+
+  let $pid := map:get($params,"processid")
+  let $_ := xdmp:log("REST EXT ProcessId: " || $pid)
+  let $_ := wfu:delete($pid)
+
+  return
+    (
+      map:put($context, "output-types", $preftype),
+      map:put($context,"output-status",(200, "OK")),
+      document {()}
+    )
+};
+

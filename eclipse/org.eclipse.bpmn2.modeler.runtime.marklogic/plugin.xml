@@ -31,6 +31,18 @@
               name="%tool.name.6"
               object="SendTask">
         </tool>
+        <tool
+              name="%tool.name.34"
+              object="ScriptTask">
+        </tool>
+     </category>
+     <category
+           id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.workflow.SubProcesses"
+           name="%category.name.9.1">
+        <tool
+              name="%tool.name.Embedded.SubProcess"
+              object="SubProcess">
+        </tool>
      </category>
      <category
            id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.workflow.Connection"
@@ -59,6 +71,14 @@
               name="%tool.name.15"
               object="ExclusiveGateway">
         </tool>
+          <tool
+                name="%tool.name.63"
+                object="InclusiveGateway">
+          </tool>
+          <tool
+                name="%tool.name.64"
+                object="ParallelGateway">
+          </tool>
      </category>
      <category
            id="org.eclipse.bpmn2.modeler.runtime.marklogic.workflow.toolpalette.workflow.Artifacts"
@@ -77,6 +97,143 @@
         name="XPath 1.0"
         uri="http://www.w3.org/1999/XPath">
   </expressionLanguage>
+    <expressionLanguage
+          name="XQuery 1.0"
+          uri="http://www.w3.org/TR/xquery/">
+    </expressionLanguage>
+    <typeLanguage
+          name="XML Schema Types"
+          prefix="xs"
+          uri="http://www.w3.org/2001/XMLSchema">
+       <type
+             name="string"
+             qname="xs:string">
+       </type>
+       <type
+             name="boolean"
+             qname="xs:boolean">
+       </type>
+       <type
+             name="decimal"
+             qname="xs:decimal">
+       </type>
+       <type
+             name="float"
+             qname="xs:float">
+       </type>
+       <type
+             name="double"
+             qname="xs:double">
+       </type>
+       <type
+             name="duration"
+             qname="xs:duration">
+       </type>
+       <type
+             name="dateTime"
+             qname="xs:dateTime">
+       </type>
+       <type
+             name="time"
+             qname="xs:time">
+       </type>
+       <type
+             name="date"
+             qname="xs:date">
+       </type>
+       <type
+             name="gYearMonth"
+             qname="xs:gYearMonth">
+       </type>
+       <type
+             name="gYear"
+             qname="xs:gYear">
+       </type>
+       <type
+             name="gMonthDay"
+             qname="xs:gMonthDay">
+       </type>
+       <type
+             name="gDay"
+             qname="xs:gDay">
+       </type>
+       <type
+             name="gMonth"
+             qname="xs:gMonth">
+       </type>
+       <type
+             name="hexBinary"
+             qname="xs:hexBinary">
+       </type>
+       <type
+             name="base64Binary"
+             qname="xs:base64Binary">
+       </type>
+       <type
+             name="anyURI"
+             qname="xs:anyURI">
+       </type>
+       <type
+             name="QName"
+             qname="xs:QName">
+       </type>
+       <type
+             name="NOTATION"
+             qname="xs:NOTATION">
+       </type>
+       <type
+             name="integer"
+             qname="xs:integer">
+       </type>
+       <type
+             name="nonPositiveInteger"
+             qname="xs:nonPositiveInteger">
+       </type>
+       <type
+             name="negativeInteger"
+             qname="xs:negativeInteger">
+       </type>
+       <type
+             name="long"
+             qname="xs:long">
+       </type>
+       <type
+             name="int"
+             qname="xs:int">
+       </type>
+       <type
+             name="short"
+             qname="xs:short">
+       </type>
+       <type
+             name="byte"
+             qname="xs:byte">
+       </type>
+       <type
+             name="nonNegativeInteger"
+             qname="xs:nonNegativeInteger">
+       </type>
+       <type
+             name="unsignedLong"
+             qname="xs:unsignedLong">
+       </type>
+       <type
+             name="unsignedInt"
+             qname="xs:unsignedInt">
+       </type>
+       <type
+             name="unsignedShort"
+             qname="xs:unsignedShort">
+       </type>
+       <type
+             name="unsignedByte"
+             qname="xs:unsignedByte">
+       </type>
+       <type
+             name="positiveInteger"
+             qname="xs:positiveInteger">
+       </type>
+    </typeLanguage>
   
   
   <!--

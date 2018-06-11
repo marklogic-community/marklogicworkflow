@@ -31,10 +31,16 @@ should be usable against this project.
 A set of REST API extensions have been created to assist with saving process models in to MarkLogic, and publishing
 them (activating them in CPF).
 
-- PUT /v1/resource/processmodel - Creates or create a new major-minor version of a process model. MIME type differs
-- GET /v1/resource/processmodel - Fetches the latest, or specified version, of a process model in its original format
-- POST /v1/sresource/processmodel - Publishes a process model (creates a CPF pipeline, and enables it, updating the CPF directory or collection scope definition)
-- DELETE /v1/resource/processmodel - Removes the process model's pipeline directory or collection scope definition (so no new processes can be started. Leaves currently running processes unaffected)
-- GET /v1/resource/processmodelsearch - Search API compatible interface that restricts results to process model definitions
+- DONE PUT /v1/resources/processmodel - Creates or create a new major-minor version of a process model. MIME type differs
+- DONE GET /v1/resources/processmodel - Fetches the latest, or specified version, of a process model in its original format
+- DONE POST /v1/resources/processmodel - Publishes a process model (creates a CPF pipeline, and enables it, updating the CPF directory or collection scope definition)
+- TODO DELETE /v1/resources/processmodel - Removes the process model's pipeline directory or collection scope definition (so no new processes can be started. Leaves currently running processes unaffected)
+- TODO GET /v1/resources/processmodelsearch - Search API compatible interface that restricts results to process model definitions
+
+There are also a number of endpoints for managing process model assets - things like blank email templates and so on:-
+
+- TEST PUT /v1/resources/processasset - Adss or updates a process asset at the model, model-major, or model-major-minor versions. Returns URI of asset created.
+- TEST GET /v1/resources/processasset - Fetches a list of assets for a model, or those assets for a specific model version.
+- TEST DELETE /v1/resources/processasset - Delete a process asset template or version. Returns URI of asset deleted.
 
 Also see the [REST API document](RESTAPI.md)

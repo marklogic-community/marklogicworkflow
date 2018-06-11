@@ -26,6 +26,10 @@ sleep 15
 . ./15-process-update.sh
 . ./16-process-read.sh
 
+sleep 15
+
+. ./13-process-update.sh
+. ./14-process-read.sh
 
 sleep 5
 
@@ -38,6 +42,27 @@ sleep 5
 . ./27-document-create.sh
 # Search needs to be immediately after - it executes too quick otherwise!!! (A blank result may mean processes already finished, not just haven't started)
 . ./28-processsearch-read.sh
+
+sleep 5
+
+. ./29-processasset-create.sh
+. ./30-processasset-read.sh
+. ./31-processasset-delete.sh
+
+sleep 5
+
+. ./32-processmodel-create-fork-simple.sh
+. ./33-processmodel-create-fork-conditional.sh
+. ./34-processmodel-create-fork-within-fork.sh
+
+
+
+
+
+sleep 5
+# All the below are final tests, to be executed at the end of all tests only
+
+. ./91-processengine-read.sh
 
 
 # . ./x05-processmodel-delete.sh

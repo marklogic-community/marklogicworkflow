@@ -2,12 +2,12 @@
 
 # CREATED BY YEOMAN generator-mljsworkplace!
 
-RESTHOST=192.168.123.4
-RESTPORT=6061
-DATABASE=workflow-content
-MLADMINUSER=admin
-MLADMINPASS=admin
-MLAUTH=digest
+export RESTHOST=127.0.0.1
+export RESTPORT=8040
+export DATABASE=workflow-content
+export MLADMINUSER=admin
+export MLADMINPASS=admin
+export MLAUTH=digest
 MLDEFAULTUSER=nobody
 WEBPORT=5001
 ALERTPORT=5002

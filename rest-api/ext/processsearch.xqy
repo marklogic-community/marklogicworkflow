@@ -1,17 +1,17 @@
+xquery version "1.0-ml";
 
 
 (: process.xqy - Start a new, or modify an existing, MarkLogic Workflow process
  :
  :)
-xquery version "1.0-ml";
 
 module namespace ext = "http://marklogic.com/rest-api/resource/processsearch";
 
 (: import module namespace config = "http://marklogic.com/roxy/config" at "/app/config/config.xqy"; :)
-import module namespace json6 = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
+import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 
 import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.xqy";
-import module namespace wfu="http://marklogic.com/workflow-util" at "/app/models/workflow-util.xqy";
+import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
@@ -46,7 +46,11 @@ function ext:get(
       if ("application/xml" = $preftype) then
         $out
       else
-        "{TODO:'TODO'}"
+        let $config := json:config("custom")
+        let $cx := map:put($config, "text-value", "label" )
+        let $cx := map:put($config , "camel-case", fn:true() )
+        return
+          json:transform-to-json($out, $config)
     }
   )
 };
