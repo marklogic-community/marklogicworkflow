@@ -42,7 +42,9 @@ function ext:get(
       if(http-util:xml-response-requested($context)) then
         $output
       else if(http-util:html-response-requested($context)) then
-        xml-to-html($output)
+        typeswitch($output)
+          case(document-node()) return xml-to-html($output/element())
+          default return xml-to-html($output)
       else
         convert-to-json($output)
     }
@@ -136,7 +138,7 @@ function ext:post(
 (:
   $response could be a document node or an element - so use type node
 :)
-declare private function convert-to-json($response as node()?) as object-node()?{
+declare function convert-to-json($response as node()?) as object-node()?{
   let $config := json:config("custom")
   let $cx := map:put($config, "text-value", "label")
   let $cx := map:put($config ,"camel-case", fn:true())
@@ -151,7 +153,7 @@ declare function process-model-list() as element(wf:process-models){
     return
     element wf:process-model{
       element wf:process-model-name{$name},
-      element wf:link{"/LATEST/resources/processmodel?publishedId="||$name}
+      element wf:link{"/LATEST/resources/processmodel?rs:name="||$name}
     }
   }
 };
@@ -163,14 +165,14 @@ declare function process-model-response($model-name as xs:string) as element(wf:
     return
     element wf:process-model{
       element wf:process-model-full-name{$full-name},
-      element wf:link{"/LATEST/resources/processmodel?name="||$full-name}
+      element wf:link{"/LATEST/resources/processmodel?rs:publishedId="||$full-name}
     }
   }  
 };
 
 
 
-declare function xml-to-html($object as element()){
+declare function xml-to-html($object as element()){  
   typeswitch($object)
     case(element(wf:process-models))
     return

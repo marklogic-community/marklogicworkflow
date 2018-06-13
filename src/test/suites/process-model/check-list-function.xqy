@@ -34,15 +34,15 @@ let $expected-response :=
 <wf:process-models xmlns:wf="http://marklogic.com/workflow">
   <wf:process-model>
     <wf:process-model-name>test-model-1</wf:process-model-name>
-    <wf:link>/LATEST/resources/processmodel?publishedId=test-model-1</wf:link>
+    <wf:link>/LATEST/resources/processmodel?rs:name=test-model-1</wf:link>
   </wf:process-model>
   <wf:process-model>
     <wf:process-model-name>test-model-2</wf:process-model-name>
-    <wf:link>/LATEST/resources/processmodel?publishedId=test-model-2</wf:link>
+    <wf:link>/LATEST/resources/processmodel?rs:name=test-model-2</wf:link>
   </wf:process-model>
   <wf:process-model>
     <wf:process-model-name>test-model-3</wf:process-model-name>
-    <wf:link>/LATEST/resources/processmodel?publishedId=test-model-3</wf:link>
+    <wf:link>/LATEST/resources/processmodel?rs:name=test-model-3</wf:link>
   </wf:process-model>
 </wf:process-models>
 return
@@ -59,17 +59,17 @@ let $expected-response :=
     <h3>Process Models</h3>
     <div>
       <div>
-	<a href="/LATEST/resources/processmodel?publishedId=test-model-1">test-model-1</a>
+	<a href="/LATEST/resources/processmodel?rs:name=test-model-1">test-model-1</a>
       </div>
     </div>
     <div>
       <div>
-	<a href="/LATEST/resources/processmodel?publishedId=test-model-2">test-model-2</a>
+	<a href="/LATEST/resources/processmodel?rs:name=test-model-2">test-model-2</a>
       </div>
     </div>
     <div>
       <div>
-	<a href="/LATEST/resources/processmodel?publishedId=test-model-3">test-model-3</a>
+	<a href="/LATEST/resources/processmodel?rs:name=test-model-3">test-model-3</a>
       </div>
     </div>
   </body>
@@ -88,15 +88,15 @@ object-node{
     "processModel": array-node{
       object-node{
         "processModelName": "test-model-1",
-        "link": "/LATEST/resources/processmodel?publishedId=test-model-1"
+        "link": "/LATEST/resources/processmodel?rs:name=test-model-1"
       },
       object-node{
         "processModelName": "test-model-2",
-        "link": "/LATEST/resources/processmodel?publishedId=test-model-2"
+        "link": "/LATEST/resources/processmodel?rs:name=test-model-2"
       },
       object-node{
         "processModelName": "test-model-3",
-        "link": "/LATEST/resources/processmodel?publishedId=test-model-3"
+        "link": "/LATEST/resources/processmodel?rs:name=test-model-3"
       }
     }
   }

@@ -40,11 +40,11 @@ let $expected-response :=
 <wf:process-models xmlns:wf="http://marklogic.com/workflow">
 <wf:process-model>
     <wf:process-model-full-name>test-model-1__1__2</wf:process-model-full-name>
-    <wf:link>/LATEST/resources/processmodel?name=test-model-1__1__2</wf:link>
+    <wf:link>/LATEST/resources/processmodel?rs:publishedId=test-model-1__1__2</wf:link>
 </wf:process-model>
 <wf:process-model>
     <wf:process-model-full-name>test-model-1__1__0</wf:process-model-full-name>
-    <wf:link>/LATEST/resources/processmodel?name=test-model-1__1__0</wf:link>
+    <wf:link>/LATEST/resources/processmodel?rs:publishedId=test-model-1__1__0</wf:link>
 </wf:process-model>
 </wf:process-models>
 return
@@ -61,12 +61,12 @@ let $expected-response :=
         <h3>Process Models</h3>
         <div>
             <div>
-                <a href="/LATEST/resources/processmodel?name=test-model-1__1__0">test-model-1__1__0</a>
+                <a href="/LATEST/resources/processmodel?rs:publishedId=test-model-1__1__0">test-model-1__1__0</a>
             </div>
         </div>
         <div>
             <div>
-                <a href="/LATEST/resources/processmodel?name=test-model-1__1__2">test-model-1__1__2</a>
+                <a href="/LATEST/resources/processmodel?rs:publishedId=test-model-1__1__2">test-model-1__1__2</a>
             </div>
         </div>
     </body>
@@ -85,11 +85,11 @@ object-node{
     "processModel": array-node{
       object-node{
         "processModelFullName": "test-model-1__1__2",
-        "link": "/LATEST/resources/processmodel?name=test-model-1__1__2"
+        "link": "/LATEST/resources/processmodel?rs:publishedId=test-model-1__1__2"
       },
       object-node{
         "processModelFullName": "test-model-1__1__0",
-        "link": "/LATEST/resources/processmodel?name=test-model-1__1__0"
+        "link": "/LATEST/resources/processmodel?rs:publishedId=test-model-1__1__0"
       }
     }
   }
