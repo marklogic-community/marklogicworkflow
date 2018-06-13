@@ -173,7 +173,7 @@ return (
     return (
       test:assert-equal('done', xs:string($properties/cpf:processing-status)),
       test:assert-equal('user', xs:string($properties/wf:currentStep/wf:type)),
-      test:assert-equal('admin', xs:string($properties/wf:currentStep/wf:assignee)),
+      test:assert-equal('admin', xs:string($properties/wf:currentStep/wf:user)),
       test:assert-equal('userTask', xs:string($properties/wf:currentStep/wf:step-type)),
       test:assert-equal('ENTERED', xs:string($properties/wf:currentStep/wf:step-status))
     )

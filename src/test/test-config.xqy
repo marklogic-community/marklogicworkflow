@@ -26,13 +26,9 @@ declare variable $LOCAL-TEST-DATA-DIR := "/raw/bpmn/";
 declare variable $SLEEP-FOR-ASYNC := 5; (: Sleep period required, in seconds, for async tasks :)
 
 declare function local-uri-for-test-file($test-file-name as xs:string){
-	$LOCAL-TEST-DATA-DIR||$test-file-name	
+	$LOCAL-TEST-DATA-DIR||$test-file-name
 };
 
 declare function test-sleep(){
 	xdmp:sleep($SLEEP-FOR-ASYNC * 1000)
-};
-
-declare function remove-test-assets(){
-	cts:uris((),(),cts:directory-query($LOCAL-TEST-DATA-DIR)) ! xdmp:document-delete(.)
 };

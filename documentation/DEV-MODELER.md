@@ -28,13 +28,15 @@ project, you will need to execute the extension manually.
 
 ### Latest from source (any branch) for Plugin development
 
+*Newer versions of Eclipse may be better supported under the develop branch*
+
 Note: If following the Contributing guide, you should have logged an issue and created a new branch from develop using
 ```sh
 $ git checkout -b feature-ISSUEID develop
 ```
 
 1. Checkout or download the zip of the latest (develop or feature branch) of MarkLogic Workflow at http://github.com/marklogic-community/marklogicworkflow
-2. Open Eclipse Luna (4.4) or above
+2. Open Eclipse Oxygen (4.7) or above
 3. Install the BPMN plugin version according to your eclipse version. Refer to [BPMN's download page](http://www.eclipse.org/bpmn2-modeler/downloads.php "BPMN download page") for more info.
   * Only needed if you haven't installed BPMN yet.  
   * Users that are using BPMN plugin v 1.2.2 or earlier (typically Eclipse-Luna) of would need to recompile the project to refer to the old class that contain ```RootElementParser```, i.e. search ```AbstractBpmn2RuntimeExtension.RootElementParser``` and replace with ```DefaultBpmn2RuntimeExtension.RootElementParser```
@@ -45,20 +47,9 @@ $ git checkout -b feature-ISSUEID develop
 7. Double click on the 'plugin.xml' file
 8. Menu >> Run >> Run As >> "Eclipse Application"
 
-### Current published In Development version
+### Current published release version
 
-- In Eclipse Luna (4.4) or above, go to Help -> Install new software
-- In the update site field type https://raw.githubusercontent.com/adamfowleruk/marklogicworkflow/develop/eclipse/MarkLogicWorkflowUpdateSite
-- It will take a few seconds to download plugin information
-- Select the Eclipse BPMN2 Modeler - MarkLogic Workflow Runtime Extension Feature
-- Click Next
-- Follow the prompts
- - NOTE: If you are warned about the project not being signed, click on 'OK' and NOT 'Cancel' to proceed with installation
-- Restart Eclipse Luna
-
-### Current published released version
-
-- As for Current published in development version, except use this URL: https://raw.githubusercontent.com/adamfowleruk/marklogicworkflow/master/eclipse/MarkLogicWorkflowUpdateSite
+- TODO: publish updatesite for plguin
 
 ## Creating a new Workflow process diagram
 
