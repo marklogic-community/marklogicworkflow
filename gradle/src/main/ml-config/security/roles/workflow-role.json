@@ -1,0 +1,46 @@
+{
+  "role-name" : "workflow-role",
+  "description" : "A role for users of the workflow application",
+  "permission" : [ {
+    "role-name" : "workflow-role",
+    "capability" : "read"
+  }, {
+    "role-name" : "workflow-role",
+    "capability" : "insert"
+  }, {
+    "role-name" : "workflow-role",
+    "capability" : "update"
+  }, {
+    "role-name" : "workflow-role",
+    "capability" : "execute"
+  } ],
+  "privilege" : [ {
+    "privilege-name" : "xdmp:set-server-field",
+    "action" : "http://marklogic.com/xdmp/privileges/xdmp-set-server-field",
+    "kind" : "execute"
+  }, {
+    "privilege-name" : "xdmp:invoke",
+    "action" : "http://marklogic.com/xdmp/privileges/xdmp-invoke",
+    "kind" : "execute"
+  }, {
+    "privilege-name" : "xdmp:get-server-field",
+    "action" : "http://marklogic.com/xdmp/privileges/xdmp-get-server-field",
+    "kind" : "execute"
+  }, {
+    "privilege-name" : "xdmp:add-response-header",
+    "action" : "http://marklogic.com/xdmp/privileges/xdmp-add-response-header",
+    "kind" : "execute"
+  }, {
+    "privilege-name" : "rest-reader",
+    "action" : "http://marklogic.com/xdmp/privileges/rest-reader",
+    "kind" : "execute"
+  }, {
+    "privilege-name" : "xdmp:with-namespaces",
+    "action" : "http://marklogic.com/xdmp/privileges/xdmp-with-namespaces",
+    "kind" : "execute"
+  }, {
+    "privilege-name" : "xdmp:value",
+    "action" : "http://marklogic.com/xdmp/privileges/xdmp-value",
+    "kind" : "execute"
+  } ]
+}

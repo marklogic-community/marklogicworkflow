@@ -1,0 +1,16 @@
+{
+  "forest-name" : "workflow-content-001-1",
+  "enabled" : true,
+  "host" : "ed-dclg-dev1.london.marklogic.com",
+  "data-directory" : "",
+  "large-data-directory" : "",
+  "fast-data-directory" : "",
+  "fast-data-max-size" : 0,
+  "updates-allowed" : "all",
+  "availability" : "online",
+  "rebalancer-enable" : true,
+  "partition-number" : "",
+  "failover-enable" : true,
+  "database-replication" : null,
+  "database" : "workflow-content"
+}
