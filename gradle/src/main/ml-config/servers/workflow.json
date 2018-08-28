@@ -1,10 +1,10 @@
 {
-  "server-name" : "workflow",
-  "group-name" : "Default",
+  "server-name" : "%%NAME%%",
+  "group-name" : "%%GROUP%%",
   "server-type" : "http",
   "enabled" : true,
   "root" : "/",
-  "port" : 8040,
+  "port" : "%%PORT%%",
   "webDAV" : false,
   "execute" : true,
   "display-last-login" : false,

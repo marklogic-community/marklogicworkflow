@@ -1,4 +1,32 @@
+// copied
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath "com.marklogic:ml-unit-test-client:${mlUnitTestVersion}"
+    classpath "com.marklogic:ml-gradle:${mlGradleVersion}"
+  }
+}
+
 plugins {
   id "net.saliman.properties" version "1.4.6"
-  id "com.marklogic.ml-gradle" version "3.8.1" 
+//   id "com.marklogic.ml-gradle" version "3.8.1"
 }
+
+apply plugin: "java"
+apply plugin: "com.marklogic.ml-gradle"
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  mlRestApi "com.marklogic:ml-unit-test-modules:${mlUnitTestVersion}"
+
+  // For running ml-unit-test tests via JUnit
+  testCompile "com.marklogic:ml-unit-test-client:${mlUnitTestVersion}"
+  testCompile "junit:junit:4.12"
+}
+

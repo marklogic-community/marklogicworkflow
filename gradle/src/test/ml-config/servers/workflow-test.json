@@ -1,6 +1,6 @@
 {
   "server-name" : "workflow-test",
-  "group-name" : "Default",
+  "group-name" : "%%GROUP%%",
   "server-type" : "http",
   "enabled" : true,
   "root" : "/",

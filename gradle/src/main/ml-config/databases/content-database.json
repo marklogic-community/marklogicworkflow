@@ -1,7 +1,8 @@
 {
-  "database-name" : "workflow-triggers",
+  "database-name" : "workflow-content",
   "security-database" : "Security",
   "schema-database" : "Schemas",
+  "triggers-database" : "workflow-triggers",
   "enabled" : true,
   "data-encryption" : "off",
   "encryption-key-id" : "",
@@ -32,7 +33,7 @@
   "two-character-searches" : false,
   "one-character-searches" : false,
   "uri-lexicon" : true,
-  "collection-lexicon" : false,
+  "collection-lexicon" : true,
   "reindexer-enable" : true,
   "reindexer-throttle" : 5,
   "reindexer-timestamp" : 0,
@@ -69,6 +70,25 @@
   "merge-min-ratio" : 2,
   "merge-timestamp" : 0,
   "retain-until-backup" : false,
+  "range-element-attribute-index" : [ {
+    "scalar-type" : "string",
+    "parent-namespace-uri" : "http://marklogic.com/workflow",
+    "parent-localname" : "process",
+    "namespace-uri" : "",
+    "localname" : "id",
+    "collation" : "http://marklogic.com/collation/",
+    "range-value-positions" : false,
+    "invalid-values" : "ignore"
+  }, {
+    "scalar-type" : "string",
+    "parent-namespace-uri" : "http://marklogic.com/workflow",
+    "parent-localname" : "attachment",
+    "namespace-uri" : "",
+    "localname" : "uri",
+    "collation" : "http://marklogic.com/collation/",
+    "range-value-positions" : false,
+    "invalid-values" : "ignore"
+  } ],
   "field" : [ {
     "field-name" : "",
     "include-root" : true
