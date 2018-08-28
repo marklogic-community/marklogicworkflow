@@ -6,4 +6,7 @@ shtests/*-out.txt
 shtests/output.log
 .idea/*
 ..iml
+.gradle
 gradle/.gradle
+gradle/build
+gradle/gradle-local.properties

@@ -18,10 +18,10 @@ xquery version "1.0-ml";
 module namespace c = "http://marklogic.com/roxy/test-config";
 
 (: configured at deploy time by Roxy deployer :)
-declare variable $c:USER := "@ml.user";
-declare variable $c:PASSWORD := "@ml.password";
+declare variable $c:USER := "%%mlUsername%%";
+declare variable $c:PASSWORD := "%%mlPassword%%";
 declare variable $c:RESTHOST := "localhost";
-declare variable $c:RESTPORT := "@ml.test-port";
+declare variable $c:RESTPORT := "%%mlTestRestPort%%";
 declare variable $LOCAL-TEST-DATA-DIR := "/raw/bpmn/";
 declare variable $SLEEP-FOR-ASYNC := 5; (: Sleep period required, in seconds, for async tasks :)
 
