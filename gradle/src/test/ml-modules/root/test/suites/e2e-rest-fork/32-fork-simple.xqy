@@ -70,6 +70,15 @@ return (
   xdmp:log(fn:concat("processId:", xdmp:quote($result[2])))
 );
 
+xdmp:sleep(10000);
+
+import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+test:assert-equal(3, (fn:count(cts:uri-match("/workflow/processes/fork-simple__1__0/*"))))
+;
+
+
+(: TODO: check the simple fork step 3 state here against the old ML forests :)
+
 (: 4 - check parent process :)
 import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
@@ -80,7 +89,6 @@ declare namespace http = "xdmp:http";
 declare namespace prop = "http://marklogic.com/xdmp/property";
 declare namespace wf="http://marklogic.com/workflow";
 
-let $_pause := xdmp:sleep(10000)
 let $pid := xs:string(doc("/test/processId.xml")/test/processId)
 let $result := wrt:process-read-all($const:xml-options, $pid)
 return (
