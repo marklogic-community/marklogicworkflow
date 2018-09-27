@@ -1,0 +1,6 @@
+{
+  "user-name" : "workflow-user",
+  "description" : "A user for the workflow application",
+  "role" : [ "workflow-role" ],
+  "password" : "CHANGEME"
+}
