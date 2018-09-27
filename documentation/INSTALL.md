@@ -2,30 +2,34 @@
 
 There are two main ways to install the marklogicworkflow project:
 
-* Roxy Installation (stand-alone project, or starting point for a new project)
+* [Gradle](https://gradle.org/) Installation (stand-alone project, or starting point for a new project)
 * Add modules to existing project
 
-## Roxy Installation
+## Gradle Installation
 
-To install via roxy, edit the properties file for the target environment - for example, ``deploy/local.properties`` and run the following commands:
+To install via gradle, create a properties file for the target environment - for example, ``gradle-local.properties`` - default values will be picked up from gradle.properties
 
-    ./ml local bootstrap
-    ./ml local deploy modules
-    ./ml local deploy cpf
+    mlHost=localhost
+    mlUsername=admin
+    mlPassword=admin
 
-For more deployment details see the [Roxy project ](https://github.com/marklogic-community/roxy)
+To deploy, run the following command:
 
-Note that if left as is, the [Roxy test harness](https://github.com/marklogic-community/roxy/wiki/Unit-Testing) will also be set up at http://localhost:8042/test/
+    gradle mlDeploy
+
+For more deployment details see the [ml-gradle](https://github.com/marklogic-community/ml-gradle)
+
+Note that if left as is, the [ML Unit test harness](https://marklogic-community.github.io/marklogic-unit-test/) will also be set up at http://localhost:8042/test/
 
 ## Adding to an existing project
 
 ### Configuring a database for MarkLogic Workflow
 
-You can install a MarkLogic Workflow modules database from the src/workflowengine folder within this repository. Once done,
+You can install a MarkLogic Workflow modules database from the src/main/ml-modules/root/workflowengine folder within this repository. Once done,
 your application's app server can be configured to either use this modules database, or more likely, use a modules
 database whose modules database points to this database (modules database chaining).
 
-You can also optionally install the REST extensions and search options in the rest-api folder of this repository
+You can also optionally install the REST extensions and search options in the src/main/ml-modules/services folder of this repository
 to allow external applications to integrate to MarkLogic Workflow. Install these extensions in your app server. The
 correct triggers and modules databases will be automatically determined by the MarkLogic Workflow code
 with no extra work from yourself.
@@ -33,12 +37,12 @@ with no extra work from yourself.
 You need to ensure your content database has a Triggers database configured, and that CPF is enabled
 (with NO global domain) before you try and deploy a process model in MarkLogic Workflow.
 
-*Installation including triggers and REST extensions will be performed automatically via the Roxy commands above.*
+*Installation including triggers and REST extensions will be performed automatically via the gradle command above.*
 
 ### Configure MIME types
 
 Default filenames for SCXML and BPMN2 models are .scxml and .bpmn respectively. These aren't recognised by MarkLogic
-by default. Add these types are application/xml mime types in MarkLogic Server for them to be handled correctly.  *This will be performed automatically via Roxy bootstrap.*
+by default. Add these types are application/xml mime types in MarkLogic Server for them to be handled correctly.  *This will be performed automatically via the gradle command above.*
 
 ### Configure Indexes
 
@@ -47,7 +51,7 @@ The project requires two range element attribute indexes:
 * wf:process/@id
 * wf:process/@attachment
 
-See deploy/ml-config.xml for full details.  *These will be generated automatically via a Roxy bootstrap.*
+See /src/main/ml-config/databases/content-database.json for full details.  *These will be generated automatically via the gradle command above.*
 
 ### Configure global process task settings
 

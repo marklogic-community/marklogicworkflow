@@ -26,6 +26,7 @@ declare function m:create(
     $forkid as xs:string?,
     $branchid as xs:string?
 ) as xs:string {
+  let $_ := xdmp:log("EDWOZERE wfu:create")
   let $_ :=
     if (fn:not(fn:empty($parent)))
     then xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments),
@@ -50,7 +51,7 @@ declare function m:create(
   )
   return $id
 };
-  
+
 (:
  : Convenience function to take a few parameters and set up the above call to m:create (removes this logic from multiple functions)
  :)
@@ -101,14 +102,14 @@ declare function m:delete($processId as xs:string) as empty-sequence() {
   let $process-uri := m:getProcessUri($processId)
   let $children as xs:string* := cts:search(/,cts:element-value-query(xs:QName("wf:parent"),$process-uri))/wf:process/@id
   return
-  (    
+  (
     (: Delete parent :)
     if(fn:doc-available($process-uri)) then xdmp:document-delete($process-uri)
     else ()
     ,
     (: Delete children :)
     $children ! m:delete(.)
-  )    
+  )
 };
 
 (:
@@ -397,7 +398,7 @@ declare function m:complete($processUri as xs:string,$transition as node(),$stat
       m:updateStatusInParent($processUri,$COMPLETE-STATUS),
       xdmp:trace("ml-workflow","about to call m:updateStatusInParent")
 
-    )      
+    )
   else ()
 
   (: clean up BPMN2 activity step properties :)
@@ -803,7 +804,7 @@ declare function m:evaluateXml($processUri as xs:string,$namespaces as element(w
 
 :)
 declare function get-mime-type($node as node()){
-  let $node := 
+  let $node :=
   typeswitch($node)
     case document-node() return $node/(object-node()|element()|text()|binary())
     default return $node
@@ -826,6 +827,6 @@ declare function m:removeSubscription($subscription-name as xs:string) as empty-
   let $_ := xdmp:trace("ml-workflow","Domain = "||$domain-name)
   return
   ss:delete-domain($domain-name)
-    
 
-};  
+
+};
