@@ -1,0 +1,21 @@
+{
+  "role-name" : "case-internal",
+  "description" : "An internal role for users of the case management application",
+  "permission" : [ {
+    "role-name" : "case-internal",
+    "capability" : "read"
+  }, {
+    "role-name" : "case-internal",
+    "capability" : "insert"
+  }, {
+    "role-name" : "case-internal",
+    "capability" : "update"
+  }, {
+    "role-name" : "case-internal",
+    "capability" : "execute"
+  } ],
+  "privilege" : [ ],
+  "collection" : [
+    "http://marklogic.com/casemanagement/cases"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "database-name" : "workflow-content-test",
+  "database-name" : "workflow-content",
   "security-database" : "Security",
   "schema-database" : "Schemas",
   "triggers-database" : "workflow-triggers",

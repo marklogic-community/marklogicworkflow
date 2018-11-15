@@ -1,0 +1,46 @@
+{
+  "role-name" : "case-administrator",
+  "description" : "A role for administrators of the case management application",
+  "role" : [ "case-user", "workflow-role", "rest-admin", "rest-extension-user" ],
+  "permission" : [ {
+    "role-name" : "case-administrator",
+    "capability" : "read"
+  }, {
+    "role-name" : "case-administrator",
+    "capability" : "insert"
+  }, {
+    "role-name" : "case-administrator",
+    "capability" : "update"
+  }, {
+    "role-name" : "case-administrator",
+    "capability" : "execute"
+  }, {
+    "role-name" : "case-user",
+    "capability" : "read"
+  }, {
+    "role-name" : "case-user",
+    "capability" : "insert"
+  }, {
+    "role-name" : "case-user",
+    "capability" : "update"
+  }, {
+    "role-name" : "case-user",
+    "capability" : "execute"
+  } ],
+  "privilege" : [ {
+    "privilege-name" : "xdmp:unprotected-collections",
+    "action" : "http://marklogic.com/xdmp/privileges/unprotected-collections",
+    "kind" : "execute"
+  }, {
+    "privilege-name" : "xdmp:unprotect-collections",
+    "action" : "http://marklogic.com/xdmp/privileges/unprotect-collections",
+    "kind" : "execute"
+  }, {
+    "privilege-name" : "xdmp:any-uri",
+    "action" : "http://marklogic.com/xdmp/privileges/any-uri",
+    "kind" : "execute"
+  } ],
+  "collection" : [
+    "http://marklogic.com/casemanagement/cases"
+  ]
+}
