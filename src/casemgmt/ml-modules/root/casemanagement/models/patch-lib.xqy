@@ -122,7 +122,7 @@ declare function patch:convert-xml-operation(
     attribute {node-name($path-att)} {
       patch:convert-path($activityid, string($path-att), $error-list)
     },
-    docmodupd:copy-namespaces($operation),
+    patch:copy-namespaces($operation),
     $operation/node()
   }
 };
@@ -134,7 +134,7 @@ declare function patch:convert-xml-patch(
 ) as element(rapi:patch)
 {
   <rapi:patch>{
-    docmodupd:copy-namespaces($raw-patch),
+    patch:copy-namespaces($raw-patch),
 
     (: safe and absolute operation paths :)
     for $node in $raw-patch/node()
@@ -207,7 +207,8 @@ declare function patch:apply-patch(
 ) as xs:boolean
 {
   let $patch-content      := ()
-  let $function-map       := ()
+  let $xqy-function-map       := ()
+  let $sjs-result-map       := ()
   let $is-xml             := fn:true()
   let $delete-ops         := $patch/rapi:delete
   let $replace-ops        := $patch/rapi:replace
@@ -246,7 +247,7 @@ declare function patch:apply-patch(
       else (
         concat(
           "docmodupd:node-replace-operation($is-xml, ",
-          "$patch-content, $function-map, $error-list, ",
+          "$patch-content, $xqy-function-map, $sjs-result-map, $error-list, ",
           "subsequence($replace-ops,",$i,",1), ",
           "'",string-join(tokenize($path,"'"),"&amp;apos;"),"', ",
           "()", ", ",
@@ -264,7 +265,7 @@ declare function patch:apply-patch(
       else (
         concat(
           "docmodupd:node-insert-",$position,"-operation($is-xml, ",
-          "$patch-content, $function-map, $error-list, ",
+          "$patch-content, $xqy-function-map, $sjs-result-map, $error-list, ",
           "subsequence($insert-ops,",$i,",1), ",
           "'",string-join(tokenize($path,"'"),"&amp;apos;"),"', ",
           "()", ", ",
