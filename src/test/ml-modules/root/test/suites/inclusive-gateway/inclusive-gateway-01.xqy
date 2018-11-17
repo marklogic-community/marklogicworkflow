@@ -21,8 +21,8 @@ declare option xdmp:mapping "false";
 let $model-response := wrt:processmodel-create ($const:xml-options, $MODEL-INPUT-FILE-NAME)[2]
 return
 (
-  test:assert-equal(xs:string($model-response/model:createResponse/model:outcome/text()),"SUCCESS"),
-  test:assert-equal(xs:string($model-response/model:createResponse/model:modelId/text()),test-constants:expected-model-id($test-constants:TEST-01-MODEL-NAME))
+  test:assert-equal("SUCCESS", xs:string($model-response/model:createResponse/model:outcome/text())),
+  test:assert-equal(test-constants:expected-model-id($test-constants:TEST-01-MODEL-NAME), xs:string($model-response/model:createResponse/model:modelId/text()))
 )
 ;
 (:
@@ -42,7 +42,7 @@ let $process-response := wrt:process-create($const:xml-options, $payload)[2]
 let $pid := $process-response/ext:createResponse/ext:processId/text()
 return
 (
-  test:assert-equal(xs:string($process-response/ext:createResponse/ext:outcome/text()),"SUCCESS"),
+  test:assert-equal("SUCCESS", xs:string($process-response/ext:createResponse/ext:outcome/text())),
   test:assert-exists($pid),
   test-constants:save-pid($pid,$test-constants:TEST-01-MODEL-NAME)
 )
@@ -66,7 +66,7 @@ let $process-state := wrt:process-read($const:xml-options,$test-pid)[2]/ext:read
 let $current-state := ($process-state/ext:document/wf:process/wf:audit-trail/wf:audit)[fn:last()]/wf:state/text()
 return
 (
-  test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
+  test:assert-equal("SUCCESS", xs:string($process-state/ext:outcome/text())),
   test:assert-equal("InclusiveGateway_1",fn:tokenize($current-state,"/")[fn:last()])
 )
 ;
@@ -127,7 +127,7 @@ let $test-pid := fn:substring-before($test-pid, "+") (: some platforms not handl
 let $child-pid := /wf:process[fn:matches(wf:parent,$test-pid)]/@id/fn:string()
 let $update-response := wrt:call-complete-on-pid($const:xml-options,$child-pid)/ext:updateResponse
 return
-  test:assert-equal(xs:string($update-response/ext:outcome/text()),"SUCCESS")
+  test:assert-equal("SUCCESS", xs:string($update-response/ext:outcome/text()))
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
 xdmp:sleep(2000)
@@ -150,7 +150,7 @@ let $penultimate-state := ($process-state/ext:document/wf:process/wf:audit-trail
 let $current-state := ($process-state/ext:document/wf:process/wf:audit-trail/wf:audit)[fn:last()]/wf:state/text()
 return
 (
-test:assert-equal(xs:string($process-state/ext:outcome/text()),"SUCCESS"),
+test:assert-equal("SUCCESS", xs:string($process-state/ext:outcome/text())),
 test:assert-equal("EndEvent_1",fn:tokenize($current-state,"/")[fn:last()]),
 test:assert-equal("InclusiveGateway_1__rv",fn:tokenize($penultimate-state,"/")[fn:last()])
 )
