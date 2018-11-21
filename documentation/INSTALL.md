@@ -17,6 +17,10 @@ To deploy, run the following command:
 
     gradle mlDeploy
 
+An example properties file is supplied for deploying MarkLogic Workflow with Case Management (gradle-case.properties) - to use:
+
+    gradle mlDeploy -PenvironmentName=case
+
 For more deployment details see the [ml-gradle](https://github.com/marklogic-community/ml-gradle)
 
 Note that if left as is, the [ML Unit test harness](https://marklogic-community.github.io/marklogic-unit-test/) will also be set up at http://localhost:8042/test/

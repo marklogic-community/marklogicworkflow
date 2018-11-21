@@ -15,6 +15,10 @@ declare namespace error="http://marklogic.com/xdmp/error";
 
 declare variable $COMPLETE-STATUS := "COMPLETE";
 declare variable $FORK-STEP-TYPE := "fork";
+declare function m:new-workflow-id() as xs:string {
+  sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
+};
+
 (:
  : Create a new process and activate it.
  :)
@@ -32,7 +36,7 @@ declare function m:create(
     then xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments),
       " parent: ", $parent, " forkid: ", $forkid, " branchid: ", $branchid),"debug")
     else xdmp:log(fn:concat("pipeline: ", $pipelineName, " $data: ", xdmp:quote($data), " attachments: ", xdmp:quote($attachments)),"debug")
-  let $id := sem:uuid-string() || "-" || xs:string(fn:current-dateTime())
+  let $id := m:new-workflow-id()
   let $uri := "/workflow/processes/"||$pipelineName||"/"||$id || ".xml"
   let $_ :=
   xdmp:document-insert($uri,

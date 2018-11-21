@@ -1,0 +1,13 @@
+{
+  "database-name" : "workflow-content",
+  "range-element-attribute-index" : [{
+    "scalar-type" : "string",
+    "parent-namespace-uri" : "http://marklogic.com/workflow/case",
+    "parent-localname" : "activity",
+    "namespace-uri" : "",
+    "localname" : "id",
+    "collation" : "http://marklogic.com/collation/",
+    "range-value-positions" : false,
+    "invalid-values" : "ignore"
+  } ]
+}

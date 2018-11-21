@@ -1,0 +1,7 @@
+{
+  "name": "application/xml",
+  "extension": [
+    "xml", "xsd", "xvs", "sch", "scxml", "bpmn"
+  ],
+  "format": "xml"
+}

@@ -14,7 +14,7 @@ declare function wsh:get-bpmn($filename as xs:string) {
 
 declare function wsh:e2e-setup() {
   let $_modules-import := deploy:deploy()
-  return uh:create-user("test-workflow-user", "test-workflow-user", "test-workflow-user",
+  return uh:create-user("test-workflow-user", "test-workflow-user",
     ("workflow-role-unit-test", "rest-reader", "rest-writer"))
 };
 

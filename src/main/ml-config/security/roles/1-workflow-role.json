@@ -1,19 +1,6 @@
 {
   "role-name" : "workflow-role",
   "description" : "A role for users of the workflow application",
-  "permission" : [ {
-    "role-name" : "workflow-role",
-    "capability" : "read"
-  }, {
-    "role-name" : "workflow-role",
-    "capability" : "insert"
-  }, {
-    "role-name" : "workflow-role",
-    "capability" : "update"
-  }, {
-    "role-name" : "workflow-role",
-    "capability" : "execute"
-  } ],
   "privilege" : [ {
     "privilege-name" : "xdmp:set-server-field",
     "action" : "http://marklogic.com/xdmp/privileges/xdmp-set-server-field",

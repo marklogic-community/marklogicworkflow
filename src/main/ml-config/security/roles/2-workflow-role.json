@@ -1,0 +1,16 @@
+{
+  "role-name" : "workflow-role",
+  "permission" : [ {
+    "role-name" : "workflow-role",
+    "capability" : "read"
+  }, {
+    "role-name" : "workflow-role",
+    "capability" : "insert"
+  }, {
+    "role-name" : "workflow-role",
+    "capability" : "update"
+  }, {
+    "role-name" : "workflow-role",
+    "capability" : "execute"
+  } ]
+}
