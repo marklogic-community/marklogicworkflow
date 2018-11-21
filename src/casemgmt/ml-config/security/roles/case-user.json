@@ -20,8 +20,8 @@
     "action" : "http://marklogic.com/xdmp/privileges/unprotected-collections",
     "kind" : "execute"
   }, {
-    "privilege-name" : "xdmp:unprotect-collections",
-    "action" : "http://marklogic.com/xdmp/privileges/unprotect-collections",
+    "privilege-name" : "xdmp:unprotect-collection",
+    "action" : "http://marklogic.com/xdmp/privileges/unprotect-collection",
     "kind" : "execute"
   }, {
     "privilege-name" : "xdmp:any-uri",

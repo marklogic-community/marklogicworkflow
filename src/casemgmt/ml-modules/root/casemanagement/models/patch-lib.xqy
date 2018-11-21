@@ -11,6 +11,7 @@ import schema namespace rapi = "http://marklogic.com/rest-api" at "restapi.xsd";
 declare namespace c="http://marklogic.com/workflow/case";
 declare option xdmp:mapping "false";
 
+declare variable $PATCH-VERSION := xs:decimal(fn:tokenize(xdmp:version(),"-")[2]);
 (:
  : ideally replace with standard library docmodupd:convert-xml-patch in the future
  :)
@@ -247,7 +248,7 @@ declare function patch:apply-patch(
       else (
         concat(
           "docmodupd:node-replace-operation($is-xml, ",
-          "$patch-content, $xqy-function-map, $sjs-result-map, $error-list, ",
+          "$patch-content, $xqy-function-map,", if ($PATCH-VERSION >= 4) then " $sjs-result-map," else (), " $error-list, ",
           "subsequence($replace-ops,",$i,",1), ",
           "'",string-join(tokenize($path,"'"),"&amp;apos;"),"', ",
           "()", ", ",
@@ -265,7 +266,7 @@ declare function patch:apply-patch(
       else (
         concat(
           "docmodupd:node-insert-",$position,"-operation($is-xml, ",
-          "$patch-content, $xqy-function-map, $sjs-result-map, $error-list, ",
+          "$patch-content, $xqy-function-map,", if ($PATCH-VERSION >= 4) then " $sjs-result-map," else (), " $error-list, ",
           "subsequence($insert-ops,",$i,",1), ",
           "'",string-join(tokenize($path,"'"),"&amp;apos;"),"', ",
           "()", ", ",
