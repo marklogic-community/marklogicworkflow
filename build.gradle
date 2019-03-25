@@ -1,5 +1,3 @@
-// copied
-
 buildscript {
   repositories {
     jcenter()
@@ -11,8 +9,11 @@ buildscript {
 }
 
 plugins {
+  id "java"
+  id "maven-publish"
+  id "com.jfrog.bintray" version "1.8.0"
   id "net.saliman.properties" version "1.4.6"
-//   id "com.marklogic.ml-gradle" version "3.8.1"
+  id "com.marklogic.ml-gradle" version "3.8.1"
 }
 
 apply plugin: "java"
@@ -30,3 +31,66 @@ dependencies {
   testCompile "junit:junit:4.12"
 }
 
+bintray {
+  user = bintray_user
+  key = bintray_key
+  publications = ['mainModules', 'sourcesModules']
+  pkg {
+    repo = 'Maven'
+    name = "marklogic-bpmn2-workflow"
+    userOrg = project.group
+    licenses = ["Apache-2.0"]
+    vcsUrl = "https://github.com/marklogic-community/marklogicworkflow.git"
+    version {
+      name = project.version
+      released = new Date()
+    }
+  }
+  publish = false
+}
+
+// Defines a configuration for the MarkLogic modules; used by the modulesZip task below
+configurations {
+  modules
+  sources
+}
+
+task modulesJar(type: Jar) {
+  description = "Jar up the marklogic-bpmn2-workflo MarkLogic modules into a package that can be published"
+  from("src/main/ml-modules") {
+    into("marklogic-bpmn2-workflow/ml-modules")
+  }
+  from("src/main/ml-config") {
+    into("marklogic-bpmn2-workflow/ml-config")
+  }
+  baseName "marklogic-bpmn2-workflow"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+  description = "A sources jar is needed for publishing to jcenter; it has the same contents as the modulesJar"
+  from("src/main/ml-modules")
+  from("src/main/ml-config")
+  baseName "marklogic-bpmn2-workflow"
+  classifier "sources"
+}
+
+artifacts {
+  modules modulesJar
+  sources sourcesJar
+}
+
+publishing {
+  publications {
+    mainModules(MavenPublication) {
+      artifactId "marklogic-bpmn2-workflow"
+      artifact modulesJar
+    }
+    sourcesModules(MavenPublication) {
+      artifactId "marklogic-bpmn2-workflow"
+      artifact sourcesJar
+    }
+  }
+  repositories {
+    mavenCentral()
+  }
+}
