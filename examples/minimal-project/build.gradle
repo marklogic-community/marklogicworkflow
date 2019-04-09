@@ -1,0 +1,24 @@
+plugins {
+  id "net.saliman.properties" version "1.4.6"
+  id "com.marklogic.ml-gradle" version "3.9.0"
+}
+
+apply plugin: "java"
+apply plugin: "com.marklogic.ml-gradle"
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  mlRestApi "luisjmart:marklogic-bpmn2-workflow:0.0.1"
+}
+
+task initConfig(type: Copy) {
+  from 'build/mlRestApi/marklogic-bpmn2-workflow/ml-config'
+  into 'src/main/ml-config'
+
+  includeEmptyDirs = false
+}
+
+initConfig.dependsOn mlPrepareRestApiDependencies
