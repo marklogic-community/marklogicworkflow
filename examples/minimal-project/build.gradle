@@ -8,10 +8,17 @@ apply plugin: "com.marklogic.ml-gradle"
 
 repositories {
   jcenter()
+  maven {
+  	url  "https://dl.bintray.com/marklogic-community/Maven"
+  	credentials {
+    	username bintray_user
+        password bintray_key
+    }
+  }
 }
 
 dependencies {
-  mlRestApi "luisjmart:marklogic-bpmn2-workflow:0.0.1"
+  mlRestApi "marklogic-community:marklogic-bpmn2-workflow:0.0.1"
 }
 
 task initConfig(type: Copy) {

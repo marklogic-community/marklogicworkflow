@@ -46,7 +46,7 @@ bintray {
       released = new Date()
     }
   }
-  publish = false
+  publish = true
 }
 
 // Defines a configuration for the MarkLogic modules; used by the modulesZip task below
