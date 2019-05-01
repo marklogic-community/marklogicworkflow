@@ -6,6 +6,10 @@ import module namespace json = "http://marklogic.com/xdmp/json" at "/MarkLogic/j
 import module namespace wfi="http://marklogic.com/workflow-import" at "/workflowengine/models/workflow-import.xqy";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 
+import module namespace http-codes = "http://marklogic.com/workflow/http-codes" at "/lib/http-codes.xqy";
+import module namespace http-util = "http://marklogic.com/workflow/http-util" at "/lib/http-util.xqy";
+import module namespace string-util = "http://marklogic.com/workflow/string-util" at "/lib/string-util.xqy";
+
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace rapi= "http://marklogic.com/rest-api";
 declare namespace roxy = "http://marklogic.com/roxy";
@@ -21,33 +25,31 @@ function ext:get(
   $params  as map:map
 ) as document-node()*
 {
-  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json" 
-
-  let $out := wfi:get-model-by-name(map:get($params,"publishedId"))
+  let $preftype := http-util:get-accept-type($context)
+  let $_ := xdmp:trace("ml-workflow","processmodel-get : requested type = "||$preftype)
+  let $output := 
+  if((map:get($params,"publishedId"))) then
+    wfi:get-model-by-name(map:get($params,"publishedId"))
+  else if(map:get($params,"name")) then
+    process-model-response(map:get($params,"name"))
+  else
+    process-model-list()      
   return
   (
-    let $mime-type := wfu:get-mime-type($out)
-    let $_ := xdmp:trace("ml-workflow","processmodel-get : model mime-type = "||$mime-type)
-    let $_ := xdmp:trace("ml-workflow","processmodel-get : requested type = "||$preftype)
-    return
-    map:put($context, "output-types", $preftype), (: TODO mime type from file name itself :)
-    xdmp:set-response-code(200, "OK"),
-
-    document {
-
-            if ("application/xml" = $preftype) then
-              $out
-            else
-              let $config := json:config("custom")
-              let $cx := map:put($config, "text-value", "label" )
-              let $cx := map:put($config , "camel-case", fn:true() )
-              return
-                json:transform-to-json($out, $config)
-
+    map:put($context,"output-status",($http-codes:OK, $http-codes:OK-MESSAGE)),
+    map:put($context, "output-types", $preftype),
+    document{
+      if(http-util:xml-response-requested($context)) then
+        $output
+      else if(http-util:html-response-requested($context)) then
+        typeswitch($output)
+          case(document-node()) return xml-to-html($output/element())
+          default return xml-to-html($output)
+      else
+        convert-to-json($output)
     }
   )
 };
-
 
 (:
  : Publish the process model
@@ -179,3 +181,64 @@ declare function ext:delete(
    })
 };
 :)
+
+(:
+  $response could be a document node or an element - so use type node
+:)
+declare function convert-to-json($response as node()?) as object-node()?{
+  let $config := json:config("custom")
+  let $cx := map:put($config, "text-value", "label")
+  let $cx := map:put($config ,"camel-case", fn:true())
+  let $cx := map:put($config,"array-element-names",xs:QName("wf:process-model"))
+  return
+  json:transform-to-json($response, $config)
+};  
+
+declare function process-model-list() as element(wf:process-models){
+  element wf:process-models{  
+    for $name in cts:element-values(xs:QName("wf:process-model-name"))  
+    return
+    element wf:process-model{
+      element wf:process-model-name{$name},
+      element wf:link{"/LATEST/resources/processmodel?rs:name="||$name}
+    }
+  }
+};
+
+declare function process-model-response($model-name as xs:string) as element(wf:process-models){
+  element wf:process-models{
+    for $process-model in /wf:process-model-metadata[wf:process-model-name = $model-name]
+    let $full-name := $process-model/wf:process-model-full-name/text()
+    return
+    element wf:process-model{
+      element wf:process-model-full-name{$full-name},
+      element wf:link{"/LATEST/resources/processmodel?rs:publishedId="||$full-name}
+    }
+  }  
+};
+
+declare function xml-to-html($object as element()){  
+  typeswitch($object)
+    case(element(wf:process-models))
+    return
+    element html{
+      element body{
+        element h3{string-util:dash-format-string(fn:local-name($object))}
+        ,
+        for $element in $object/*
+        let $name-element := $element/*[fn:matches(fn:local-name(.),"name")]
+        let $link-element := $element/wf:link
+        order by $name-element      
+        return
+        element div{
+          let $name-element := $element/*[fn:matches(fn:local-name(.),"name")]
+          let $link-element := $element/wf:link
+          return
+          element div{element a{attribute href{$link-element/text()},$name-element/text()}}
+        }        
+      }
+    }
+    default return $object
+};
+
+
