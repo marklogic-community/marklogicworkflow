@@ -63,8 +63,8 @@ The following rules apply:-
  - Each release is tagged as v1 or v2 etc to match the sprint number until we catch up with the current MarkLogic release number, then we'll adopt v8-2-008 (MarkLogic V8.0-2, sprint 008)
 - Hotfix branches are taken off of master, fixed, then committed to master AND then develop
 
-We ask that you open an issue in the [issue tracker][] and get agreement from
-at least one of the project maintainers before you start coding.
+We ask that you open an issue in the [issue tracker](https://github.com/marklogic-community/marklogicworkflow/issues)
+and get agreement from at least one of the project maintainers before you start coding.
 
 Nothing is more frustrating than seeing your hard work go to waste because
 your vision does not align with that of a project maintainer.
@@ -105,7 +105,7 @@ equivalent to our .editorconfig file.
 #### Test your code (pre-release mainly)
 
 We are working hard to improve MarkLogic Workflow's testing. If you add new actions
-in process models then please write unit tests using the [Roxy framework](https://github.com/marklogic-community/roxy/wiki/Unit-Testing).
+in process models then please write unit tests using the [ml-unit-test framework](https://marklogic-community.github.io/marklogic-unit-test/).
 
 The default location for the test interface is http://localhost:8042/test/ - note that tests e2e-rest-process-json and e2e-rest-process-xml will attempt to create a user (**test-workflow-user**) during setup and remove it during the teardown phase.
 
@@ -113,6 +113,7 @@ When finished, verify that the self-test works.
 
 Make sure that all tests pass. Please, do not submit patches that fail.
 
+See the [testing notes](./documentation/DEV-TESTING.md) for more information
 
 #### Commit your complete feature
 
