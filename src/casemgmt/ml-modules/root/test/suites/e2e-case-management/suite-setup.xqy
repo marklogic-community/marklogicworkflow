@@ -1,6 +1,6 @@
 xquery version "1.0-ml";
 
-import module namespace uh = "http://marklogic.com/roxy/test-models/workflow-users-test-helper" at "/test/workflow-users-test-helper.xqy";
+import module namespace uh = "http://marklogic.com/test-models/workflow-users-test-helper" at "/test/workflow-users-test-helper.xqy";
 
 let $create-roles := (
   uh:create-role("test-case-role-one", ("workflow-role-unit-test", "case-user"), () ),

@@ -7,7 +7,7 @@ xquery version "1.0-ml";
 
 (: patch:convert-path tests - good :)
 import module namespace patch="http://marklogic.com/casemanagement/patch-lib" at "/casemanagement/models/patch-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 import schema namespace rapi = "http://marklogic.com/rest-api" at "restapi.xsd";
 declare namespace c="http://marklogic.com/workflow/case";
 
@@ -25,7 +25,7 @@ declare namespace c="http://marklogic.com/workflow/case";
 
 (: patch:convert-path tests - bad :)
 import module namespace patch="http://marklogic.com/casemanagement/patch-lib" at "/casemanagement/models/patch-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 import schema namespace rapi = "http://marklogic.com/rest-api" at "restapi.xsd";
 declare namespace c="http://marklogic.com/workflow/case";
 
@@ -37,7 +37,7 @@ return
 
 (: patch:convert-path tests - ugly :)
 import module namespace patch="http://marklogic.com/casemanagement/patch-lib" at "/casemanagement/models/patch-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 import schema namespace rapi = "http://marklogic.com/rest-api" at "restapi.xsd";
 declare namespace c="http://marklogic.com/workflow/case";
 
@@ -49,7 +49,7 @@ return
 
 (: patch:convert-xml-operation tests :)
 import module namespace patch="http://marklogic.com/casemanagement/patch-lib" at "/casemanagement/models/patch-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 import schema namespace rapi = "http://marklogic.com/rest-api" at "restapi.xsd";
 declare namespace c="http://marklogic.com/workflow/case";
 
@@ -61,7 +61,7 @@ return (
 );
 
 import module namespace patch="http://marklogic.com/casemanagement/patch-lib" at "/casemanagement/models/patch-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 import schema namespace rapi = "http://marklogic.com/rest-api" at "restapi.xsd";
 declare namespace c="http://marklogic.com/workflow/case";
 
@@ -80,7 +80,7 @@ return (
 
 (: patch:convert-xml-patch tests :)
 import module namespace patch="http://marklogic.com/casemanagement/patch-lib" at "/casemanagement/models/patch-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 import schema namespace rapi = "http://marklogic.com/rest-api" at "restapi.xsd";
 declare namespace c="http://marklogic.com/workflow/case";
 

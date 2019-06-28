@@ -3,13 +3,13 @@ xquery version "1.0-ml";
 (: 01 to 07 CREATE CASE :)
 
 (: 01 - start transaction2 :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
 cmrt:create-transaction ("/test/transaction2.xml");
 
 (: 02 - create case2 (transaction2) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
@@ -25,35 +25,35 @@ return (
 );
 
 (: 03 - DB read case2 (fail) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $caseId := cmrt:get-case-id("/test/case2.xml")
 return cmrt:fail-db-case-doc($caseId);
 
 (: 04 - GET read case2 (fail) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 
 let $caseId := cmrt:get-case-id("/test/case2.xml")
 return cmrt:get-case-fail($caseId, $cmrt:user-one-options)
 ;
 
 (: 05 - commit transaction2 :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
 let $txid := cmrt:get-transaction-id("/test/transaction2.xml")
 return cmrt:commit-transaction ($txid);
 
 (: 06 - DB read case2 (pass) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $_pause := xdmp:sleep(5000)
 let $caseId := cmrt:get-case-id("/test/case2.xml")
 return cmrt:pass-db-case-doc($caseId);
 
 (: 07 - GET read case2 (pass) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
@@ -72,13 +72,13 @@ return (
 (: 11 to 16 UPDATE CASE :)
 
 (: 11 - start transaction3 :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
 cmrt:create-transaction ("/test/transaction3.xml");
 
 (: 12 - update case2 (transaction3) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
@@ -92,9 +92,9 @@ return (
 );
 
 (: 13 - GET read case2 (not updated) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
@@ -109,14 +109,14 @@ return (
 );
 
 (: 14 - commit transaction3 :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
 let $txid := cmrt:get-transaction-id("/test/transaction3.xml")
 return cmrt:commit-transaction ($txid);
 
 (: 15 - GET read case2 (updated) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
@@ -131,9 +131,9 @@ return (
 );
 
 (: 16 - attempt to update a case with no data :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
@@ -151,13 +151,13 @@ return (
 (: 21 to 26 INSERT CASE ACTIVITY :)
 
 (: 21 - start transaction4 :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
 cmrt:create-transaction ("/test/transaction4.xml");
 
 (: 22 - new activity 1 :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
 declare namespace http = "xdmp:http";
@@ -186,9 +186,9 @@ return (
 );
 
 (: 23 - GET read case2 (not updated) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
@@ -203,9 +203,9 @@ return (
 );
 
 (: 24 - new activity 2 :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
 declare namespace http = "xdmp:http";
@@ -234,14 +234,14 @@ return (
 );
 
 (: 25 - commit transaction4 :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
 let $txid := cmrt:get-transaction-id("/test/transaction4.xml")
 return cmrt:commit-transaction ($txid);
 
 (: 26 - GET read case2 (updated) :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";

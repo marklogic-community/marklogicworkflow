@@ -1,6 +1,6 @@
 xquery version "1.0-ml";
 
-module namespace r="http://marklogic.com/roxy/deploy-rest-resources";
+module namespace r="http://marklogic.com/test/deploy-rest-resources";
 
 
 declare function r:deploy() {

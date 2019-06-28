@@ -1,9 +1,9 @@
 xquery version "1.0-ml";
 module namespace wsh = "http://marklogic.com/workflow/setup";
 
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
-import module namespace deploy  = "http://marklogic.com/roxy/deploy-rest-resources" at "/test/workflow-deploy-rest-resources.xqy";
-import module namespace uh = "http://marklogic.com/roxy/test-models/workflow-users-test-helper" at "/test/workflow-users-test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
+import module namespace deploy  = "http://marklogic.com/test/deploy-rest-resources" at "/test/workflow-deploy-rest-resources.xqy";
+import module namespace uh = "http://marklogic.com/test-models/workflow-users-test-helper" at "/test/workflow-users-test-helper.xqy";
 
 declare function wsh:get-bpmn($filename as xs:string) {
   let $binary := test:get-modules-file(fn:concat("/test/bpmn/", $filename))

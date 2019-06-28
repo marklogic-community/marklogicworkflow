@@ -1,8 +1,8 @@
 xquery version "1.0-ml";
-module namespace cmrt = "http://marklogic.com/roxy/casemanagement/rest-tests";
+module namespace cmrt = "http://marklogic.com/test/casemanagement/rest-tests";
 
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace error = "http://marklogic.com/xdmp/error";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";

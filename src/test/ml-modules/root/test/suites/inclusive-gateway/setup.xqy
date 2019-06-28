@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 
-import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test-config = "http://marklogic.com/test-config" at "/test/test-config.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
 
 	

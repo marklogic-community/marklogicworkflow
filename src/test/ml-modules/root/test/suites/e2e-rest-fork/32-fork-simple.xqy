@@ -2,8 +2,8 @@ xquery version "1.0-ml";
 
 (: 32-processmodel-create-fork-simple :)
 (: 1 - import bpmn and create model :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
@@ -29,9 +29,9 @@ return ( (:
 :)
 
 (: 2 - publish model :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/processmodel";
 declare namespace http = "xdmp:http";
 
@@ -47,16 +47,16 @@ return ( (:
 );
 
 (: 3 - check the pipelines :)
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $pipelines := cts:uri-match("http://marklogic.com/cpf/pipelines/*.xml")
 return
   test:assert-equal(3, fn:count($pipelines))
 ;
 
 (: 4 - create a new process :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
@@ -72,7 +72,7 @@ return (
 
 xdmp:sleep(10000);
 
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 test:assert-equal(3, (fn:count(cts:uri-match("/workflow/processes/fork-simple__1__0/*"))))
 ;
 
@@ -80,9 +80,9 @@ test:assert-equal(3, (fn:count(cts:uri-match("/workflow/processes/fork-simple__1
 (: TODO: check the simple fork step 3 state here against the old ML forests :)
 
 (: 4 - check parent process :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace cpf  = "http://marklogic.com/cpf";
 declare namespace ext  = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
@@ -114,9 +114,9 @@ return (
 );
 
 (: 5 - check Task1 process :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace cpf  = "http://marklogic.com/cpf";
 declare namespace ext  = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
@@ -140,9 +140,9 @@ return (
 );
 
 (: 6 - check Task2 process - Task 2 is automatic, so the path should be complete :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace cpf  = "http://marklogic.com/cpf";
 declare namespace ext  = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
@@ -163,9 +163,9 @@ return (
 );
 
 (: 7 update Task1 process :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 
@@ -177,9 +177,9 @@ return (
 );
 
 (: 8 - check Task1 process - path should be complete :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace cpf  = "http://marklogic.com/cpf";
 declare namespace ext  = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
@@ -201,9 +201,9 @@ return (
 );
 
 (: 9 - check parent process :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace cpf  = "http://marklogic.com/cpf";
 declare namespace ext  = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
@@ -228,9 +228,9 @@ return (
 (: All the below are final tests, to be executed at the end of all tests only :)
 
 (: 91-processengine-read : )
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/processengine";
 declare namespace http = "xdmp:http";
 declare namespace wf = "http://marklogic.com/workflow";

@@ -2,9 +2,9 @@ xquery version "1.0-ml";
 
 
 (: 01 - GET case - no id :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace error = "http://marklogic.com/xdmp/error";
 declare namespace http = "xdmp:http";
 
@@ -19,14 +19,14 @@ return (
 );
 
 (: 02 - GET non-existing case :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 cmrt:get-case-fail("12345", $cmrt:user-one-options);
 
 (: 03 - attempt to insert a case with no data :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace error = "http://marklogic.com/xdmp/error";
 declare namespace http = "xdmp:http";
 
@@ -39,9 +39,9 @@ return (
 );
 
 (: 03 - attempt to insert a case that already exists :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace error = "http://marklogic.com/xdmp/error";
 declare namespace http = "xdmp:http";
 
@@ -55,9 +55,9 @@ return (
 );
 
 (: 04 - attempt to update a case with no caseId :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace error = "http://marklogic.com/xdmp/error";
 declare namespace http = "xdmp:http";
 
@@ -71,9 +71,9 @@ return (
 );
 
 (: 05 - attempt to update a case which does not exist :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 
@@ -92,8 +92,8 @@ currently a script - returns a nice "500" error; needs user in suite-setup & sui
 
 xquery version "1.0-ml";
 
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
 let $options:=

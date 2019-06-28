@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 module namespace wrt = "http://marklogic.com/workflow/rest-tests";
 
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 
 declare namespace process = "http://marklogic.com/rest-api/resource/process";
 declare namespace wf = "http://marklogic.com/workflow";

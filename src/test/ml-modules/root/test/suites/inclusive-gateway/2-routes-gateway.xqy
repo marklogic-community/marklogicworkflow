@@ -4,12 +4,12 @@
 (:
   Create process model for Inclusive Gateway Test 02, and check it has been created correctly
 :)
-import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test-config = "http://marklogic.com/test-config" at "/test/test-config.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
 
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 
 declare namespace model = "http://marklogic.com/rest-api/resource/processmodel";
 
@@ -27,10 +27,10 @@ return
 (:
   Create process for Inclusive Gateway Test 02. Check success. Check pid exists and save.
 :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 
@@ -53,9 +53,9 @@ xdmp:sleep(10000)
   Check process has entered the first gateway ( and effectively stopped there )
 :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace wf = "http://marklogic.com/workflow";
@@ -73,8 +73,8 @@ return
 :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace wf = "http://marklogic.com/workflow";
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
@@ -87,7 +87,7 @@ return
   test:assert-equal("SUCCESS", xs:string($update-response/ext:outcome/text()))
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
-import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
+import module namespace test-config = "http://marklogic.com/test-config" at "/test/test-config.xqy";
 
 test-config:test-sleep()
 ;
@@ -95,9 +95,9 @@ test-config:test-sleep()
   Check process is still in the waiting state
 :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace wf = "http://marklogic.com/workflow";
@@ -117,8 +117,8 @@ return
 :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace wf = "http://marklogic.com/workflow";
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
@@ -131,7 +131,7 @@ return
   test:assert-equal("SUCCESS", xs:string($update-response/ext:outcome/text()))
 ;
 (: Need to sleep to ensure asynchronous behaviour has completed :)
-import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
+import module namespace test-config = "http://marklogic.com/test-config" at "/test/test-config.xqy";
 
 test-config:test-sleep()
 ;
@@ -139,9 +139,9 @@ test-config:test-sleep()
   Check process has rendezvoused and completed
 :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace wf = "http://marklogic.com/workflow";

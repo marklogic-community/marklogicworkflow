@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
-import module namespace deploy  = "http://marklogic.com/roxy/deploy-rest-resources" at "/test/workflow-deploy-rest-resources.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
+import module namespace deploy  = "http://marklogic.com/test/deploy-rest-resources" at "/test/workflow-deploy-rest-resources.xqy";
 
 let $_modules-import := deploy:deploy()
 

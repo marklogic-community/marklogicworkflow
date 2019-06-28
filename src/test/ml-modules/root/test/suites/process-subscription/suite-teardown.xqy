@@ -1,7 +1,7 @@
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "lib/constants.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace wf = "http://marklogic.com/workflow";
