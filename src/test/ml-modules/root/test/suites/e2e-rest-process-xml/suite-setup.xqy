@@ -1,8 +1,8 @@
 xquery version "1.0-ml";
 
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
-import module namespace deploy  = "http://marklogic.com/roxy/deploy-rest-resources" at "/test/workflow-deploy-rest-resources.xqy";
-import module namespace uh = "http://marklogic.com/roxy/test-models/workflow-users-test-helper" at "/test/workflow-users-test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
+import module namespace deploy  = "http://marklogic.com/test/deploy-rest-resources" at "/test/workflow-deploy-rest-resources.xqy";
+import module namespace uh = "http://marklogic.com/test-models/workflow-users-test-helper" at "/test/workflow-users-test-helper.xqy";
 
 let $_modules-import := deploy:deploy()
 let $_lock-fail-user := uh:create-user("test-workflow-user", "test-workflow-user",

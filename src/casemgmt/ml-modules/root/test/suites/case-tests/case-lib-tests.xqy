@@ -2,7 +2,7 @@ xquery version "1.0-ml";
 
 (: 01 - new case ids :)
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 for $source in (
   <c:case id="12345"/>,
@@ -15,14 +15,14 @@ return (
 );
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $caseid := clib:get-new-id(())
 return (
   test:assert-meets-minimum-threshold(58, fn:string-length($caseid))
 );
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace sec="http://marklogic.com/xdmp/security";
 let $strings:= (
   "case-user:read",

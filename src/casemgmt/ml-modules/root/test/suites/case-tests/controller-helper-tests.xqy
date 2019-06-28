@@ -16,7 +16,7 @@ xquery version "1.0-ml";
 
 (: validation: new case - fail :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 
 let $action-name := "new case"
 let $params := map:new((
@@ -33,7 +33,7 @@ return (
 
 (: validation: new case - fail :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 
 let $action-name := "new case"
 let $params := map:new((
@@ -50,7 +50,7 @@ return (
 
 (: validation: new case - pass :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $action-name := "new case"
@@ -68,7 +68,7 @@ return (
 
 (: validation: new case - pass :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $action-name := "new case"
@@ -87,7 +87,7 @@ return (
 
 (: validation: new case - fail :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $action-name := "new case"
@@ -106,7 +106,7 @@ return (
 
 (: validation: new case - fail :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $action-name := "new case"
@@ -126,7 +126,7 @@ return (
 
 (: validation: retrieve activity - pass :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 
 let $action-name := "get activity"
 let $params := map:new((
@@ -143,7 +143,7 @@ return (
 
 (: validation: retrieve activity - fail :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 
 let $action-name := "get activity"
 let $params := map:new((
@@ -160,7 +160,7 @@ return (
 
 (:
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $caseid := clib:get-new-id(())
 return (
   test:assert-meets-minimum-threshold(58, fn:string-length($caseid))

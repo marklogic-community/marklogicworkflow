@@ -7,7 +7,7 @@ xquery version "1.0-ml";
 :)
 (: 01 - new case :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $validate := ch:validate("newid", fn:true(), fn:true(), fn:true())
 return (
   test:assert-equal(200,                            map:get($validate, "status-code")),
@@ -16,7 +16,7 @@ return (
 
 (: 02 - get existing case :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $validate := ch:validate("12345", fn:false(), fn:false(), fn:false())
 return (
   test:assert-equal(200,                            map:get($validate, "status-code")),
@@ -25,7 +25,7 @@ return (
 
 (: 03 - update existing case :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $validate := ch:validate("12345", fn:false(), fn:true(), fn:true())
 return (
   test:assert-equal(200,                            map:get($validate, "status-code")),
@@ -34,7 +34,7 @@ return (
 
 (: 04 - all - no case id; should always throw error :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $caseid := ()
 for $new-case in (fn:false(), fn:true())
   for $input-data in (fn:false(), fn:true())
@@ -48,7 +48,7 @@ for $new-case in (fn:false(), fn:true())
 
 (: 05 - new case - existing id :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 for $input-data in (fn:false(), fn:true())
   for $input-expected in (fn:false(), fn:true())
     let $validate := ch:validate("12345", fn:true(), $input-data, $input-expected)
@@ -60,7 +60,7 @@ for $input-data in (fn:false(), fn:true())
 
 (: 06 - update/get case where id does not exist :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 for $input-data in (fn:false(), fn:true())
   for $input-expected in (fn:false(), fn:true())
     let $validate := ch:validate("newid", fn:false(), $input-data, $input-expected)
@@ -72,7 +72,7 @@ for $input-data in (fn:false(), fn:true())
 
 (: 07 - create new case -no data :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $validate := ch:validate("newid", fn:true(), fn:false(), fn:true())
 return (
   test:assert-equal(405,                            map:get($validate, "status-code")),
@@ -82,7 +82,7 @@ return (
 
 (: 08 - update existing case -no data :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $validate := ch:validate("12345", fn:false(), fn:false(), fn:true())
 return (
   test:assert-equal(405,                            map:get($validate, "status-code")),
@@ -92,7 +92,7 @@ return (
 
 (: 09 - contraversial ? receive data when not expected - ignore and carry on :)
 import module namespace ch="http://marklogic.com/casemanagement/controller-helper" at "/casemanagement/models/controller-helper.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $validate := ch:validate("12345", fn:false(), fn:true(), fn:false())
 return (
   test:assert-equal(200,                            map:get($validate, "status-code")),

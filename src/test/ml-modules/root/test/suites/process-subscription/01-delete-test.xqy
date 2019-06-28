@@ -10,12 +10,12 @@
   5) Verify that we have NO alert documents and NO domain - white box testing
 
 :)
-import module namespace test-config = "http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test-config = "http://marklogic.com/test-config" at "/test/test-config.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/inclusive-gateway/lib/constants.xqy";
 
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 
 declare namespace model = "http://marklogic.com/rest-api/resource/processmodel";
 
@@ -33,8 +33,8 @@ return
 
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace ext="http://marklogic.com/rest-api/resource/processsubscription";
 
@@ -61,8 +61,8 @@ return
 ;
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace alert="http://marklogic.com/xdmp/alert";
 declare namespace ext="http://marklogic.com/rest-api/resource/processsubscription";
@@ -76,7 +76,7 @@ return
 ;
 (: Internally verify that we have a cpf domain with the expected name :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace dom  = "http://marklogic.com/cpf/domains";
 
@@ -86,15 +86,15 @@ xdmp:invoke-function(function(){
 ;
 (: And that we have three alert documents  :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 test:assert-equal(fn:count(fn:collection(test-constants:expected-subscription-id($test-constants:SUBSCRIPTION-NAME))),3)
 ;
 (: Delete should return a 204 :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace http = "xdmp:http";
 
@@ -104,8 +104,8 @@ test:assert-equal($delete-response/http:code/fn:data(),204)
 ;
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace alert="http://marklogic.com/xdmp/alert";
 declare namespace ext="http://marklogic.com/rest-api/resource/processsubscription";
@@ -116,7 +116,7 @@ test:assert-equal($read-response/ext:readResponse/ext:outcome/fn:string(),"NOT F
 ;
 (: Internally verify that we NO LONGER have a cpf domain with the expected name :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace dom  = "http://marklogic.com/cpf/domains";
 
@@ -126,6 +126,6 @@ xdmp:invoke-function(function(){
 ;
 (: And that we have NO alert documents  :)
 import module namespace test-constants = "http://marklogic.com/workflow/test-constants/inclusive-gateway" at "/test/suites/process-subscription/lib/constants.xqy";
-import module namespace test = "http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test = "http://marklogic.com/test" at "/test/test-helper.xqy";
 
 test:assert-equal(fn:count(fn:collection(test-constants:expected-subscription-id($test-constants:SUBSCRIPTION-NAME))),0)

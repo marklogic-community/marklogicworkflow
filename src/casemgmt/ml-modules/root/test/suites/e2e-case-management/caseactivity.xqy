@@ -1,8 +1,8 @@
 xquery version "1.0-ml";
 (: 01 - POST caseactivity 1 :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
 declare namespace http = "xdmp:http";
@@ -29,9 +29,9 @@ return (
 );
 
 (: 02 - check case updated & new activity created :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
@@ -44,9 +44,9 @@ return (
 );
 
 (: 03 - POST caseactivity 2 :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
 declare namespace http = "xdmp:http";
@@ -73,9 +73,9 @@ return (
 );
 
 (: 04 - check case updated activity updated :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";
@@ -89,9 +89,9 @@ return (
 );
 
 (: 05 - POST caseactivity 2 again - should fail :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
 declare namespace http = "xdmp:http";
@@ -117,9 +117,9 @@ return (
 );
 
 (: 05 - POST caseactivity 3 as user 2 - fails as user cannot see the document :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
 declare namespace http = "xdmp:http";
@@ -145,9 +145,9 @@ return (
 );
 
 (: 06 - PUT caseactivity 2 - update :)
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/caseactivity";
 declare namespace http = "xdmp:http";
@@ -168,9 +168,9 @@ return (
 );
 
 (: 07 - check case updated activity updated :)
-import module namespace cmrt="http://marklogic.com/roxy/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace cmrt="http://marklogic.com/test/casemanagement/rest-tests" at "/test/casemgmt-rest-tests.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace wfc = "http://marklogic.com/workflow/case";
 declare namespace ext = "http://marklogic.com/rest-api/resource/case";
 declare namespace http = "xdmp:http";

@@ -1,6 +1,6 @@
 xquery version "1.0-ml";
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace prop = "http://marklogic.com/xdmp/property";
@@ -44,7 +44,7 @@ return (
 
 ;
 (:
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 let $_pause := xdmp:sleep(5000)
 let $processes := fn:collection("http://marklogic.com/workflow/processes")
 return test:assert-equal(3, fn:count($processes))
@@ -54,9 +54,9 @@ return test:assert-equal(3, fn:count($processes))
 
 
 (: 16-process-read : )
-import module namespace const="http://marklogic.com/roxy/workflow-constants" at "/test/workflow-constants.xqy";
+import module namespace const="http://marklogic.com/test/workflow-constants" at "/test/workflow-constants.xqy";
 import module namespace wrt="http://marklogic.com/workflow/rest-tests" at "/test/workflow-rest-tests.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace ext = "http://marklogic.com/rest-api/resource/process";
 declare namespace http = "xdmp:http";
 

@@ -1,7 +1,7 @@
 xquery version "1.0-ml";
 
-module namespace const = "http://marklogic.com/roxy/workflow-constants";
-import module namespace c="http://marklogic.com/roxy/test-config" at "/test/test-config.xqy";
+module namespace const = "http://marklogic.com/test/workflow-constants";
+import module namespace c="http://marklogic.com/test-config" at "/test/test-config.xqy";
 
 (: configured at deploy time by Roxy deployer :)
 declare variable $const:USER := $c:USER;

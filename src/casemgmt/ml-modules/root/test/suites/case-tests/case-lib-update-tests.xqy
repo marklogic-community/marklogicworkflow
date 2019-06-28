@@ -2,7 +2,7 @@ xquery version "1.0-ml";
 
 (: new attribute :)
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
 let $b :=  <c:case id="12345" template-id="ctemplate1" foo="thisisnew"></c:case>
@@ -13,7 +13,7 @@ return (
 
 (: can't update the id! :)
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
 let $b :=  <c:case id="888" template-id="ctemplate1"></c:case>
@@ -23,7 +23,7 @@ return (
 );
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
@@ -42,7 +42,7 @@ return (
 );
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
@@ -57,7 +57,7 @@ return (
 );
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
@@ -92,7 +92,7 @@ return (
 );
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
@@ -110,7 +110,7 @@ return (
 );
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
@@ -125,7 +125,7 @@ return (
 );
 
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
@@ -142,7 +142,7 @@ return (
 
 (: Put it all together! :)
 import module namespace clib="http://marklogic.com/casemanagement/case-lib" at "/casemanagement/models/case-lib.xqy";
-import module namespace test="http://marklogic.com/roxy/test-helper" at "/test/test-helper.xqy";
+import module namespace test="http://marklogic.com/test" at "/test/test-helper.xqy";
 declare namespace c="http://marklogic.com/workflow/case";
 let $a := doc("/casemanagement/cases/notemplate/12345.xml")/c:case
 let $b :=
