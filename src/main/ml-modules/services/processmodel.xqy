@@ -27,9 +27,12 @@ function ext:get(
 {
   let $preftype := http-util:get-accept-type($context)
   let $_ := xdmp:trace("ml-workflow","processmodel-get : requested type = "||$preftype)
+  let $_ := map:put($context, "output-types", $preftype)
   let $output := 
   if((map:get($params,"publishedId"))) then
+  (
     wfi:get-model-by-name(map:get($params,"publishedId"))
+  )
   else if(map:get($params,"name")) then
     process-model-response(map:get($params,"name"))
   else
@@ -37,7 +40,6 @@ function ext:get(
   return
   (
     map:put($context,"output-status",($http-codes:OK, $http-codes:OK-MESSAGE)),
-    map:put($context, "output-types", $preftype),
     document{
       if(http-util:xml-response-requested($context)) then
         $output
@@ -221,24 +223,36 @@ declare function xml-to-html($object as element()){
   typeswitch($object)
     case(element(wf:process-models))
     return
-    element html{
-      element body{
-        element h3{string-util:dash-format-string(fn:local-name($object))}
+    element html {
+      element style {
+        attribute type {"text/css"},
+        text {
+          "body {
+            font-family: Helvetica, sans-serif;
+            line-height: 1.55;
+          }
+          code {
+            font-family: Inconsolata, Consolas, monospace;
+          }"
+        }
+      },
+      element body {
+        element h2 {string-util:dash-format-string(fn:local-name($object))}
         ,
-        for $element in $object/*
-        let $name-element := $element/*[fn:matches(fn:local-name(.),"name")]
-        let $link-element := $element/wf:link
-        order by $name-element      
-        return
-        element div{
+        element ul {
+          for $element in $object/*
           let $name-element := $element/*[fn:matches(fn:local-name(.),"name")]
           let $link-element := $element/wf:link
+          order by $name-element      
           return
-          element div{element a{attribute href{$link-element/text()},$name-element/text()}}
+          element li {
+            let $name-element := $element/*[fn:matches(fn:local-name(.),"name")]
+            let $link-element := $element/wf:link
+            return
+            element a { attribute href {$link-element/text()}, attribute accept { "application/xml" }, $name-element/text()}
+          }
         }        
       }
     }
     default return $object
 };
-
-

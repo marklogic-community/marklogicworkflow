@@ -66,25 +66,41 @@ declare function xml-to-html($object as element()){
   typeswitch($object)
     case(element(wf:inbox))
     return
-    element html{
-      element body{
-        for $element in $object/wf:task
-        let $process := $element/wf:process-data/wf:process
-        let $process-name as xs:string? := $process/@title
-        let $process-link as xs:string? := "/v1/resources/process?rs:processid="||$process/@id
-        return
-        element div {
-          element h3{string-util:dash-format-string(fn:local-name($element))}
-          ,
-          element div{
-            element p { "Process: ", element a { attribute href{$process-link}, $process-name}}
-          },
-          element div{
-            element p { "Properties: "},
-            element dl {
-              for $prop in $element/wf:process-properties/*/wf:*
-              return
-              (element dt {string-util:dash-format-string(fn:local-name($prop))}, element dd {$prop/text()})
+    element html {
+      element body {
+        element h2 {"Inbox"},
+        element ul {
+          for $element in $object/wf:task
+          let $process := $element/wf:process-data/wf:process
+          let $process-name as xs:string? := $process/@title
+          let $process-link as xs:string? := "/v1/resources/process?rs:processid="||$process/@id
+          return
+          element li {
+            element h3 {string-util:dash-format-string(fn:local-name($element))}
+            ,
+            element div{
+              element p { "Process: ", element a { attribute href{$process-link}, $process-name}}
+            },
+            element div {
+              element p { "Properties: "},
+              element ul {
+                for $prop in $element/wf:process-properties/*/wf:*
+                return
+                element li { 
+                  element p { 
+                    element b {string-util:dash-format-string(fn:local-name($prop)) || ": "}, 
+                    for $node in $prop/(*|text())
+                    return
+                      typeswitch($node)
+                        case(element())
+                          return
+                            element p {string-util:dash-format-string(fn:local-name($node)) || ": ", text {$node/text()}} 
+                        default 
+                          return
+                            text {$node}
+                  }
+                }
+              }
             }
           }
         }        

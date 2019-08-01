@@ -9,6 +9,10 @@ import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 import module namespace wfadmin="http://marklogic.com/workflow-admin" at "/workflowengine/models/workflow-admin.xqy";
 
+import module namespace http-codes = "http://marklogic.com/workflow/http-codes" at "/lib/http-codes.xqy";
+import module namespace http-util = "http://marklogic.com/workflow/http-util" at "/lib/http-util.xqy";
+import module namespace string-util = "http://marklogic.com/workflow/string-util" at "/lib/string-util.xqy";
+
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
 
@@ -23,22 +27,32 @@ function ext:get(
   $params  as map:map
 ) as document-node()*
 {
-  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $preftype := http-util:get-accept-type($context)
+  let $_ := xdmp:trace("ml-workflow","processenginge-get : requested type = "||$preftype)
+
+  let $_ := map:put($context, "output-types", $preftype)
 
   let $_ := xdmp:log($params)
   let $_ := xdmp:log($context)
 
+  let $processes := wfadmin:processes(())
+
   let $out :=
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
-        {wfadmin:processes( () )}
+        {$processes}
       </ext:readResponse>
 
   return
   (
-    xdmp:set-response-code(200, "OK"),
+    map:put($context,"output-status",($http-codes:OK, $http-codes:OK-MESSAGE)),
     document {
-      if ("application/xml" = $preftype) then
+      if ( http-util:xml-response-requested($context)) then
+      (
+        map:put($context, "output-types", "application/xml"),
         $out
+      )
+      else if( http-util:html-response-requested($context)) then
+        ext:xml-to-html( $processes/wf:process-details)
       else
         let $config := json:config("custom")
         let $cx := map:put($config, "text-value", "label" )
@@ -47,6 +61,7 @@ function ext:get(
           json:transform-to-json($out, $config)
     }
   )
+
 };
 
 (:
@@ -83,3 +98,22 @@ function ext:delete(
     }
   )
 };
+
+declare function xml-to-html($objects as element()*)
+{
+  element html {
+    element body {
+      element h2 {"Process Engine"},
+      element ul {
+        for $object in $objects
+        let $process-id as xs:string? := $object/@id
+        let $process-title as xs:string? := $object/wf:process-data/wf:process/@title
+        return
+          element li {
+            element a { attribute href { "/LATEST/resources/process?rs:processid="||$process-id}, $process-title}
+          }
+      }
+    }
+  }
+};
+
