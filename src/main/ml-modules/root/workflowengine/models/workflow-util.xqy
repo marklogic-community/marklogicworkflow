@@ -182,9 +182,9 @@ declare function m:getProcessAssets($assetname as xs:string?,$processName as xs:
     'declare variable $wf:major as xs:string external;' ||
     'declare variable $wf:minor as xs:string external;' ||
     'declare variable $wf:assetname as xs:string external;' ||
-    ' (fn:doc("/workflowengine/assets/" || $wf:processName || "/" || $wf:major || "/" || $wf:minor || "/" || $wf:assetname ),' ||
-    '  fn:doc("/workflowengine/assets/" || $wf:processName || "/" || $wf:major || "/" || "/" || $wf:assetname ),' ||
-    '  fn:doc("/workflowengine/assets/" || $wf:processName || "/" || $wf:assetname )' ||
+    ' (fn:doc("/workflowengine/assets/" || $wf:processName || "/" || $wf:major || "/" || $wf:minor || $wf:assetname ),' ||
+    '  fn:doc("/workflowengine/assets/" || $wf:processName || "/" || $wf:major || "/" || $wf:assetname ),' ||
+    '  fn:doc("/workflowengine/assets/" || $wf:processName || $wf:assetname )' ||
     ')[1]'
     (: TODO support blank asset name by listing all processes within processName's URI folder :)
     ,
