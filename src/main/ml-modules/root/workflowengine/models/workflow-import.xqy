@@ -6,10 +6,13 @@ import module namespace p="http://marklogic.com/cpf/pipelines" at "/MarkLogic/cp
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
 import module namespace stack="http://marklogic.com/stack" at "/workflowengine/models/lib-stack.xqy";
 import module namespace ss = "http://marklogic.com/alerts/alerts" at "/workflowengine/models/lib-alerts.xqy";
+import module namespace wfc = "http://marklogic.com/workflow/constants" at "/lib/workflow-constants.xqy";
 
 declare namespace wf="http://marklogic.com/workflow";
 declare namespace sc="http://www.w3.org/2005/07/scxml";
 declare namespace b2="http://www.omg.org/spec/BPMN/20100524/MODEL";
+
+declare variable $PROCESS-MODEL-METADATA-DIR := "/workflow/model-metadata/";
 
 (: TODO replace following outgoing routes with call to m:b2getNextSteps() :)
 
@@ -64,9 +67,14 @@ declare function m:enable($localPipelineId as xs:string) as xs:unsignedLong* {
   return m:domain($pname, m:get-pipeline-id($pname)) (: Keep uri, major, minor here in case :)
 };
 
-declare function m:get-model-by-name($name as xs:string) as node() {
-  let $uri := "/workflow/models/" || $name
-  return fn:doc($uri)
+declare function process-model-uri($model-full-name as xs:string) as xs:string{
+  /wf:process-model-metadata[wf:process-model-full-name = $model-full-name]/wf:process-model-uri/text()  
+};
+
+declare function m:get-model-by-name($model-full-name as xs:string) as node() {
+  let $uri := process-model-uri($model-full-name)
+  return 
+  fn:doc($uri)
 };
 
 declare function m:getPipelineFamily($pname as xs:string) as xs:string* {
@@ -360,7 +368,7 @@ declare function m:create($processmodeluri as xs:string,$major as xs:string,$min
             <isolation>different-transaction</isolation>
           </options>
         ) (: TODO handle failure gracefully :)
-
+  let $_ := insert-process-model-metadata($shortname,$major,$minor,$processmodeluri)
   return
     $pmap
 
@@ -1418,3 +1426,41 @@ declare function m:b2getNextSteps($process as element(b2:process),$state as elem
   let $sf := $process/b2:sequenceFlow[./@id = $rc]
   return $process/element()[./@id = xs:string($sf/@targetRef)]
 };
+
+(:
+  KT Need to store metadata about the process model - we can't currently easily look for models with the same base name 
+  without parsing the process model long name
+:)
+declare function insert-process-model-metadata($model-name as xs:string,$major-version as xs:string,$minor-version as xs:string,$process-model-uri){
+    let $process-model-full-name := process-model-full-name($model-name,$major-version,$minor-version)
+    let $uri := fn:concat($PROCESS-MODEL-METADATA-DIR,$process-model-full-name,".xml")
+    let $content := 
+    element wf:process-model-metadata{
+      element wf:process-model-full-name{$process-model-full-name},
+      element wf:process-model-name{$model-name},
+      element wf:process-model-uri{$process-model-uri},
+      element wf:major-version{$major-version},
+      element wf:minor-version{$minor-version}
+    }
+    return
+    xdmp:document-insert($uri,$content)
+};
+
+(:
+  Process model full name - i.e. including version tokens
+  Get rid of prefix / suffix content if any received
+:)
+declare function process-model-full-name($model-name as xs:string,$major-version as xs:string,$minor-version as xs:string) as xs:string{
+  fn:concat($model-name,"__",$major-version,"__",$minor-version)
+};
+
+declare function process-model-uri($filename as xs:string,$major-version as xs:string,$minor-version as xs:string) as xs:string{
+  let $max := m:index-of-string($filename,"/")[last()]
+  let $start := fn:substring($filename,$max + 1)
+  let $shortname := fn:substring-before($start,".")
+  let $suffix := fn:substring-after($start,".")
+  return
+  fn:concat($wfc:MODELS-DIRECTORY,process-model-full-name($shortname,$major-version,$minor-version),".",$suffix)
+
+};
+  

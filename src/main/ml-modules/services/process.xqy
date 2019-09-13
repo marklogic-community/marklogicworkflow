@@ -11,6 +11,10 @@ import module namespace cpf = "http://marklogic.com/cpf" at "/MarkLogic/cpf/cpf.
 import module namespace wfu="http://marklogic.com/workflow-util" at "/workflowengine/models/workflow-util.xqy";
 import module namespace wfa="http://marklogic.com/workflow-actions" at "/workflowengine/models/workflow-actions.xqy";
 
+import module namespace http-codes = "http://marklogic.com/workflow/http-codes" at "/lib/http-codes.xqy";
+import module namespace http-util = "http://marklogic.com/workflow/http-util" at "/lib/http-util.xqy";
+import module namespace string-util = "http://marklogic.com/workflow/string-util" at "/lib/string-util.xqy";
+
 declare namespace rapi = "http://marklogic.com/rest-api";
 declare namespace roxy = "http://marklogic.com/roxy";
 declare namespace wf="http://marklogic.com/workflow";
@@ -90,33 +94,45 @@ function ext:get(
   $params  as map:map
 ) as document-node()*
 {
-  let $preftype := if ("application/xml" = map:get($context,"accept-types")) then "application/xml" else "application/json"
+  let $preftype := http-util:get-accept-type($context)
+  let $_ := xdmp:trace("ml-workflow","process-get : requested type = "||$preftype)
+  
+  let $_ := map:put($context, "output-types", $preftype)
+
   let $part := (map:get($params,"part"),"document")[1]
 
-  let $_ := xdmp:log($params)
-  let $_ := xdmp:log($context)
+  let $document := wfu:get(map:get($params,"processid"))
+  let $properties := wfu:getProperties(map:get($params,"processid"))
 
   let $out :=
     if (fn:empty(map:get($params,"processid"))) then
       <ext:readResponse><ext:outcome>FAILURE</ext:outcome><ext:details>processId parameter is required</ext:details></ext:readResponse>
     else
       <ext:readResponse><ext:outcome>SUCCESS</ext:outcome>
-        {if ($part = "document") then
-          <ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>
-         else if ($part = "properties") then
-           <ext:properties>{wfu:getProperties(map:get($params,"processid"))}</ext:properties>
-         else
-           (<ext:document>{wfu:get(map:get($params,"processid"))}</ext:document>,
-           <ext:properties>{wfu:getProperties(map:get($params,"processid"))}</ext:properties>)
+        {
+          if ($part = "document") then
+            <ext:document>{$document}</ext:document>
+          else if ($part = "properties") then
+            <ext:properties>{$properties}</ext:properties>
+          else
+          (
+            <ext:document>{$document}</ext:document>,
+            <ext:properties>{$properties}</ext:properties>
+          )
         }
       </ext:readResponse>
 
   return
   (
-    xdmp:set-response-code(200, "OK"),
+    map:put($context,"output-status",($http-codes:OK, $http-codes:OK-MESSAGE)),
     document {
-      if ("application/xml" = $preftype) then
+      if ( http-util:xml-response-requested($context)) then
+      (
+        map:put($context, "output-types", "application/xml"),
         $out
+      )
+      else if( http-util:html-response-requested($context)) then
+        ext:xml-to-html( ($document, $properties))
       else
         let $config := json:config("custom")
         let $cx := map:put($config, "array-element-names",(xs:QName("wf:audit"),xs:QName("wf:metric")))                
@@ -287,3 +303,60 @@ function ext:delete(
     )
 };
 
+declare function xml-to-html($objects as element()*)
+{  
+  element html {
+    element body {
+      element h2 {"Process"},
+      for $object in $objects
+      return
+        typeswitch($object)
+          case(element(wf:process)) return
+            element div {
+              element p { 
+                element b {"Process Definition: "}, 
+                let $definition as xs:string? := $object/wf:process-definition-name
+                return
+                  element a { attribute href { "/LATEST/resources/processmodel?rs:publishedId="||$definition}, $definition}
+              },
+              $object/* ! element-to-html(.)               
+            }
+          case(element(prop:properties)) return
+            element div {
+              element h3 {"Properties"},
+              element-to-html($object) 
+            }
+          default return
+            $object
+    }
+  }  
+};
+
+declare function element-to-html( $node as node())
+{
+  typeswitch($node)
+    case(element(wf:attachment)) return
+      let $process := $node/ancestor::wf:process
+      let $uri as xs:string? := $node/Uri
+      return
+      element div { 
+        element b {fn:name($node)||": "}, 
+        element a { 
+          attribute href { "/LATEST/resources/processasset?rs:model="||$process/@name||"&amp;rs:major="||$process/@major||"&amp;rs:minor="||$process/@minor||"&amp;rs:asset="||$node/@uri}, 
+          fn:string( $node/@name)
+        }
+      }
+    case(element()) return
+      element div { 
+        element b {fn:name($node)||": "}, 
+        element ul {
+          $node/(node()|attribute()) ! element li { element-to-html(.) }
+        }
+      }
+    case(attribute()) return
+      element div { 
+        element b {string-util:dash-format-string(fn:name($node))||": "}, fn:data( $node) 
+      }
+    default return
+      fn:data( $node)
+};

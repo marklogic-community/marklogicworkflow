@@ -70,6 +70,16 @@
   "merge-min-ratio" : 2,
   "merge-timestamp" : 0,
   "retain-until-backup" : false,
+  "range-element-index": [
+    {
+      "scalar-type": "string",
+      "namespace-uri": "http://marklogic.com/workflow",
+      "localname": "process-model-name",
+      "collation": "http://marklogic.com/collation/",
+      "range-value-positions": false,
+      "invalid-values": "reject"
+    }
+  ],
   "range-element-attribute-index" : [ {
     "scalar-type" : "string",
     "parent-namespace-uri" : "http://marklogic.com/workflow",

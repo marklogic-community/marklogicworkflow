@@ -94,7 +94,7 @@ declare function wrt:test-02-processmodel-read ($options)
 {
   let $uri := fn:concat(
     "http://", $const:RESTHOST, ':', $const:RESTPORT,
-    "/v1/resources/processmodel?rs:publishedId=015-restapi-tests.bpmn")
+    "/v1/resources/processmodel?rs:publishedId=015-restapi-tests__1__0")
   return xdmp:http-get($uri, $options)
 };
 
