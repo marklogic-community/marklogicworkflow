@@ -1,7 +1,8 @@
 ## Installation methods
 
-There are two main ways to install the marklogicworkflow project:
+There are three ways to install the marklogicworkflow project:
 
+* Include in a project as a [Gradle](https://gradle.org/) dependency - see the [minimal project example](../examples/minimal-project)
 * [Gradle](https://gradle.org/) Installation (stand-alone project, or starting point for a new project)
 * Add modules to existing project
 
